@@ -381,6 +381,7 @@ def notify_daily_update(
     *,
     run_date: date,
     initial_sync: bool = False,
+    notify_unchanged: bool = False,
 ) -> bool:
     """读取 GitHub Secrets 对应环境变量并推送每日变化。"""
     sendkey = os.environ.get("SERVERCHAN_SENDKEY", "").strip()
@@ -396,7 +397,7 @@ def notify_daily_update(
         raise NotificationError(f"暂不支持微信通知提供方: {provider}")
 
     total = _change_count(new_papers) + _change_count(updated_papers)
-    if not total:
+    if not total and not notify_unchanged:
         logger.info("论文目录没有变化，跳过微信通知")
         return False
 

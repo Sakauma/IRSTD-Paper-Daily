@@ -33,7 +33,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
-        run: python daily_arxiv.py --notify-wechat
+        run: python daily_arxiv.py --notify-wechat --notify-unchanged
 
       - name: Commit generated files
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -42,3 +42,14 @@ jobs:
           file_pattern: README.md docs/irstd-paper-daily-state.json docs/irstd-paper-daily.json docs/irstd-paper-daily-wechat.json docs/index.md docs/wechat.md
           commit_user_name: ${{ env.GITHUB_USER_NAME }}
           commit_user_email: ${{ env.GITHUB_USER_EMAIL }}
+
+      - name: Send email digest
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURITY: ${{ secrets.SMTP_SECURITY }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python -m arxiv_daily.emailer docs/wechat.md

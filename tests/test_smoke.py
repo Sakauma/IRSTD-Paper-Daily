@@ -12,6 +12,13 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
 from arxiv_daily.config import add_date_range, build_query, load_config  # noqa: E402
+from arxiv_daily.emailer import (  # noqa: E402
+    EMAIL_SUBJECT,
+    EmailNotificationError,
+    load_email_settings,
+    parse_recipients,
+    send_daily_email,
+)
 from arxiv_daily.notifier import (  # noqa: E402
     MAX_CONTENT_BYTES,
     NotificationError,
@@ -107,6 +114,113 @@ def test_wechat_render() -> None:
     )
     assert "## IRSTD" in output
     assert "Paper: [http://arxiv.org/abs/2608.07015]" in output
+
+
+def test_load_email_settings() -> None:
+    settings = load_email_settings(
+        {
+            "SMTP_HOST": "smtp.example.com",
+            "SMTP_USERNAME": "sender@example.com",
+            "SMTP_PASSWORD": "app-password",
+            "EMAIL_TO": "first@example.com; second@example.com,first@example.com",
+        }
+    )
+
+    assert settings is not None
+    assert settings.host == "smtp.example.com"
+    assert settings.port == 465
+    assert settings.security == "ssl"
+    assert settings.sender == "sender@example.com"
+    assert settings.recipients == ("first@example.com", "second@example.com")
+    assert parse_recipients("one@example.com,two@example.com") == (
+        "one@example.com",
+        "two@example.com",
+    )
+
+
+def test_email_settings_skip_or_reject_incomplete_configuration() -> None:
+    assert load_email_settings({}) is None
+    try:
+        load_email_settings({"SMTP_HOST": "smtp.example.com"})
+    except EmailNotificationError as exc:
+        assert "SMTP_USERNAME" in str(exc)
+        assert "SMTP_PASSWORD" in str(exc)
+        assert "EMAIL_TO" in str(exc)
+    else:
+        raise AssertionError("不完整 SMTP 配置应当被拒绝")
+
+
+def test_send_daily_email_with_ssl() -> None:
+    content = "# IRSTD Paper Daily\n\n- Demo paper\n"
+    smtp_client = mock.Mock()
+    smtp_context = mock.MagicMock()
+    smtp_context.__enter__.return_value = smtp_client
+    environ = {
+        "SMTP_HOST": "smtp.example.com",
+        "SMTP_PORT": "465",
+        "SMTP_SECURITY": "ssl",
+        "SMTP_USERNAME": "sender@example.com",
+        "SMTP_PASSWORD": "app-password",
+        "EMAIL_FROM": "papers@example.com",
+        "EMAIL_TO": "reader@example.com",
+    }
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        markdown_path = os.path.join(tmp_dir, "wechat.md")
+        with open(markdown_path, "w", encoding="utf-8") as file:
+            file.write(content)
+        with mock.patch(
+            "arxiv_daily.emailer.smtplib.SMTP_SSL",
+            return_value=smtp_context,
+        ) as smtp_ssl:
+            sent = send_daily_email(markdown_path, environ=environ)
+
+    assert sent is True
+    smtp_ssl.assert_called_once()
+    smtp_client.login.assert_called_once_with("sender@example.com", "app-password")
+    message = smtp_client.send_message.call_args.args[0]
+    assert message["Subject"] == EMAIL_SUBJECT
+    assert message["From"] == "papers@example.com"
+    assert message["To"] == "reader@example.com"
+    assert message.get_content() == content
+
+
+def test_send_daily_email_with_starttls() -> None:
+    smtp_client = mock.Mock()
+    smtp_context = mock.MagicMock()
+    smtp_context.__enter__.return_value = smtp_client
+    environ = {
+        "SMTP_HOST": "smtp.example.com",
+        "SMTP_PORT": "587",
+        "SMTP_SECURITY": "starttls",
+        "SMTP_USERNAME": "sender@example.com",
+        "SMTP_PASSWORD": "app-password",
+        "EMAIL_TO": "reader@example.com",
+    }
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        markdown_path = os.path.join(tmp_dir, "wechat.md")
+        with open(markdown_path, "w", encoding="utf-8") as file:
+            file.write("日报正文\n")
+        with mock.patch(
+            "arxiv_daily.emailer.smtplib.SMTP",
+            return_value=smtp_context,
+        ) as smtp:
+            sent = send_daily_email(markdown_path, environ=environ)
+
+    assert sent is True
+    smtp.assert_called_once()
+    assert smtp_client.ehlo.call_count == 2
+    smtp_client.starttls.assert_called_once()
+    smtp_client.login.assert_called_once_with("sender@example.com", "app-password")
+
+
+def test_send_daily_email_without_secrets_skips_safely() -> None:
+    with mock.patch("arxiv_daily.emailer.send_email_message") as send:
+        sent = send_daily_email("missing-wechat.md", environ={})
+
+    assert sent is False
+    send.assert_not_called()
 
 
 def test_build_serverchan_url() -> None:
@@ -295,6 +409,29 @@ def test_notify_without_secrets_skips_safely() -> None:
 
     assert sent is False
     send.assert_not_called()
+
+
+def test_notify_unchanged_sends_daily_status() -> None:
+    config = {
+        "wechat_notification": {"provider": "serverchan", "max_papers": 20}
+    }
+    with mock.patch.dict(
+        os.environ,
+        {"SERVERCHAN_SENDKEY": "SCT_test-key"},
+        clear=True,
+    ), mock.patch("arxiv_daily.notifier.send_serverchan_message") as send:
+        sent = notify_daily_update(
+            config,
+            {},
+            {},
+            run_date=date(2026, 9, 4),
+            notify_unchanged=True,
+        )
+
+    assert sent is True
+    send.assert_called_once()
+    assert "今日无新增" in send.call_args.kwargs["summary"]
+    assert "未发现新增或发生变化" in send.call_args.kwargs["content"]
 
 
 def test_notify_rejects_invalid_sendkey() -> None:
@@ -726,6 +863,17 @@ def test_first_run_notifies_with_full_catalog_then_skips_unchanged() -> None:
             )
             notify.assert_not_called()
 
+            daily_arxiv.run(
+                config,
+                notify_wechat=True,
+                notify_unchanged=True,
+                today=date(2026, 9, 5),
+            )
+            notify.assert_called_once()
+            assert notify.call_args.args[1] == {"IRSTD": []}
+            assert notify.call_args.args[2] == {"IRSTD": []}
+            assert notify.call_args.kwargs["notify_unchanged"] is True
+
 
 def test_full_refresh_notifies_after_code_backfill() -> None:
     import daily_arxiv
@@ -795,6 +943,11 @@ if __name__ == "__main__":
         test_merge_and_storage,
         test_render_markdown,
         test_wechat_render,
+        test_load_email_settings,
+        test_email_settings_skip_or_reject_incomplete_configuration,
+        test_send_daily_email_with_ssl,
+        test_send_daily_email_with_starttls,
+        test_send_daily_email_without_secrets_skips_safely,
         test_build_serverchan_url,
         test_build_daily_digest,
         test_daily_digest_truncates_by_utf8_bytes,
@@ -803,6 +956,7 @@ if __name__ == "__main__":
         test_serverchan_business_failure,
         test_serverchan_http_error_hides_sendkey,
         test_notify_without_secrets_skips_safely,
+        test_notify_unchanged_sends_daily_status,
         test_notify_rejects_invalid_sendkey,
         test_initial_notification_ignores_incremental_display_limit,
         test_initial_notification_sends_every_digest_part,

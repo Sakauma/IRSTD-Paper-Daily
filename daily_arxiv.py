@@ -5,6 +5,7 @@
     python daily_arxiv.py --backfill_code
     python daily_arxiv.py --full-refresh
     python daily_arxiv.py --notify-wechat
+    python daily_arxiv.py --notify-wechat --notify-unchanged
 """
 
 from __future__ import annotations
@@ -157,6 +158,7 @@ def _notify_catalog_update(
     current_data: Dict[str, Any],
     *,
     run_date: date,
+    notify_unchanged: bool = False,
 ) -> None:
     """首次发送完整目录，之后只在目录实际变化时发送。"""
     settings = config.get("wechat_notification", {})
@@ -178,8 +180,10 @@ def _notify_catalog_update(
             current_data,
         )
         if not (_change_count(new_papers) + _change_count(updated_papers)):
-            logger.info("论文目录没有变化，跳过微信通知")
-            return
+            if not notify_unchanged:
+                logger.info("论文目录没有变化，跳过微信通知")
+                return
+            logger.info("论文目录没有变化，发送今日无新增通知")
 
     sent = notify_daily_update(
         config,
@@ -187,6 +191,7 @@ def _notify_catalog_update(
         updated_papers,
         run_date=run_date,
         initial_sync=initial_sync,
+        notify_unchanged=notify_unchanged,
     )
     if sent:
         state["wechat_notification"] = {
@@ -239,6 +244,7 @@ def run(
     full_refresh: bool = False,
     backfill_code: bool = False,
     notify_wechat: bool = False,
+    notify_unchanged: bool = False,
     today: Optional[date] = None,
 ) -> None:
     """读取缓存，执行增量或全量抓取，然后合并并渲染。"""
@@ -308,6 +314,7 @@ def run(
             previous_data,
             data,
             run_date=run_date,
+            notify_unchanged=notify_unchanged,
         )
     successful_dates.update(
         {topic: run_date.isoformat() for topic in new_papers_by_topic}
@@ -322,6 +329,7 @@ def run_backfill(
     config: Dict[str, Any],
     *,
     notify_wechat: bool = False,
+    notify_unchanged: bool = False,
     today: Optional[date] = None,
 ) -> None:
     """为历史论文补齐代码链接并重新生成所有开启的输出。"""
@@ -343,6 +351,7 @@ def run_backfill(
             previous_data,
             data,
             run_date=run_date,
+            notify_unchanged=notify_unchanged,
         )
         save_data(state_path, state)
     logger.info("代码链接回填完成，共补齐 %d 篇", updated)
@@ -373,6 +382,11 @@ def main() -> None:
         action="store_true",
         help="更新完成后通过 Server酱向绑定的微信发送论文摘要",
     )
+    parser.add_argument(
+        "--notify-unchanged",
+        action="store_true",
+        help="论文目录没有变化时也发送“今日无新增”微信通知",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config_path)
@@ -383,11 +397,20 @@ def main() -> None:
             full_refresh=True,
             backfill_code=args.backfill_code,
             notify_wechat=args.notify_wechat,
+            notify_unchanged=args.notify_unchanged,
         )
     elif args.backfill_code:
-        run_backfill(config, notify_wechat=args.notify_wechat)
+        run_backfill(
+            config,
+            notify_wechat=args.notify_wechat,
+            notify_unchanged=args.notify_unchanged,
+        )
     else:
-        run(config, notify_wechat=args.notify_wechat)
+        run(
+            config,
+            notify_wechat=args.notify_wechat,
+            notify_unchanged=args.notify_unchanged,
+        )
 
 
 if __name__ == "__main__":

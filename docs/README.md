@@ -108,8 +108,8 @@ GitHub Actions Secrets 中删除不再使用的 `WXPUSHER_APP_TOKEN` 和
 数量并提供完整目录链接。程序随后会在 `docs/irstd-paper-daily-state.json` 中记录
 `serverchan` 初始化状态。旧通知服务的初始化记录不会跳过这次首次全量发送。
 后续只有目录实际变化时才发送，内容包括新增论文，以及标题、作者、arXiv 信息
-或代码链接发生变化的论文。每日和每周工作流都没有发现变化时，不会发送“今日
-无新增”。
+或代码链接发生变化的论文。每日工作流没有发现变化时会发送“今日无新增”，用于
+确认当天任务已正常完成；每周全量工作流没有变化时不重复发送微信通知。
 
 后续增量通知始终只发送一条，默认最多展示 20 篇变化；可通过 `config.yaml` 的
 `wechat_notification.max_papers` 修改。消息同样按 UTF-8 字节数限制在 28 KB 内，
@@ -123,7 +123,45 @@ GitHub Actions Secrets 中删除不再使用的 `WXPUSHER_APP_TOKEN` 和
 本地测试通知可先设置同名环境变量，再运行：
 
 ```bash
-python daily_arxiv.py --notify-wechat
+python daily_arxiv.py --notify-wechat --notify-unchanged
+```
+
+## 邮件通知配置
+
+每日工作流在论文更新和生成文件提交成功后，会通过 SMTP 把 `docs/wechat.md` 的
+完整 UTF-8 文本发送到指定邮箱。邮件主题固定为 `IRSTD-Paper-Daily`。邮件每天
+发送一次，即使当天论文目录没有变化也会发送；每周全量刷新工作流不会重复发信。
+
+先在邮箱服务商后台开启 SMTP，并生成 SMTP 授权码或应用专用密码。不要使用或
+提交邮箱网页登录密码。然后打开 GitHub 仓库的 **Settings → Secrets and variables
+→ Actions**，添加以下 Repository secrets：
+
+- `SMTP_HOST`：SMTP 服务器，例如 QQ 邮箱为 `smtp.qq.com`。
+- `SMTP_USERNAME`：SMTP 登录账号，通常是完整发件邮箱。
+- `SMTP_PASSWORD`：SMTP 授权码或应用专用密码。
+- `EMAIL_TO`：收件邮箱；多个地址可以用英文逗号或分号分隔。
+
+以下 Secrets 可选：
+
+- `SMTP_PORT`：默认 `465`。
+- `SMTP_SECURITY`：默认 `ssl`；端口 `587` 通常设置为 `starttls`。
+- `EMAIL_FROM`：发件地址，默认使用 `SMTP_USERNAME`。
+
+常见配置如下：
+
+| 邮箱服务 | `SMTP_HOST` | `SMTP_PORT` | `SMTP_SECURITY` |
+|---|---|---:|---|
+| QQ 邮箱 | `smtp.qq.com` | `465` | `ssl` |
+| 163 邮箱 | `smtp.163.com` | `465` | `ssl` |
+| Gmail | `smtp.gmail.com` | `465` | `ssl` |
+| Gmail STARTTLS | `smtp.gmail.com` | `587` | `starttls` |
+
+全部必需 Secrets 都没有配置时，程序会安全跳过邮件。不完整的配置会让邮件步骤
+失败并在 Actions 日志中列出缺少的变量，但不会打印密码。完成配置后，可手动运行
+**Update IRSTD Paper Daily** 测试邮件。本地测试命令为：
+
+```bash
+python -m arxiv_daily.emailer docs/wechat.md
 ```
 
 ## 微信版输出说明
