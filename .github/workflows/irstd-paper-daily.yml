@@ -38,6 +38,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update IRSTD paper daily"
-          file_pattern: README.md docs/irstd-paper-daily.json docs/irstd-paper-daily-wechat.json docs/index.md docs/wechat.md
+          file_pattern: README.md docs/irstd-paper-daily-state.json docs/irstd-paper-daily.json docs/irstd-paper-daily-wechat.json docs/index.md docs/wechat.md
           commit_user_name: ${{ env.GITHUB_USER_NAME }}
           commit_user_email: ${{ env.GITHUB_USER_EMAIL }}

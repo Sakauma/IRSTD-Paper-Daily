@@ -18,6 +18,9 @@ max_results: null
 # 只收录从该日期起首次提交到 arXiv 的论文，结束日期自动取运行当天。
 start_date: "2026-01-01"
 
+# 每日增量抓取会从上次成功日期向前回看，容忍 arXiv 收录延迟。
+incremental_lookback_days: 3
+
 # 通过 GitHub 搜索 API 为论文匹配代码仓库
 enable_code_lookup: true
 
@@ -28,6 +31,7 @@ publish_wechat: true
 
 # 文件路径
 data_path: "./docs/irstd-paper-daily.json"
+state_path: "./docs/irstd-paper-daily-state.json"
 wechat_data_path: "./docs/irstd-paper-daily-wechat.json"
 md_readme_path: "README.md"
 md_gitpage_path: "./docs/index.md"
@@ -53,6 +57,7 @@ domains:
     #     enable: true
     #     max_results: null
     #     start_date: "2026-01-01"
+    #     incremental_lookback_days: 3
     #     filters:
     #         - "keyword1"
     #         - "keyword phrase 2"

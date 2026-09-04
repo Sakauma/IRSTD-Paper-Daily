@@ -11,7 +11,7 @@ from unittest import mock
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
-from arxiv_daily.config import build_query, load_config  # noqa: E402
+from arxiv_daily.config import add_date_range, build_query, load_config  # noqa: E402
 from arxiv_daily.renderer import render_markdown  # noqa: E402
 from arxiv_daily.storage import load_data, merge_papers, save_data  # noqa: E402
 from arxiv_daily.wechat import build_wechat_data, render_wechat_markdown  # noqa: E402
@@ -42,6 +42,11 @@ def test_build_query() -> None:
     assert dated_query == (
         "(IRSTD) AND submittedDate:[202601010000 TO 202609042359]"
     )
+    assert add_date_range(
+        "IRSTD",
+        start_date="2026-09-01",
+        end_date="2026-09-04",
+    ) == "(IRSTD) AND submittedDate:[202609010000 TO 202609042359]"
 
 
 def test_config() -> None:
@@ -49,7 +54,9 @@ def test_config() -> None:
     assert list(config["kv"].keys()) == ["IRSTD"]
     assert "Infrared Small Target Detection" in config["kv"]["IRSTD"]
     assert config["domain_max_results"]["IRSTD"] is None
-    assert "submittedDate:[202601010000 TO" in config["kv"]["IRSTD"]
+    assert "submittedDate" not in config["kv"]["IRSTD"]
+    assert config["domain_start_dates"]["IRSTD"] == "2026-01-01"
+    assert config["domain_lookback_days"]["IRSTD"] == 3
     assert config["publish_wechat"] is True
 
 
@@ -203,6 +210,7 @@ def test_run_renders_all_enabled_outputs() -> None:
             "user_name": "Sakauma",
             "repo_name": "IRSTD-Paper-Daily",
             "data_path": os.path.join(tmp_dir, "data.json"),
+            "state_path": os.path.join(tmp_dir, "state.json"),
             "wechat_data_path": os.path.join(tmp_dir, "wechat.json"),
             "md_readme_path": os.path.join(tmp_dir, "README.md"),
             "md_gitpage_path": os.path.join(tmp_dir, "docs", "index.md"),
@@ -216,13 +224,15 @@ def test_run_renders_all_enabled_outputs() -> None:
             "enable_code_lookup": False,
             "kv": {"IRSTD": "IRSTD"},
             "domain_max_results": {"IRSTD": None},
+            "domain_start_dates": {"IRSTD": "2026-01-01"},
+            "domain_lookback_days": {"IRSTD": 3},
         }
         with mock.patch.object(
             daily_arxiv,
             "fetch_daily_papers",
             return_value=[sample_paper("https://github.com/foo/bar")],
         ):
-            daily_arxiv.run(config)
+            daily_arxiv.run(config, today=date(2026, 9, 4))
 
         assert "Demo Paper" in open(config["md_readme_path"], encoding="utf-8").read()
         assert "Demo Paper" in open(
@@ -230,6 +240,59 @@ def test_run_renders_all_enabled_outputs() -> None:
         ).read()
         assert "Paper:" in open(config["md_wechat_path"], encoding="utf-8").read()
         assert os.path.exists(config["wechat_data_path"])
+        assert load_data(config["state_path"])["last_successful_update"] == {
+            "IRSTD": "2026-09-04"
+        }
+
+
+def test_incremental_and_full_refresh_windows() -> None:
+    import daily_arxiv
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        data_path = os.path.join(tmp_dir, "data.json")
+        state_path = os.path.join(tmp_dir, "state.json")
+        save_data(data_path, {"IRSTD": {"2608.07015": sample_paper()}})
+        save_data(
+            state_path,
+            {"last_successful_update": {"IRSTD": "2026-09-04"}},
+        )
+        config = {
+            "data_path": data_path,
+            "state_path": state_path,
+            "publish_readme": False,
+            "publish_gitpage": False,
+            "publish_wechat": False,
+            "enable_code_lookup": False,
+            "max_results": None,
+            "incremental_lookback_days": 3,
+            "kv": {"IRSTD": "IRSTD"},
+            "domain_max_results": {"IRSTD": None},
+            "domain_start_dates": {"IRSTD": "2026-01-01"},
+            "domain_lookback_days": {"IRSTD": 3},
+        }
+
+        with mock.patch.object(
+            daily_arxiv,
+            "fetch_daily_papers",
+            return_value=[],
+        ) as fetch:
+            daily_arxiv.run(config, today=date(2026, 9, 5))
+            incremental_query = fetch.call_args.args[1]
+            assert "submittedDate:[202609010000 TO 202609052359]" in (
+                incremental_query
+            )
+
+            daily_arxiv.run(
+                config,
+                full_refresh=True,
+                today=date(2026, 9, 6),
+            )
+            full_query = fetch.call_args.args[1]
+            assert "submittedDate:[202601010000 TO 202609062359]" in full_query
+
+        assert load_data(state_path)["last_successful_update"]["IRSTD"] == (
+            "2026-09-06"
+        )
 
 
 def test_date_is_available() -> None:
@@ -248,6 +311,7 @@ if __name__ == "__main__":
         test_fetcher_reuses_cached_code_when_lookup_is_disabled,
         test_fetcher_prefers_official_arxiv_code_link,
         test_run_renders_all_enabled_outputs,
+        test_incremental_and_full_refresh_windows,
         test_date_is_available,
     ]
     for test in tests:

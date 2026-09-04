@@ -3,17 +3,19 @@
 用法：
     python daily_arxiv.py [--config_path config.yaml]
     python daily_arxiv.py --backfill_code
+    python daily_arxiv.py --full-refresh
 """
 
 from __future__ import annotations
 
 import argparse
 import logging
+from datetime import date, timedelta
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from arxiv_daily.codelink import backfill_code_links
-from arxiv_daily.config import load_config
+from arxiv_daily.config import add_date_range, load_config
 from arxiv_daily.fetcher import fetch_daily_papers
 from arxiv_daily.renderer import render_markdown
 from arxiv_daily.storage import load_data, merge_papers, save_data
@@ -97,25 +99,89 @@ def _known_paper_ids(data: Dict[str, Any]) -> set[str]:
     }
 
 
-def run(config: Dict[str, Any]) -> None:
-    """主流程：读取历史 -> 抓取 -> 合并 -> 渲染。"""
+def _last_successful_dates(state: Dict[str, Any]) -> Dict[str, str]:
+    """读取每个领域最近一次成功更新日期。"""
+    values = state.get("last_successful_update", {})
+    if not isinstance(values, dict):
+        return {}
+    return {str(topic): str(value) for topic, value in values.items() if value}
+
+
+def _effective_start_date(
+    configured_start: Optional[str],
+    last_successful: Optional[str],
+    lookback_days: int,
+    *,
+    full_refresh: bool,
+    today: date,
+) -> tuple[Optional[str], bool]:
+    """返回实际查询起始日期以及是否使用了增量水位。"""
+    if full_refresh or not last_successful:
+        return configured_start, False
+
+    try:
+        last_date = date.fromisoformat(last_successful)
+    except ValueError:
+        logger.warning("更新状态日期无效，将执行全量刷新: %s", last_successful)
+        return configured_start, False
+
+    if last_date > today:
+        logger.warning("更新状态日期晚于今天，将执行全量刷新: %s", last_successful)
+        return configured_start, False
+
+    incremental_start = last_date - timedelta(days=lookback_days)
+    if configured_start:
+        full_start = date.fromisoformat(configured_start)
+        incremental_start = max(incremental_start, full_start)
+    return incremental_start.isoformat(), True
+
+
+def run(
+    config: Dict[str, Any],
+    *,
+    full_refresh: bool = False,
+    today: Optional[date] = None,
+) -> None:
+    """读取缓存，执行增量或全量抓取，然后合并并渲染。"""
+    run_date = today or date.today()
     data = load_data(config["data_path"])
+    state_path = config.get("state_path", "./docs/irstd-paper-daily-state.json")
+    state = load_data(state_path)
+    successful_dates = _last_successful_dates(state)
     known_codes: Dict[str, str] = _known_code_links(data)
     known_paper_ids = _known_paper_ids(data)
     lookup_missing_code = bool(config.get("enable_code_lookup", True))
 
     new_papers_by_topic: Dict[str, Any] = {}
-    for topic, query in config["kv"].items():
+    for topic, base_query in config["kv"].items():
         max_results = config["domain_max_results"].get(
             topic,
             config.get("max_results", 10),
         )
+        configured_start = config.get("domain_start_dates", {}).get(topic)
+        lookback_days = config.get("domain_lookback_days", {}).get(
+            topic,
+            int(config.get("incremental_lookback_days", 3)),
+        )
+        query_start, is_incremental = _effective_start_date(
+            configured_start,
+            successful_dates.get(topic),
+            lookback_days,
+            full_refresh=full_refresh,
+            today=run_date,
+        )
+        query = add_date_range(
+            base_query,
+            start_date=query_start,
+            end_date=run_date.isoformat(),
+        )
         limit_description = (
-            "日期范围内全部论文"
+            f"{query_start or '不限起始日期'} 至 {run_date.isoformat()} 的全部论文"
             if max_results is None
             else f"最多 {max_results} 篇"
         )
-        logger.info("开始抓取领域 %s（%s）", topic, limit_description)
+        mode = "增量" if is_incremental else "全量"
+        logger.info("开始%s抓取领域 %s（%s）", mode, topic, limit_description)
         new_papers_by_topic[topic] = fetch_daily_papers(
             topic,
             query,
@@ -131,6 +197,12 @@ def run(config: Dict[str, Any]) -> None:
     logger.info("数据已写入 %s", config["data_path"])
 
     _render_outputs(config, data)
+    successful_dates.update(
+        {topic: run_date.isoformat() for topic in new_papers_by_topic}
+    )
+    state["last_successful_update"] = successful_dates
+    save_data(state_path, state)
+    logger.info("增量更新状态已写入 %s", state_path)
     logger.info("全部任务完成")
 
 
@@ -158,11 +230,20 @@ def main() -> None:
         action="store_true",
         help="遍历已有数据，为缺失代码链接的论文补齐链接（不抓取新论文）",
     )
+    parser.add_argument(
+        "--full-refresh",
+        action="store_true",
+        help="忽略增量水位，重新抓取配置起始日期以来的全部论文",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config_path)
     logger.info("配置加载完成，启用领域: %s", list(config["kv"].keys()))
-    if args.backfill_code:
+    if args.full_refresh:
+        run(config, full_refresh=True)
+        if args.backfill_code:
+            run_backfill(config)
+    elif args.backfill_code:
         run_backfill(config)
     else:
         run(config)
