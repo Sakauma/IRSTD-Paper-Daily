@@ -128,8 +128,10 @@ python daily_arxiv.py --notify-wechat --notify-unchanged
 
 ## 邮件通知配置
 
-每日工作流在论文更新和生成文件提交成功后，会通过 SMTP 把 `docs/wechat.md` 的
-完整 UTF-8 文本发送到指定邮箱。邮件主题固定为 `IRSTD-Paper-Daily`。邮件每天
+每日工作流在论文更新和生成文件提交成功后，会读取 `docs/wechat.md`，通过 SMTP
+把排版后的日报发送到指定邮箱。HTML 正文使用论文卡片展示日期、标题、作者以及
+Paper/Code 按钮，不显示 Markdown 标记、徽章源码或目录标签；不支持 HTML 的邮件
+客户端会显示清理后的纯文本正文。邮件主题固定为 `IRSTD-Paper-Daily`。邮件每天
 发送一次，即使当天论文目录没有变化也会发送；每周全量刷新工作流不会重复发信。
 
 先在邮箱服务商后台开启 SMTP，并生成 SMTP 授权码或应用专用密码。不要使用或

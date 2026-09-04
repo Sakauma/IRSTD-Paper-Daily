@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import html
 import logging
 import os
 import re
@@ -13,12 +14,19 @@ from email.message import EmailMessage
 from email.utils import getaddresses, parseaddr
 from pathlib import Path
 from typing import Mapping, Sequence
+from urllib.parse import urlsplit
 
 logger = logging.getLogger(__name__)
 
 EMAIL_SUBJECT = "IRSTD-Paper-Daily"
 SMTP_TIMEOUT = 20
 SUPPORTED_SECURITY_MODES = {"ssl", "starttls"}
+UPDATED_PATTERN = re.compile(r"^> Updated on (?P<date>.+)$")
+PAPER_PATTERN = re.compile(
+    r"^- (?P<date>\d{4}-\d{2}-\d{2}), \*\*(?P<title>.+?)\*\*, "
+    r"(?P<author>.*?), Paper: \[[^]]*\]\((?P<paper_url>[^)]+)\)"
+    r"(?:, Code: \*\*\[[^]]*\]\((?P<code_url>[^)]+)\)\*\*)?$"
+)
 
 
 class EmailNotificationError(RuntimeError):
@@ -36,6 +44,26 @@ class EmailSettings:
     password: str
     sender: str
     recipients: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class EmailPaper:
+    """从 ``wechat.md`` 解析出的单篇论文。"""
+
+    topic: str
+    publish_date: str
+    title: str
+    author: str
+    paper_url: str
+    code_url: str
+
+
+@dataclass(frozen=True)
+class EmailDigest:
+    """用于纯文本和 HTML 邮件渲染的日报内容。"""
+
+    updated_on: str
+    papers: tuple[EmailPaper, ...]
 
 
 def _email_address(value: str, *, label: str) -> str:
@@ -120,30 +148,258 @@ def load_email_settings(
     )
 
 
+def parse_wechat_markdown(content: str) -> EmailDigest:
+    """从生成的 ``wechat.md`` 中提取更新时间、领域和论文条目。"""
+    updated_on = ""
+    current_topic = "IRSTD"
+    papers: list[EmailPaper] = []
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        updated_match = UPDATED_PATTERN.fullmatch(line)
+        if updated_match:
+            updated_on = updated_match.group("date").replace(".", "-")
+            continue
+        if line.startswith("## "):
+            current_topic = line[3:].strip() or "IRSTD"
+            continue
+        paper_match = PAPER_PATTERN.fullmatch(line)
+        if not paper_match:
+            continue
+        papers.append(
+            EmailPaper(
+                topic=current_topic,
+                publish_date=paper_match.group("date"),
+                title=paper_match.group("title"),
+                author=paper_match.group("author").strip().rstrip(","),
+                paper_url=paper_match.group("paper_url"),
+                code_url=paper_match.group("code_url") or "",
+            )
+        )
+
+    if not papers:
+        raise EmailNotificationError("未能从 wechat.md 解析出论文条目")
+    return EmailDigest(updated_on=updated_on, papers=tuple(papers))
+
+
+def _topics(digest: EmailDigest) -> dict[str, list[EmailPaper]]:
+    grouped: dict[str, list[EmailPaper]] = {}
+    for paper in digest.papers:
+        grouped.setdefault(paper.topic, []).append(paper)
+    return grouped
+
+
+def render_plain_email(digest: EmailDigest) -> str:
+    """生成不含 Markdown 标记的纯文本备用正文。"""
+    lines = [EMAIL_SUBJECT]
+    if digest.updated_on:
+        lines.append(f"更新日期：{digest.updated_on}")
+    lines.extend([f"论文数量：{len(digest.papers)}", ""])
+    index = 0
+    for topic, papers in _topics(digest).items():
+        lines.extend([topic, "=" * len(topic)])
+        for paper in papers:
+            index += 1
+            lines.extend(
+                [
+                    f"{index}. {paper.title}",
+                    f"   日期：{paper.publish_date}",
+                ]
+            )
+            if paper.author:
+                lines.append(f"   作者：{paper.author}")
+            lines.append(f"   论文：{paper.paper_url}")
+            if paper.code_url:
+                lines.append(f"   代码：{paper.code_url}")
+            lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _safe_http_url(value: str) -> str:
+    parsed = urlsplit(value.strip())
+    if parsed.scheme in {"http", "https"} and parsed.netloc:
+        return html.escape(value.strip(), quote=True)
+    return ""
+
+
+def render_html_email(
+    digest: EmailDigest,
+    *,
+    repository_url: str = "",
+) -> str:
+    """生成适合常见桌面端和移动端邮件客户端的 HTML 日报。"""
+    updated_on = html.escape(digest.updated_on or "本次更新")
+    sections: list[str] = []
+    global_index = 0
+    for topic, papers in _topics(digest).items():
+        cards: list[str] = []
+        for paper in papers:
+            global_index += 1
+            title = html.escape(paper.title)
+            author = html.escape(paper.author)
+            publish_date = html.escape(paper.publish_date)
+            paper_url = _safe_http_url(paper.paper_url)
+            code_url = _safe_http_url(paper.code_url)
+            title_html = (
+                f'<a class="paper-title" href="{paper_url}">{title}</a>'
+                if paper_url
+                else f'<span class="paper-title">{title}</span>'
+            )
+            author_html = (
+                f'<div class="paper-author">作者：{author}</div>' if author else ""
+            )
+            actions: list[str] = []
+            if paper_url:
+                actions.append(
+                    f'<a class="button paper-button" href="{paper_url}">查看论文</a>'
+                )
+            if code_url:
+                actions.append(
+                    f'<a class="button code-button" href="{code_url}">查看代码</a>'
+                )
+            cards.append(
+                "".join(
+                    [
+                        '<article class="paper-card">',
+                        '<div class="paper-meta">',
+                        f'<span class="paper-index">#{global_index}</span>',
+                        f'<span class="paper-date">{publish_date}</span>',
+                        "</div>",
+                        title_html,
+                        author_html,
+                        f'<div class="paper-actions">{"".join(actions)}</div>',
+                        "</article>",
+                    ]
+                )
+            )
+        sections.append(
+            "".join(
+                [
+                    '<section class="topic-section">',
+                    '<div class="topic-heading">',
+                    f"<h2>{html.escape(topic)}</h2>",
+                    f'<span class="topic-count">{len(papers)} 篇</span>',
+                    "</div>",
+                    "".join(cards),
+                    "</section>",
+                ]
+            )
+        )
+
+    safe_repository_url = _safe_http_url(repository_url)
+    repository_link = (
+        f'<a href="{safe_repository_url}">在 GitHub 查看完整目录</a>'
+        if safe_repository_url
+        else "IRSTD Paper Daily 自动生成"
+    )
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {{ margin: 0; padding: 0; background: #f3f5f8; color: #172033;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }}
+    .page {{ max-width: 760px; margin: 0 auto; padding: 24px 12px 40px; }}
+    .hero {{ padding: 30px 28px; border-radius: 18px; color: #fff;
+      background: #172554 linear-gradient(135deg, #172554, #9a3412); }}
+    .eyebrow {{ margin: 0 0 8px; color: #fed7aa; font-size: 12px;
+      font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }}
+    .hero h1 {{ margin: 0; font-size: 30px; line-height: 1.25; }}
+    .hero p {{ margin: 10px 0 0; color: #e2e8f0; font-size: 14px; }}
+    .summary {{ display: inline-block; margin-top: 18px; padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,.25); border-radius: 999px;
+      background: rgba(255,255,255,.12); color: #fff; font-size: 13px; }}
+    .topic-section {{ margin-top: 26px; }}
+    .topic-heading {{ display: flex; align-items: center; justify-content: space-between;
+      margin: 0 4px 12px; }}
+    .topic-heading h2 {{ margin: 0; color: #172554; font-size: 20px; }}
+    .topic-count {{ color: #64748b; font-size: 13px; }}
+    .paper-card {{ margin-bottom: 12px; padding: 18px 20px; border: 1px solid #e2e8f0;
+      border-left: 4px solid #ea580c; border-radius: 12px; background: #fff;
+      box-shadow: 0 3px 12px rgba(15,23,42,.05); }}
+    .paper-meta {{ margin-bottom: 8px; color: #64748b; font-size: 12px; }}
+    .paper-index {{ display: inline-block; margin-right: 8px; color: #c2410c;
+      font-weight: 700; }}
+    .paper-title {{ display: block; color: #172033; font-size: 16px;
+      font-weight: 700; line-height: 1.5; text-decoration: none; }}
+    .paper-author {{ margin-top: 7px; color: #64748b; font-size: 13px; }}
+    .paper-actions {{ margin-top: 13px; }}
+    .button {{ display: inline-block; margin: 0 8px 4px 0; padding: 7px 12px;
+      border-radius: 7px; color: #fff !important; font-size: 12px;
+      font-weight: 700; text-decoration: none; }}
+    .paper-button {{ background: #2563eb; }}
+    .code-button {{ background: #15803d; }}
+    .footer {{ margin-top: 28px; color: #64748b; font-size: 12px;
+      text-align: center; }}
+    .footer a {{ color: #2563eb; text-decoration: none; }}
+    @media (max-width: 520px) {{
+      .page {{ padding: 12px 8px 28px; }}
+      .hero {{ padding: 24px 20px; border-radius: 12px; }}
+      .hero h1 {{ font-size: 25px; }}
+      .paper-card {{ padding: 16px; }}
+    }}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Infrared Small Target Research</p>
+      <h1>IRSTD Paper Daily</h1>
+      <p>红外小目标检测论文每日更新</p>
+      <div class="summary">更新日期：{updated_on} · 共 {len(digest.papers)} 篇</div>
+    </header>
+    {''.join(sections)}
+    <footer class="footer">{repository_link}</footer>
+  </main>
+</body>
+</html>
+"""
+
+
+def _repository_url(environ: Mapping[str, str]) -> str:
+    explicit_url = str(environ.get("EMAIL_REPOSITORY_URL", "")).strip()
+    if _safe_http_url(explicit_url):
+        return explicit_url
+    repository = str(environ.get("GITHUB_REPOSITORY", "")).strip()
+    if re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        return f"https://github.com/{repository}"
+    return ""
+
+
 def build_email_message(
     content: str,
     *,
     sender: str,
     recipients: Sequence[str],
+    repository_url: str = "",
 ) -> EmailMessage:
-    """创建主题固定、正文为 ``wechat.md`` 原文的 UTF-8 邮件。"""
+    """创建主题固定、同时包含纯文本和 HTML 排版的 UTF-8 邮件。"""
+    digest = parse_wechat_markdown(content)
     message = EmailMessage()
     message["Subject"] = EMAIL_SUBJECT
     message["From"] = sender
     message["To"] = ", ".join(recipients)
-    message.set_content(content, charset="utf-8")
+    message.set_content(render_plain_email(digest), charset="utf-8")
+    message.add_alternative(
+        render_html_email(digest, repository_url=repository_url),
+        subtype="html",
+        charset="utf-8",
+    )
     return message
 
 
 def send_email_message(
     settings: EmailSettings,
     content: str,
+    *,
+    repository_url: str = "",
 ) -> None:
     """使用 SSL 或 STARTTLS 连接 SMTP 服务并发送日报。"""
     message = build_email_message(
         content,
         sender=settings.sender,
         recipients=settings.recipients,
+        repository_url=repository_url,
     )
     tls_context = ssl.create_default_context()
     try:
@@ -187,7 +443,8 @@ def send_daily_email(
     environ: Mapping[str, str] | None = None,
 ) -> bool:
     """读取日报并发送；完全未配置 SMTP 时安全跳过。"""
-    settings = load_email_settings(environ)
+    values = environ if environ is not None else os.environ
+    settings = load_email_settings(values)
     if settings is None:
         logger.warning("未配置 SMTP 邮件 Secrets，跳过邮件通知")
         return False
@@ -199,7 +456,11 @@ def send_daily_email(
     if not content.strip():
         raise EmailNotificationError(f"邮件正文文件为空: {path}")
 
-    send_email_message(settings, content)
+    send_email_message(
+        settings,
+        content,
+        repository_url=_repository_url(values),
+    )
     logger.info("邮件通知已发送给 %d 个收件地址", len(settings.recipients))
     return True
 

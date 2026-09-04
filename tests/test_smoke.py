@@ -17,6 +17,9 @@ from arxiv_daily.emailer import (  # noqa: E402
     EmailNotificationError,
     load_email_settings,
     parse_recipients,
+    parse_wechat_markdown,
+    render_html_email,
+    render_plain_email,
     send_daily_email,
 )
 from arxiv_daily.notifier import (  # noqa: E402
@@ -43,6 +46,25 @@ def sample_paper(code: str | None = None) -> dict[str, object]:
         "url": "http://arxiv.org/abs/2608.07015",
         "code": code,
     }
+
+
+def sample_wechat_markdown() -> str:
+    return """[![Contributors][contributors-shield]][contributors-url]
+
+> Updated on 2026.09.04
+> Usage instructions: [here](./README.md#usage)
+
+<details>
+  <summary>Table of Contents</summary>
+</details>
+
+## IRSTD
+
+- 2026-08-07, **Demo Paper $x$**, Alice et.al., Paper: [http://arxiv.org/abs/2608.07015](http://arxiv.org/abs/2608.07015), Code: **[https://github.com/foo/bar](https://github.com/foo/bar)**
+
+[contributors-shield]: https://img.shields.io/example
+[contributors-url]: https://github.com/example
+"""
 
 
 def test_build_query() -> None:
@@ -150,8 +172,41 @@ def test_email_settings_skip_or_reject_incomplete_configuration() -> None:
         raise AssertionError("不完整 SMTP 配置应当被拒绝")
 
 
+def test_render_formatted_email() -> None:
+    digest = parse_wechat_markdown(sample_wechat_markdown())
+    plain_content = render_plain_email(digest)
+    html_content = render_html_email(
+        digest,
+        repository_url="https://github.com/Sakauma/IRSTD-Paper-Daily",
+    )
+
+    assert digest.updated_on == "2026-09-04"
+    assert len(digest.papers) == 1
+    assert "1. Demo Paper $x$" in plain_content
+    assert "**" not in plain_content
+    assert "contributors-shield" not in plain_content
+    assert '<article class="paper-card">' in html_content
+    assert "更新日期：2026-09-04 · 共 1 篇" in html_content
+    assert 'href="http://arxiv.org/abs/2608.07015"' in html_content
+    assert 'href="https://github.com/foo/bar"' in html_content
+    assert "查看论文" in html_content
+    assert "查看代码" in html_content
+    assert "contributors-shield" not in html_content
+    assert "<details>" not in html_content
+
+    unsafe_digest = parse_wechat_markdown(
+        "## IRSTD\n"
+        "- 2026-09-04, **<script>alert(1)</script>**, Alice et.al., "
+        "Paper: [unsafe](javascript:evil)\n"
+    )
+    unsafe_html = render_html_email(unsafe_digest)
+    assert "<script>" not in unsafe_html
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in unsafe_html
+    assert "javascript:evil" not in unsafe_html
+
+
 def test_send_daily_email_with_ssl() -> None:
-    content = "# IRSTD Paper Daily\n\n- Demo paper\n"
+    content = sample_wechat_markdown()
     smtp_client = mock.Mock()
     smtp_context = mock.MagicMock()
     smtp_context.__enter__.return_value = smtp_client
@@ -163,6 +218,7 @@ def test_send_daily_email_with_ssl() -> None:
         "SMTP_PASSWORD": "app-password",
         "EMAIL_FROM": "papers@example.com",
         "EMAIL_TO": "reader@example.com",
+        "GITHUB_REPOSITORY": "Sakauma/IRSTD-Paper-Daily",
     }
 
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -182,7 +238,14 @@ def test_send_daily_email_with_ssl() -> None:
     assert message["Subject"] == EMAIL_SUBJECT
     assert message["From"] == "papers@example.com"
     assert message["To"] == "reader@example.com"
-    assert message.get_content() == content
+    assert message.is_multipart()
+    plain_part = message.get_body(preferencelist=("plain",))
+    html_part = message.get_body(preferencelist=("html",))
+    assert plain_part is not None
+    assert html_part is not None
+    assert "1. Demo Paper $x$" in plain_part.get_content()
+    assert '<article class="paper-card">' in html_part.get_content()
+    assert "在 GitHub 查看完整目录" in html_part.get_content()
 
 
 def test_send_daily_email_with_starttls() -> None:
@@ -201,7 +264,7 @@ def test_send_daily_email_with_starttls() -> None:
     with tempfile.TemporaryDirectory() as tmp_dir:
         markdown_path = os.path.join(tmp_dir, "wechat.md")
         with open(markdown_path, "w", encoding="utf-8") as file:
-            file.write("日报正文\n")
+            file.write(sample_wechat_markdown())
         with mock.patch(
             "arxiv_daily.emailer.smtplib.SMTP",
             return_value=smtp_context,
@@ -945,6 +1008,7 @@ if __name__ == "__main__":
         test_wechat_render,
         test_load_email_settings,
         test_email_settings_skip_or_reject_incomplete_configuration,
+        test_render_formatted_email,
         test_send_daily_email_with_ssl,
         test_send_daily_email_with_starttls,
         test_send_daily_email_without_secrets_skips_safely,
