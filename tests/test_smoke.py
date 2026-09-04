@@ -91,7 +91,10 @@ def test_build_query() -> None:
 def test_config() -> None:
     config = load_config(os.path.join(PROJECT_ROOT, "config.yaml"))
     assert list(config["kv"].keys()) == ["IRSTD"]
-    assert "Infrared Small Target Detection" in config["kv"]["IRSTD"]
+    assert "all:infrared" in config["kv"]["IRSTD"]
+    assert 'all:"small targets"' in config["kv"]["IRSTD"]
+    assert 'all:"point target"' in config["kv"]["IRSTD"]
+    assert "all:MFIRST" in config["kv"]["IRSTD"]
     assert config["domain_max_results"]["IRSTD"] is None
     assert "submittedDate" not in config["kv"]["IRSTD"]
     assert config["domain_start_dates"]["IRSTD"] == "2025-01-01"
@@ -99,6 +102,23 @@ def test_config() -> None:
     assert config["publish_wechat"] is True
     assert config["wechat_notification"]["provider"] == "serverchan"
     assert config["wechat_notification"]["max_papers"] == 20
+
+
+def test_domain_query_overrides_filters() -> None:
+    config_text = """domains:
+    IRSTD:
+        enable: true
+        query: 'all:infrared AND all:"small target"'
+        filters:
+            - ignored keyword
+"""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_path = os.path.join(tmp_dir, "config.yaml")
+        with open(config_path, "w", encoding="utf-8") as file:
+            file.write(config_text)
+        config = load_config(config_path)
+
+    assert config["kv"]["IRSTD"] == 'all:infrared AND all:"small target"'
 
 
 def test_merge_and_storage() -> None:
@@ -1044,6 +1064,7 @@ if __name__ == "__main__":
     tests = [
         test_build_query,
         test_config,
+        test_domain_query_overrides_filters,
         test_merge_and_storage,
         test_render_markdown,
         test_wechat_render,

@@ -57,7 +57,7 @@ python daily_arxiv.py --full-refresh --backfill_code
 
 ## 配置新领域
 
-在 `config.yaml` 的 `domains` 下增加条目即可：
+在 `config.yaml` 的 `domains` 下增加条目即可。简单领域可以使用 `filters`：
 
 ```yaml
 domains:
@@ -77,11 +77,25 @@ domains:
 论文，但不会删除历史数据。含空格的过滤词按完整短语搜索，多个过滤词以 `OR`
 连接。
 
+需要使用字段限定、括号和布尔条件时，可以直接配置原生 arXiv 查询；`query` 的
+优先级高于 `filters`：
+
+```yaml
+domains:
+    "New Domain":
+        enable: true
+        max_results: null
+        query: '(all:infrared AND all:"small target") OR all:IRSTD'
+```
+
 GitHub Actions 每天北京时间 08:00 执行增量更新。每周一北京时间 16:00 执行
 全量论文刷新和历史代码链接补查。两个工作流都会在论文目录实际变化时发送通知。
 
-默认 IRSTD 关键词只保留明确包含 infrared、IRSTD 或 SIRST 的检索词，避免把
-声呐小目标、普通 UAV 检测等论文误收进列表。
+默认 IRSTD 查询采用宽范围候选策略：收录明确处于 infrared/infra-red 语境，并
+包含 small、dim、weak、tiny、point target 或 small object 表达的论文；同时补充
+IRSTD、SIRST、MIRST、MIRSTD、MFIRST 和常用数据集名称。检测、分割、跟踪、增强、
+解混、数据集与评价等任务均可收录。普通可见光或声呐小目标论文不会仅因出现
+“small target”而进入结果。
 
 ## 微信通知配置
 

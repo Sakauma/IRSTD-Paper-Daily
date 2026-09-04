@@ -2,7 +2,7 @@
 # IRSTD-PAPER-DAILY 配置文件
 # ---------------------------------------------------------------------
 # domains 是领域配置。新增领域时复制一个条目并修改 enable、
-# max_results 和 filters，代码无需改动。
+# max_results 以及 query 或 filters，代码无需改动。
 # =====================================================================
 
 # 仓库信息（用于 README 底部徽章）
@@ -47,15 +47,25 @@ domains:
     "IRSTD":
         enable: true
         max_results: null
-        filters:
-            - "Infrared Small Target Detection"
-            - "Infrared Small Target Segmentation"
-            - "Infrared Small Target"
-            - "Infrared Dim Small Target"
-            - "Infrared Weak Small Target"
-            - "Moving Infrared Small Target"
-            - "IRSTD"
-            - "SIRST"
+        # 宽范围候选查询：要求红外语境与小/弱/暗/微小/点目标表达同时出现，
+        # 或命中该领域常用缩写与数据集名称。任务类型不受限制。
+        query: >-
+            ((all:infrared OR all:"infra-red") AND
+            (all:"small target" OR all:"small targets" OR
+            all:"small-target" OR all:"small-targets" OR
+            all:"dim target" OR all:"dim targets" OR
+            all:"dim-target" OR all:"dim-targets" OR
+            all:"weak target" OR all:"weak targets" OR
+            all:"weak-target" OR all:"weak-targets" OR
+            all:"tiny target" OR all:"tiny targets" OR
+            all:"tiny-target" OR all:"tiny-targets" OR
+            all:"point target" OR all:"point targets" OR
+            all:"point-target" OR all:"point-targets" OR
+            all:"small object" OR all:"small objects" OR
+            all:"small-object" OR all:"small-objects")) OR
+            all:IRSTD OR all:SIRST OR all:MIRST OR all:MIRSTD OR
+            all:MFIRST OR all:"NUAA-SIRST" OR all:"NUDT-SIRST" OR
+            all:"IRSTD-1K" OR all:IRSTD1K
 
     # 新增领域示例：取消注释后即可启用，无需修改 Python 代码。
     # "New Domain":

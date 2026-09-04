@@ -94,6 +94,7 @@ def load_config(config_path: str | Path) -> Dict[str, Any]:
         if isinstance(domain_config, dict):
             if not domain_config.get("enable", True):
                 continue
+            raw_query = domain_config.get("query")
             filters = domain_config.get("filters", [])
             max_results = domain_config.get("max_results", global_max_results)
             start_date = domain_config.get("start_date", global_start_date)
@@ -103,6 +104,7 @@ def load_config(config_path: str | Path) -> Dict[str, Any]:
             )
         else:
             # 兼容旧版 keywords: {"Topic": ["keyword", ...]}
+            raw_query = None
             filters = domain_config
             max_results = global_max_results
             start_date = global_start_date
@@ -138,7 +140,13 @@ def load_config(config_path: str | Path) -> Dict[str, Any]:
             )
 
         topic_name = str(topic)
-        kv[topic_name] = build_query(filters)
+        if raw_query is not None:
+            parsed_query = str(raw_query).strip()
+            if not parsed_query:
+                raise ValueError(f"领域 {topic!r} 的 query 不能为空")
+        else:
+            parsed_query = build_query(filters)
+        kv[topic_name] = parsed_query
         domain_max_results[topic_name] = parsed_max_results
         domain_start_dates[topic_name] = parsed_start_date
         domain_lookback_days[topic_name] = parsed_lookback_days
