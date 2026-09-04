@@ -15,6 +15,7 @@ from arxiv_daily.config import add_date_range, build_query, load_config  # noqa:
 from arxiv_daily.emailer import (  # noqa: E402
     EMAIL_SUBJECT,
     EmailNotificationError,
+    build_email_message,
     load_email_settings,
     parse_recipients,
     parse_wechat_markdown,
@@ -203,6 +204,46 @@ def test_render_formatted_email() -> None:
     assert "<script>" not in unsafe_html
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in unsafe_html
     assert "javascript:evil" not in unsafe_html
+
+
+def test_formatted_email_limits_size_and_keeps_newest_papers() -> None:
+    lines = ["> Updated on 2026.09.04", "", "## IRSTD", ""]
+    for index in range(1, 13):
+        paper_url = f"https://arxiv.org/abs/2609.{index:05d}"
+        lines.append(
+            f"- 2026-09-{index:02d}, **Paper {index} {'红' * 300}**, "
+            f"Author {index} et.al., Paper: [{paper_url}]({paper_url})"
+        )
+    markdown = "\n".join(lines) + "\n"
+    digest = parse_wechat_markdown(markdown)
+    repository_url = "https://github.com/Sakauma/IRSTD-Paper-Daily"
+    max_bytes = 10_000
+
+    html_content = render_html_email(
+        digest,
+        repository_url=repository_url,
+        max_bytes=max_bytes,
+    )
+    message = build_email_message(
+        markdown,
+        sender="sender@example.com",
+        recipients=["reader@example.com"],
+        repository_url=repository_url,
+        max_html_bytes=max_bytes,
+    )
+
+    assert len(html_content.encode("utf-8")) <= max_bytes
+    assert "2609.00012" in html_content
+    assert "2609.00001" not in html_content
+    assert "仅显示最新" in html_content
+    assert "较早的" in html_content
+    assert "在 GitHub 查看完整目录" in html_content
+    plain_part = message.get_body(preferencelist=("plain",))
+    assert plain_part is not None
+    plain_content = plain_part.get_content()
+    assert "2609.00012" in plain_content
+    assert "2609.00001" not in plain_content
+    assert f"完整目录：{repository_url}" in plain_content
 
 
 def test_send_daily_email_with_ssl() -> None:
@@ -1009,6 +1050,7 @@ if __name__ == "__main__":
         test_load_email_settings,
         test_email_settings_skip_or_reject_incomplete_configuration,
         test_render_formatted_email,
+        test_formatted_email_limits_size_and_keeps_newest_papers,
         test_send_daily_email_with_ssl,
         test_send_daily_email_with_starttls,
         test_send_daily_email_without_secrets_skips_safely,

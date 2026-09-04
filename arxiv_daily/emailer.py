@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 EMAIL_SUBJECT = "IRSTD-Paper-Daily"
 SMTP_TIMEOUT = 20
+MAX_EMAIL_HTML_BYTES = 96 * 1024
 SUPPORTED_SECURITY_MODES = {"ssl", "starttls"}
 UPDATED_PATTERN = re.compile(r"^> Updated on (?P<date>.+)$")
 PAPER_PATTERN = re.compile(
@@ -188,12 +189,19 @@ def _topics(digest: EmailDigest) -> dict[str, list[EmailPaper]]:
     return grouped
 
 
-def render_plain_email(digest: EmailDigest) -> str:
+def render_plain_email(
+    digest: EmailDigest,
+    *,
+    total_count: int | None = None,
+    omitted_count: int = 0,
+    repository_url: str = "",
+) -> str:
     """生成不含 Markdown 标记的纯文本备用正文。"""
+    effective_total = total_count if total_count is not None else len(digest.papers)
     lines = [EMAIL_SUBJECT]
     if digest.updated_on:
         lines.append(f"更新日期：{digest.updated_on}")
-    lines.extend([f"论文数量：{len(digest.papers)}", ""])
+    lines.extend([f"论文数量：{effective_total}", ""])
     index = 0
     for topic, papers in _topics(digest).items():
         lines.extend([topic, "=" * len(topic)])
@@ -211,6 +219,16 @@ def render_plain_email(digest: EmailDigest) -> str:
             if paper.code_url:
                 lines.append(f"   代码：{paper.code_url}")
             lines.append("")
+    if omitted_count:
+        lines.extend(
+            [
+                f"为避免邮件过长，仅显示最新 {len(digest.papers)} 篇，"
+                f"较早的 {omitted_count} 篇未展示。",
+                "",
+            ]
+        )
+    if _safe_http_url(repository_url):
+        lines.append(f"完整目录：{repository_url.strip()}")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -221,12 +239,15 @@ def _safe_http_url(value: str) -> str:
     return ""
 
 
-def render_html_email(
+def _render_html_document(
     digest: EmailDigest,
     *,
     repository_url: str = "",
+    total_count: int | None = None,
+    omitted_count: int = 0,
 ) -> str:
-    """生成适合常见桌面端和移动端邮件客户端的 HTML 日报。"""
+    """渲染已经确定论文范围的 HTML 日报。"""
+    effective_total = total_count if total_count is not None else len(digest.papers)
     updated_on = html.escape(digest.updated_on or "本次更新")
     sections: list[str] = []
     global_index = 0
@@ -291,6 +312,14 @@ def render_html_email(
         if safe_repository_url
         else "IRSTD Paper Daily 自动生成"
     )
+    omitted_notice = (
+        '<div class="omitted-notice">'
+        f"为避免邮件超过 102 KB，仅显示最新 <strong>{len(digest.papers)}</strong> "
+        f"篇，较早的 <strong>{omitted_count}</strong> 篇未展示。"
+        "</div>"
+        if omitted_count
+        else ""
+    )
     return f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -332,6 +361,9 @@ def render_html_email(
     .footer {{ margin-top: 28px; color: #64748b; font-size: 12px;
       text-align: center; }}
     .footer a {{ color: #2563eb; text-decoration: none; }}
+    .omitted-notice {{ margin: 26px 0 0; padding: 13px 16px; border: 1px solid #fed7aa;
+      border-radius: 9px; background: #fff7ed; color: #9a3412; font-size: 13px;
+      line-height: 1.6; text-align: center; }}
     @media (max-width: 520px) {{
       .page {{ padding: 12px 8px 28px; }}
       .hero {{ padding: 24px 20px; border-radius: 12px; }}
@@ -346,14 +378,88 @@ def render_html_email(
       <p class="eyebrow">Infrared Small Target Research</p>
       <h1>IRSTD Paper Daily</h1>
       <p>红外小目标检测论文每日更新</p>
-      <div class="summary">更新日期：{updated_on} · 共 {len(digest.papers)} 篇</div>
+      <div class="summary">更新日期：{updated_on} · 共 {effective_total} 篇</div>
     </header>
     {''.join(sections)}
+    {omitted_notice}
     <footer class="footer">{repository_link}</footer>
   </main>
 </body>
 </html>
 """
+
+
+def _fit_html_digest(
+    digest: EmailDigest,
+    *,
+    repository_url: str,
+    max_bytes: int,
+) -> tuple[EmailDigest, int, str]:
+    """保留尽可能多的最新论文，使 HTML 正文不超过字节上限。"""
+    if max_bytes < 1:
+        raise EmailNotificationError("HTML 邮件字节上限必须大于 0")
+
+    total_count = len(digest.papers)
+    full_html = _render_html_document(
+        digest,
+        repository_url=repository_url,
+        total_count=total_count,
+    )
+    if len(full_html.encode("utf-8")) <= max_bytes:
+        return digest, 0, full_html
+
+    ordered_papers = sorted(
+        digest.papers,
+        key=lambda paper: (paper.publish_date, paper.paper_url),
+        reverse=True,
+    )
+    low = 0
+    high = total_count
+    best_digest = EmailDigest(updated_on=digest.updated_on, papers=())
+    best_html = _render_html_document(
+        best_digest,
+        repository_url=repository_url,
+        total_count=total_count,
+        omitted_count=total_count,
+    )
+    if len(best_html.encode("utf-8")) > max_bytes:
+        raise EmailNotificationError("HTML 邮件模板本身超过字节上限")
+
+    while low <= high:
+        visible_count = (low + high) // 2
+        candidate = EmailDigest(
+            updated_on=digest.updated_on,
+            papers=tuple(ordered_papers[:visible_count]),
+        )
+        candidate_html = _render_html_document(
+            candidate,
+            repository_url=repository_url,
+            total_count=total_count,
+            omitted_count=total_count - visible_count,
+        )
+        if len(candidate_html.encode("utf-8")) <= max_bytes:
+            best_digest = candidate
+            best_html = candidate_html
+            low = visible_count + 1
+        else:
+            high = visible_count - 1
+
+    return best_digest, total_count - len(best_digest.papers), best_html
+
+
+def render_html_email(
+    digest: EmailDigest,
+    *,
+    repository_url: str = "",
+    max_bytes: int = MAX_EMAIL_HTML_BYTES,
+) -> str:
+    """生成不超过安全字节上限、优先保留最新论文的 HTML 日报。"""
+    _, _, html_content = _fit_html_digest(
+        digest,
+        repository_url=repository_url,
+        max_bytes=max_bytes,
+    )
+    return html_content
 
 
 def _repository_url(environ: Mapping[str, str]) -> str:
@@ -372,16 +478,30 @@ def build_email_message(
     sender: str,
     recipients: Sequence[str],
     repository_url: str = "",
+    max_html_bytes: int = MAX_EMAIL_HTML_BYTES,
 ) -> EmailMessage:
     """创建主题固定、同时包含纯文本和 HTML 排版的 UTF-8 邮件。"""
     digest = parse_wechat_markdown(content)
+    visible_digest, omitted_count, html_content = _fit_html_digest(
+        digest,
+        repository_url=repository_url,
+        max_bytes=max_html_bytes,
+    )
     message = EmailMessage()
     message["Subject"] = EMAIL_SUBJECT
     message["From"] = sender
     message["To"] = ", ".join(recipients)
-    message.set_content(render_plain_email(digest), charset="utf-8")
+    message.set_content(
+        render_plain_email(
+            visible_digest,
+            total_count=len(digest.papers),
+            omitted_count=omitted_count,
+            repository_url=repository_url,
+        ),
+        charset="utf-8",
+    )
     message.add_alternative(
-        render_html_email(digest, repository_url=repository_url),
+        html_content,
         subtype="html",
         charset="utf-8",
     )
