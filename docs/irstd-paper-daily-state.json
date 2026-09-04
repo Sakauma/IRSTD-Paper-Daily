@@ -4,6 +4,7 @@
   },
   "wechat_notification": {
     "initialized": true,
+    "provider": "serverchan",
     "last_successful_notification": "2026-09-04"
   }
 }
