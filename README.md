@@ -1,5 +1,5 @@
 ## Updated on 2026.09.04
-> Usage instructions: [here](./docs/README.md#usage)
+> 本项目可开启微信和邮箱推送，Usage instructions: [here](./docs/README.md#usage)
 
 <details>
   <summary>Table of Contents</summary>
