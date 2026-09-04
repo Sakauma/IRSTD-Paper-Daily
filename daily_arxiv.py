@@ -143,11 +143,11 @@ def _change_count(groups: Dict[str, Any]) -> int:
     return sum(len(papers) for papers in groups.values())
 
 
-def _notification_initialized(state: Dict[str, Any]) -> bool:
+def _notification_initialized(state: Dict[str, Any], provider: str) -> bool:
     notification_state = state.get("wechat_notification", {})
     return isinstance(notification_state, dict) and bool(
         notification_state.get("initialized")
-    )
+    ) and notification_state.get("provider") == provider
 
 
 def _notify_catalog_update(
@@ -159,7 +159,13 @@ def _notify_catalog_update(
     run_date: date,
 ) -> None:
     """首次发送完整目录，之后只在目录实际变化时发送。"""
-    initial_sync = not _notification_initialized(state)
+    settings = config.get("wechat_notification", {})
+    provider = (
+        str(settings.get("provider", "serverchan")).lower()
+        if isinstance(settings, dict)
+        else "serverchan"
+    )
+    initial_sync = not _notification_initialized(state, provider)
     if initial_sync:
         new_papers = _all_papers(current_data)
         updated_papers: Dict[str, Any] = {}
@@ -185,6 +191,7 @@ def _notify_catalog_update(
     if sent:
         state["wechat_notification"] = {
             "initialized": True,
+            "provider": provider,
             "last_successful_notification": run_date.isoformat(),
         }
 
@@ -364,7 +371,7 @@ def main() -> None:
     parser.add_argument(
         "--notify-wechat",
         action="store_true",
-        help="更新完成后通过 WxPusher 向指定微信用户发送当日摘要",
+        help="更新完成后通过 Server酱向绑定的微信发送论文摘要",
     )
     args = parser.parse_args()
 

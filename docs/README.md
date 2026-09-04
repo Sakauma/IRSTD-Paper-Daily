@@ -85,19 +85,26 @@ GitHub Actions 每天北京时间 08:00 执行增量更新。每周一北京时�
 
 ## 微信通知配置
 
-自动化工作流使用 [WxPusher](https://wxpusher.zjiecode.com/) 将论文变化推送到
-指定个人微信。配置步骤如下：
+自动化工作流使用 [Server酱](https://sct.ftqq.com/) 将论文变化推送到绑定的微信。
+推荐使用 Server酱 Turbo；程序也兼容 [Server酱³](https://sc3.ft07.com/)。配置步骤
+如下：
 
-1. 登录 WxPusher 后创建一个应用，复制以 `AT_` 开头的 `appToken`。
-2. 让接收者用微信扫描该应用的关注二维码，在应用用户列表中复制其 `UID_...`。
-3. 打开 GitHub 仓库的 **Settings → Secrets and variables → Actions**，新建两个
-   Repository secrets：
-   - `WXPUSHER_APP_TOKEN`：上一步获得的 `AT_...`。
-   - `WXPUSHER_UIDS`：目标微信的 `UID_...`；多个 UID 使用英文逗号分隔。
+1. 登录 Server酱，在后台按照提示绑定用于接收消息的微信服务号。
+2. 打开 SendKey 页面，复制以 `SCT` 开头的 Turbo SendKey；使用 Server酱³ 时，
+   复制以 `sctp` 开头的 SendKey。SendKey 相当于密码，不要写入仓库文件。
+3. 打开 GitHub 仓库的 **Settings → Secrets and variables → Actions**，新建一个
+   Repository secret：
+   - Name：`SERVERCHAN_SENDKEY`
+   - Secret：上一步复制的完整 SendKey
 4. 在 GitHub Actions 页面手动运行 **Update IRSTD Paper Daily** 测试推送。
 
-首次成功通知会发送当前完整论文目录，不受增量通知展示数量限制。程序随后会在
-`docs/irstd-paper-daily-state.json` 记录初始化状态。后续只有目录实际变化时才发送，
+接收微信由 Server酱后台管理，因此不需要在仓库中配置 UID。迁移完成后，可以在
+GitHub Actions Secrets 中删除不再使用的 `WXPUSHER_APP_TOKEN` 和
+`WXPUSHER_UIDS`。
+
+首次成功的 Server酱通知会发送当前完整论文目录，不受增量通知展示数量限制。
+程序随后会在 `docs/irstd-paper-daily-state.json` 中记录 `serverchan` 初始化状态。
+旧通知服务的初始化记录不会跳过这次首次全量发送。后续只有目录实际变化时才发送，
 内容包括新增论文，以及标题、作者、arXiv 信息或代码链接发生变化的论文。每日和
 每周工作流都没有发现变化时，不会发送“今日无新增”。
 
@@ -105,10 +112,9 @@ GitHub Actions 每天北京时间 08:00 执行增量更新。每周一北京时�
 `wechat_notification.max_papers` 修改。这里的代码更新指目录中的代码链接从空值
 变为 GitHub 地址或链接发生变化，不监控代码仓库内部的每次 commit。
 
-两个 Secrets 都没有配置时，程序会安全跳过通知，并保持“首次未发送”状态；配置
-完成后的下一次运行仍会发送完整目录。只配置其中一个会视为配置错误并让工作流
-失败，以免误以为通知已经送达。Token 和 UID 只从 GitHub Secrets 读取，不应写入
-`config.yaml` 或提交到仓库。
+没有配置 `SERVERCHAN_SENDKEY` 时，程序会安全跳过通知，并保持“首次未发送”状态；
+配置完成后的下一次运行仍会发送完整目录。SendKey 只从 GitHub Secret 读取，不应
+写入 `config.yaml` 或提交到仓库。
 
 本地测试通知可先设置同名环境变量，再运行：
 
@@ -123,8 +129,8 @@ python daily_arxiv.py --notify-wechat
 - `docs/irstd-paper-daily-wechat.json`：微信版条目的结构化索引。
 - `docs/wechat.md`：按领域分组的项目符号列表，包含论文和代码链接。
 
-微信版文件与 WxPusher 通知互相独立：前者是可复制的完整 Markdown 日报，后者是
-每日工作流自动发送的精简变化摘要。
+微信版文件与 Server酱通知互相独立：前者是可复制的完整 Markdown 日报，后者是
+自动化工作流发送的变化摘要。
 
 ## 测试
 
@@ -133,7 +139,7 @@ python tests/test_smoke.py
 ```
 
 测试不访问网络，覆盖配置解析、增量与全量日期窗口、数据合并、Markdown 渲染、
-微信渲染、WxPusher 通知以及代码链接校验的基本行为。
+微信渲染、Server酱通知以及代码链接校验的基本行为。
 
 ## 参考项目
 

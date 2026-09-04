@@ -29,10 +29,9 @@ publish_readme: true
 publish_gitpage: true
 publish_wechat: true
 
-# 微信通知通过 WxPusher 发送。密钥和接收 UID 只从环境变量读取：
-# WXPUSHER_APP_TOKEN、WXPUSHER_UIDS（多个 UID 用逗号分隔）。
+# 微信通知通过 Server酱发送，SendKey 只从 SERVERCHAN_SENDKEY 环境变量读取。
 wechat_notification:
-    provider: "wxpusher"
+    provider: "serverchan"
     max_papers: 20
 
 # 文件路径

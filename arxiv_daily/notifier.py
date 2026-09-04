@@ -1,4 +1,4 @@
-"""把每日论文变化通过 WxPusher 推送到指定微信用户。"""
+"""把论文目录变化通过 Server酱推送到绑定的微信。"""
 
 from __future__ import annotations
 
@@ -12,9 +12,10 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-WXPUSHER_API_URL = "https://wxpusher.zjiecode.com/api/send/message"
+SERVERCHAN_TURBO_API_URL = "https://sctapi.ftqq.com/{sendkey}.send"
+SERVERCHAN_3_API_URL = "https://{sendkey}.push.ft07.com/send"
 REQUEST_TIMEOUT = 15
-WXPUSHER_SUCCESS_CODE = 1000
+SERVERCHAN_SUCCESS_CODE = 0
 MAX_CONTENT_LENGTH = 40_000
 MAX_SUMMARY_LENGTH = 100
 
@@ -23,17 +24,15 @@ class NotificationError(RuntimeError):
     """微信通知配置或发送失败。"""
 
 
-def parse_wxpusher_uids(value: str) -> List[str]:
-    """解析逗号、分号或空白分隔的 WxPusher UID，并保持顺序去重。"""
-    uids = list(dict.fromkeys(part for part in re.split(r"[,;\s]+", value) if part))
-    invalid = [uid for uid in uids if not re.fullmatch(r"UID_\S+", uid)]
-    if invalid:
-        raise NotificationError("WXPUSHER_UIDS 包含无效 UID，UID 必须以 UID_ 开头")
-    if not uids:
-        raise NotificationError("WXPUSHER_UIDS 未配置任何接收者")
-    if len(uids) > 2000:
-        raise NotificationError("WXPUSHER_UIDS 不能超过 2000 个接收者")
-    return uids
+def build_serverchan_url(sendkey: str) -> str:
+    """校验 SendKey，并生成 Turbo 或 Server酱³ 的发送地址。"""
+    if re.fullmatch(r"sctp[A-Za-z0-9-]+", sendkey):
+        return SERVERCHAN_3_API_URL.format(sendkey=sendkey)
+    if re.fullmatch(r"SCT[A-Za-z0-9_-]+", sendkey):
+        return SERVERCHAN_TURBO_API_URL.format(sendkey=sendkey)
+    raise NotificationError(
+        "SERVERCHAN_SENDKEY 无效，应以 SCT（Turbo）或 sctp（Server酱³）开头"
+    )
 
 
 def _change_count(groups: Mapping[str, Sequence[Mapping[str, Any]]]) -> int:
@@ -89,7 +88,7 @@ def build_daily_digest(
     max_papers: int = 20,
     initial_sync: bool = False,
 ) -> Tuple[str, str]:
-    """生成适合 WxPusher 的 Markdown 摘要和通知标题。"""
+    """生成适合 Server酱的 Markdown 摘要和通知标题。"""
     if max_papers < 1:
         raise NotificationError("wechat_notification.max_papers 必须大于 0")
 
@@ -154,42 +153,41 @@ def build_daily_digest(
     return summary[:MAX_SUMMARY_LENGTH], content
 
 
-def send_wxpusher_message(
+def send_serverchan_message(
     *,
-    app_token: str,
-    uids: Sequence[str],
+    sendkey: str,
     summary: str,
     content: str,
-    url: str = "",
 ) -> Dict[str, Any]:
-    """调用 WxPusher 标准推送接口，业务 code=1000 才视为成功。"""
-    if not re.fullmatch(r"AT_\S+", app_token):
-        raise NotificationError("WXPUSHER_APP_TOKEN 无效，Token 必须以 AT_ 开头")
-    parsed_uids = parse_wxpusher_uids(",".join(uids))
+    """调用 Server酱接口，业务 code=0 才视为成功。"""
+    api_url = build_serverchan_url(sendkey)
     payload: Dict[str, Any] = {
-        "appToken": app_token,
-        "content": content,
-        "summary": summary[:MAX_SUMMARY_LENGTH],
-        "contentType": 3,
-        "uids": parsed_uids,
+        "title": summary[:MAX_SUMMARY_LENGTH],
+        "desp": content,
+        "short": summary[:MAX_SUMMARY_LENGTH],
     }
-    if url:
-        payload["url"] = url
 
     try:
         response = requests.post(
-            WXPUSHER_API_URL,
+            api_url,
             json=payload,
             timeout=REQUEST_TIMEOUT,
         )
         response.raise_for_status()
         result = response.json()
-    except (requests.RequestException, ValueError) as exc:
-        raise NotificationError(f"WxPusher 请求失败: {exc}") from exc
+    except requests.RequestException:
+        # Server酱 URL 中含 SendKey，异常链可能打印完整 URL，因此不保留原异常。
+        raise NotificationError("Server酱请求失败（网络或 HTTP 错误）") from None
+    except ValueError:
+        raise NotificationError("Server酱返回了无法解析的响应") from None
 
-    if not isinstance(result, dict) or result.get("code") != WXPUSHER_SUCCESS_CODE:
-        message = result.get("msg", "未知错误") if isinstance(result, dict) else "响应格式错误"
-        raise NotificationError(f"WxPusher 发送失败: {message}")
+    if not isinstance(result, dict) or result.get("code") != SERVERCHAN_SUCCESS_CODE:
+        message = (
+            result.get("message", "未知错误")
+            if isinstance(result, dict)
+            else "响应格式错误"
+        )
+        raise NotificationError(f"Server酱发送失败: {message}")
     return result
 
 
@@ -202,21 +200,16 @@ def notify_daily_update(
     initial_sync: bool = False,
 ) -> bool:
     """读取 GitHub Secrets 对应环境变量并推送每日变化。"""
-    app_token = os.environ.get("WXPUSHER_APP_TOKEN", "").strip()
-    raw_uids = os.environ.get("WXPUSHER_UIDS", "").strip()
-    if not app_token and not raw_uids:
-        logger.warning("未配置 WxPusher Secrets，跳过微信通知")
+    sendkey = os.environ.get("SERVERCHAN_SENDKEY", "").strip()
+    if not sendkey:
+        logger.warning("未配置 SERVERCHAN_SENDKEY，跳过微信通知")
         return False
-    if not app_token or not raw_uids:
-        raise NotificationError(
-            "必须同时配置 WXPUSHER_APP_TOKEN 和 WXPUSHER_UIDS"
-        )
 
     settings = config.get("wechat_notification", {})
     if not isinstance(settings, dict):
         raise NotificationError("wechat_notification 必须是 YAML 对象")
-    provider = str(settings.get("provider", "wxpusher")).lower()
-    if provider != "wxpusher":
+    provider = str(settings.get("provider", "serverchan")).lower()
+    if provider != "serverchan":
         raise NotificationError(f"暂不支持微信通知提供方: {provider}")
 
     total = _change_count(new_papers) + _change_count(updated_papers)
@@ -243,13 +236,10 @@ def notify_daily_update(
         max_papers=max_papers,
         initial_sync=initial_sync,
     )
-    uids = parse_wxpusher_uids(raw_uids)
-    send_wxpusher_message(
-        app_token=app_token,
-        uids=uids,
+    send_serverchan_message(
+        sendkey=sendkey,
         summary=summary,
         content=content,
-        url=repo_url,
     )
-    logger.info("WxPusher 微信通知已发送给 %d 个接收者", len(uids))
+    logger.info("Server酱微信通知已提交发送")
     return True

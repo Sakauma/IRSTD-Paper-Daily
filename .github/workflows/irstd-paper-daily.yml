@@ -32,8 +32,7 @@ jobs:
       - name: Run daily arXiv update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WXPUSHER_APP_TOKEN: ${{ secrets.WXPUSHER_APP_TOKEN }}
-          WXPUSHER_UIDS: ${{ secrets.WXPUSHER_UIDS }}
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
         run: python daily_arxiv.py --notify-wechat
 
       - name: Commit generated files

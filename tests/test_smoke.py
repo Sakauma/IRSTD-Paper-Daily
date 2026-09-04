@@ -15,9 +15,9 @@ from arxiv_daily.config import add_date_range, build_query, load_config  # noqa:
 from arxiv_daily.notifier import (  # noqa: E402
     NotificationError,
     build_daily_digest,
+    build_serverchan_url,
     notify_daily_update,
-    parse_wxpusher_uids,
-    send_wxpusher_message,
+    send_serverchan_message,
 )
 from arxiv_daily.renderer import render_markdown  # noqa: E402
 from arxiv_daily.storage import load_data, merge_papers, save_data  # noqa: E402
@@ -65,7 +65,7 @@ def test_config() -> None:
     assert config["domain_start_dates"]["IRSTD"] == "2025-01-01"
     assert config["domain_lookback_days"]["IRSTD"] == 3
     assert config["publish_wechat"] is True
-    assert config["wechat_notification"]["provider"] == "wxpusher"
+    assert config["wechat_notification"]["provider"] == "serverchan"
     assert config["wechat_notification"]["max_papers"] == 20
 
 
@@ -107,19 +107,20 @@ def test_wechat_render() -> None:
     assert "Paper: [http://arxiv.org/abs/2608.07015]" in output
 
 
-def test_parse_wxpusher_uids() -> None:
-    assert parse_wxpusher_uids("UID_first, UID_second;UID_first\nUID_third") == [
-        "UID_first",
-        "UID_second",
-        "UID_third",
-    ]
+def test_build_serverchan_url() -> None:
+    assert build_serverchan_url("SCT_test-key_123") == (
+        "https://sctapi.ftqq.com/SCT_test-key_123.send"
+    )
+    assert build_serverchan_url("sctp-test-key") == (
+        "https://sctp-test-key.push.ft07.com/send"
+    )
 
     try:
-        parse_wxpusher_uids("not-a-uid")
+        build_serverchan_url("invalid-key")
     except NotificationError as exc:
-        assert "无效 UID" in str(exc)
+        assert "SERVERCHAN_SENDKEY 无效" in str(exc)
     else:
-        raise AssertionError("无效 WxPusher UID 应当被拒绝")
+        raise AssertionError("无效 Server酱 SendKey 应当被拒绝")
 
 
 def test_build_daily_digest() -> None:
@@ -162,52 +163,80 @@ def test_build_daily_digest() -> None:
     assert "## 完整论文目录" in initial_content
 
 
-def test_send_wxpusher_message() -> None:
+def test_send_serverchan_message() -> None:
     response = mock.Mock()
-    response.json.return_value = {"code": 1000, "msg": "处理成功"}
+    response.json.return_value = {"code": 0, "message": "SUCCESS"}
     with mock.patch(
         "arxiv_daily.notifier.requests.post",
         return_value=response,
     ) as post:
-        result = send_wxpusher_message(
-            app_token="AT_test-token",
-            uids=["UID_first", "UID_second"],
+        result = send_serverchan_message(
+            sendkey="SCT_test-key",
             summary="测试摘要",
             content="# 测试内容",
-            url="https://github.com/Sakauma/IRSTD-Paper-Daily",
         )
 
-    assert result["code"] == 1000
+    assert result["code"] == 0
     response.raise_for_status.assert_called_once_with()
     payload = post.call_args.kwargs["json"]
-    assert payload["contentType"] == 3
-    assert payload["uids"] == ["UID_first", "UID_second"]
+    assert post.call_args.args[0] == (
+        "https://sctapi.ftqq.com/SCT_test-key.send"
+    )
+    assert payload == {
+        "title": "测试摘要",
+        "desp": "# 测试内容",
+        "short": "测试摘要",
+    }
     assert post.call_args.kwargs["timeout"] == 15
 
 
-def test_wxpusher_business_failure() -> None:
+def test_serverchan_business_failure() -> None:
     response = mock.Mock()
-    response.json.return_value = {"code": 1001, "msg": "发送失败"}
+    response.json.return_value = {"code": 1, "message": "发送失败"}
     with mock.patch(
         "arxiv_daily.notifier.requests.post",
         return_value=response,
     ):
         try:
-            send_wxpusher_message(
-                app_token="AT_test-token",
-                uids=["UID_first"],
+            send_serverchan_message(
+                sendkey="SCT_test-key",
                 summary="测试摘要",
                 content="# 测试内容",
             )
         except NotificationError as exc:
             assert "发送失败" in str(exc)
         else:
-            raise AssertionError("WxPusher 业务失败应当抛出 NotificationError")
+            raise AssertionError("Server酱业务失败应当抛出 NotificationError")
+
+
+def test_serverchan_http_error_hides_sendkey() -> None:
+    from arxiv_daily import notifier
+
+    secret = "SCT_secret-must-not-leak"
+    response = mock.Mock()
+    response.raise_for_status.side_effect = notifier.requests.HTTPError(
+        f"500 Server Error: https://sctapi.ftqq.com/{secret}.send"
+    )
+    with mock.patch(
+        "arxiv_daily.notifier.requests.post",
+        return_value=response,
+    ):
+        try:
+            send_serverchan_message(
+                sendkey=secret,
+                summary="测试摘要",
+                content="# 测试内容",
+            )
+        except NotificationError as exc:
+            assert secret not in str(exc)
+            assert exc.__cause__ is None
+        else:
+            raise AssertionError("Server酱 HTTP 失败应当抛出 NotificationError")
 
 
 def test_notify_without_secrets_skips_safely() -> None:
     with mock.patch.dict(os.environ, {}, clear=True), mock.patch(
-        "arxiv_daily.notifier.send_wxpusher_message"
+        "arxiv_daily.notifier.send_serverchan_message"
     ) as send:
         sent = notify_daily_update({}, {}, {}, run_date=date(2026, 9, 4))
 
@@ -215,18 +244,19 @@ def test_notify_without_secrets_skips_safely() -> None:
     send.assert_not_called()
 
 
-def test_notify_requires_both_secrets() -> None:
-    with mock.patch.dict(
-        os.environ,
-        {"WXPUSHER_APP_TOKEN": "AT_only-token"},
-        clear=True,
-    ):
+def test_notify_rejects_invalid_sendkey() -> None:
+    with mock.patch.dict(os.environ, {"SERVERCHAN_SENDKEY": "invalid"}, clear=True):
         try:
-            notify_daily_update({}, {}, {}, run_date=date(2026, 9, 4))
+            notify_daily_update(
+                {},
+                {"IRSTD": [sample_paper()]},
+                {},
+                run_date=date(2026, 9, 4),
+            )
         except NotificationError as exc:
-            assert "必须同时配置" in str(exc)
+            assert "SERVERCHAN_SENDKEY 无效" in str(exc)
         else:
-            raise AssertionError("只配置一个 WxPusher Secret 应当报错")
+            raise AssertionError("无效 Server酱 SendKey 应当报错")
 
 
 def test_initial_notification_ignores_incremental_display_limit() -> None:
@@ -235,16 +265,13 @@ def test_initial_notification_ignores_incremental_display_limit() -> None:
     second["id"] = "2608.07016"
     second["title"] = "Second paper"
     config = {
-        "wechat_notification": {"provider": "wxpusher", "max_papers": 1}
+        "wechat_notification": {"provider": "serverchan", "max_papers": 1}
     }
     with mock.patch.dict(
         os.environ,
-        {
-            "WXPUSHER_APP_TOKEN": "AT_test-token",
-            "WXPUSHER_UIDS": "UID_first",
-        },
+        {"SERVERCHAN_SENDKEY": "SCT_test-key"},
         clear=True,
-    ), mock.patch("arxiv_daily.notifier.send_wxpusher_message") as send:
+    ), mock.patch("arxiv_daily.notifier.send_serverchan_message") as send:
         sent = notify_daily_update(
             config,
             {"IRSTD": [first, second]},
@@ -477,7 +504,12 @@ def test_run_notifies_only_new_and_updated_papers() -> None:
         )
         save_data(
             state_path,
-            {"wechat_notification": {"initialized": True}},
+            {
+                "wechat_notification": {
+                    "initialized": True,
+                    "provider": "serverchan",
+                }
+            },
         )
 
         updated = dict(old_version)
@@ -530,6 +562,15 @@ def test_first_run_notifies_with_full_catalog_then_skips_unchanged() -> None:
             data_path,
             {"IRSTD": {str(first["id"]): first, str(second["id"]): second}},
         )
+        save_data(
+            state_path,
+            {
+                "wechat_notification": {
+                    "initialized": True,
+                    "last_successful_notification": "2026-09-04",
+                }
+            },
+        )
         config = {
             "data_path": data_path,
             "state_path": state_path,
@@ -563,7 +604,9 @@ def test_first_run_notifies_with_full_catalog_then_skips_unchanged() -> None:
                 "2608.07016",
             ]
             assert notify.call_args.kwargs["initial_sync"] is True
-            assert load_data(state_path)["wechat_notification"]["initialized"]
+            notification_state = load_data(state_path)["wechat_notification"]
+            assert notification_state["initialized"]
+            assert notification_state["provider"] == "serverchan"
 
             notify.reset_mock()
             daily_arxiv.run(
@@ -584,7 +627,12 @@ def test_full_refresh_notifies_after_code_backfill() -> None:
         save_data(data_path, {"IRSTD": {str(paper["id"]): paper}})
         save_data(
             state_path,
-            {"wechat_notification": {"initialized": True}},
+            {
+                "wechat_notification": {
+                    "initialized": True,
+                    "provider": "serverchan",
+                }
+            },
         )
         config = {
             "data_path": data_path,
@@ -637,12 +685,13 @@ if __name__ == "__main__":
         test_merge_and_storage,
         test_render_markdown,
         test_wechat_render,
-        test_parse_wxpusher_uids,
+        test_build_serverchan_url,
         test_build_daily_digest,
-        test_send_wxpusher_message,
-        test_wxpusher_business_failure,
+        test_send_serverchan_message,
+        test_serverchan_business_failure,
+        test_serverchan_http_error_hides_sendkey,
         test_notify_without_secrets_skips_safely,
-        test_notify_requires_both_secrets,
+        test_notify_rejects_invalid_sendkey,
         test_initial_notification_ignores_incremental_display_limit,
         test_lookup_and_verify_code_link,
         test_extract_code_link_from_arxiv_metadata,
