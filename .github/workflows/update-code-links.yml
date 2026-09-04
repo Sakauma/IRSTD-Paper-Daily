@@ -1,0 +1,43 @@
+name: Backfill IRSTD Paper Code Links
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 每周一 UTC 08:00 执行一次历史链接回填
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: write
+
+env:
+  GITHUB_USER_NAME: Sakauma
+  GITHUB_USER_EMAIL: irstd-paper-daily@users.noreply.github.com
+
+jobs:
+  backfill:
+    name: Backfill code links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Backfill code links
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python daily_arxiv.py --backfill_code
+
+      - name: Commit generated files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: backfill paper code links"
+          file_pattern: README.md docs/irstd-paper-daily.json docs/irstd-paper-daily-wechat.json docs/index.md docs/wechat.md
+          commit_user_name: ${{ env.GITHUB_USER_NAME }}
+          commit_user_email: ${{ env.GITHUB_USER_EMAIL }}

@@ -1,0 +1,12 @@
+# GitHub Pages（Jekyll）站点配置
+title: IRSTD Paper Daily
+description: Automatically update infrared small target detection papers daily
+show_downloads: true
+
+remote_theme: jekyll/minima@v2.5.1
+skin: dark
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-feed
+  - jekyll-seo-tag
