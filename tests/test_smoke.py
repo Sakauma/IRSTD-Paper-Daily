@@ -13,8 +13,10 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from arxiv_daily.config import add_date_range, build_query, load_config  # noqa: E402
 from arxiv_daily.notifier import (  # noqa: E402
+    MAX_CONTENT_BYTES,
     NotificationError,
     build_daily_digest,
+    build_initial_digests,
     build_serverchan_url,
     notify_daily_update,
     send_serverchan_message,
@@ -163,6 +165,57 @@ def test_build_daily_digest() -> None:
     assert "## 完整论文目录" in initial_content
 
 
+def test_daily_digest_truncates_by_utf8_bytes() -> None:
+    paper = sample_paper()
+    paper["title"] = "红外小目标" * 3_000
+    _, content = build_daily_digest(
+        {"IRSTD": [paper]},
+        {},
+        run_date=date(2026, 9, 4),
+        repo_url="",
+        max_papers=1,
+    )
+
+    assert len(content.encode("utf-8")) <= MAX_CONTENT_BYTES
+    assert content.endswith("内容已按 Server酱长度限制截断。")
+
+
+def test_initial_digests_split_and_omit_oldest_papers() -> None:
+    papers = []
+    for index in range(1, 9):
+        paper = sample_paper()
+        paper_id = f"2601.{index:05d}"
+        paper["id"] = paper_id
+        paper["publish_date"] = f"2026-01-{index:02d}"
+        paper["url"] = f"http://arxiv.org/abs/{paper_id}"
+        paper["title"] = f"Paper {index} " + "红" * 160
+        papers.append(paper)
+
+    messages = build_initial_digests(
+        {"IRSTD": papers},
+        run_date=date(2026, 9, 4),
+        repo_url="",
+        max_content_bytes=1_024,
+        max_messages=5,
+    )
+
+    assert len(messages) == 5
+    assert [summary.rsplit(" ", 1)[-1] for summary, _ in messages] == [
+        "1/5",
+        "2/5",
+        "3/5",
+        "4/5",
+        "5/5",
+    ]
+    assert all(len(content.encode("utf-8")) <= 1_024 for _, content in messages)
+    combined_content = "\n".join(content for _, content in messages)
+    for index in range(4, 9):
+        assert f"2601.{index:05d}" in combined_content
+    for index in range(1, 4):
+        assert f"2601.{index:05d}" not in combined_content
+    assert "较早的 **3** 篇论文未展示" in combined_content
+
+
 def test_send_serverchan_message() -> None:
     response = mock.Mock()
     response.json.return_value = {"code": 0, "message": "SUCCESS"}
@@ -281,9 +334,66 @@ def test_initial_notification_ignores_incremental_display_limit() -> None:
         )
 
     assert sent is True
+    send.assert_called_once()
     assert "Demo Paper" in send.call_args.kwargs["content"]
     assert "Second paper" in send.call_args.kwargs["content"]
     assert "仅展示前" not in send.call_args.kwargs["content"]
+
+
+def test_initial_notification_sends_every_digest_part() -> None:
+    config = {"wechat_notification": {"provider": "serverchan"}}
+    messages = [("首次同步 1/2", "第一条"), ("首次同步 2/2", "第二条")]
+    with mock.patch.dict(
+        os.environ,
+        {"SERVERCHAN_SENDKEY": "SCT_test-key"},
+        clear=True,
+    ), mock.patch(
+        "arxiv_daily.notifier.build_initial_digests",
+        return_value=messages,
+    ), mock.patch("arxiv_daily.notifier.send_serverchan_message") as send:
+        sent = notify_daily_update(
+            config,
+            {"IRSTD": [sample_paper()]},
+            {},
+            run_date=date(2026, 9, 4),
+            initial_sync=True,
+        )
+
+    assert sent is True
+    assert [call.kwargs["content"] for call in send.call_args_list] == [
+        "第一条",
+        "第二条",
+    ]
+
+
+def test_incremental_notification_remains_one_message() -> None:
+    papers = []
+    for index in range(20):
+        paper = sample_paper()
+        paper["id"] = f"2608.{index:05d}"
+        paper["title"] = "红外小目标" * 500
+        papers.append(paper)
+    config = {
+        "wechat_notification": {"provider": "serverchan", "max_papers": 20}
+    }
+
+    with mock.patch.dict(
+        os.environ,
+        {"SERVERCHAN_SENDKEY": "SCT_test-key"},
+        clear=True,
+    ), mock.patch("arxiv_daily.notifier.send_serverchan_message") as send:
+        sent = notify_daily_update(
+            config,
+            {"IRSTD": papers},
+            {},
+            run_date=date(2026, 9, 4),
+        )
+
+    assert sent is True
+    send.assert_called_once()
+    content = send.call_args.kwargs["content"]
+    assert len(content.encode("utf-8")) <= MAX_CONTENT_BYTES
+    assert content.endswith("内容已按 Server酱长度限制截断。")
 
 
 def test_lookup_and_verify_code_link() -> None:
@@ -687,12 +797,16 @@ if __name__ == "__main__":
         test_wechat_render,
         test_build_serverchan_url,
         test_build_daily_digest,
+        test_daily_digest_truncates_by_utf8_bytes,
+        test_initial_digests_split_and_omit_oldest_papers,
         test_send_serverchan_message,
         test_serverchan_business_failure,
         test_serverchan_http_error_hides_sendkey,
         test_notify_without_secrets_skips_safely,
         test_notify_rejects_invalid_sendkey,
         test_initial_notification_ignores_incremental_display_limit,
+        test_initial_notification_sends_every_digest_part,
+        test_incremental_notification_remains_one_message,
         test_lookup_and_verify_code_link,
         test_extract_code_link_from_arxiv_metadata,
         test_fetcher_reuses_cached_code_when_lookup_is_disabled,

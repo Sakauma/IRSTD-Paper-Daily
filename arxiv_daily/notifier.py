@@ -16,8 +16,9 @@ SERVERCHAN_TURBO_API_URL = "https://sctapi.ftqq.com/{sendkey}.send"
 SERVERCHAN_3_API_URL = "https://{sendkey}.push.ft07.com/send"
 REQUEST_TIMEOUT = 15
 SERVERCHAN_SUCCESS_CODE = 0
-MAX_CONTENT_LENGTH = 40_000
-MAX_SUMMARY_LENGTH = 100
+MAX_CONTENT_BYTES = 28 * 1024
+MAX_INITIAL_MESSAGES = 5
+MAX_SUMMARY_LENGTH = 32
 
 
 class NotificationError(RuntimeError):
@@ -43,6 +44,45 @@ def _escape_markdown(value: Any) -> str:
     return str(value or "").replace("[", "\\[").replace("]", "\\]")
 
 
+def _truncate_utf8(
+    value: str,
+    max_bytes: int,
+    *,
+    suffix: str = "\n\n> 内容已按 Server酱长度限制截断。",
+) -> str:
+    """按 UTF-8 字节数安全截断，不产生残缺的多字节字符。"""
+    if max_bytes < 1:
+        raise NotificationError("Server酱单条消息字节上限必须大于 0")
+    encoded = value.encode("utf-8")
+    if len(encoded) <= max_bytes:
+        return value
+
+    suffix_bytes = suffix.encode("utf-8")
+    if len(suffix_bytes) >= max_bytes:
+        return suffix_bytes[:max_bytes].decode("utf-8", errors="ignore")
+    body = encoded[: max_bytes - len(suffix_bytes)].decode(
+        "utf-8",
+        errors="ignore",
+    )
+    return body.rstrip() + suffix
+
+
+def _paper_lines(paper: Mapping[str, Any], index: int) -> List[str]:
+    title = _escape_markdown(paper.get("title", "未命名论文"))
+    paper_url = str(paper.get("url") or "")
+    title_text = f"[{title}]({paper_url})" if paper_url else title
+    lines = [f"{index}. {title_text}"]
+
+    author = _escape_markdown(paper.get("first_author", ""))
+    if author:
+        lines.append(f"   - 作者：{author} et al.")
+    code_url = str(paper.get("code") or "")
+    if code_url:
+        lines.append(f"   - 代码：[GitHub]({code_url})")
+    lines.append("")
+    return lines
+
+
 def _append_papers(
     lines: List[str],
     groups: Mapping[str, Sequence[Mapping[str, Any]]],
@@ -64,19 +104,164 @@ def _append_papers(
                 return remaining, index
             index += 1
             remaining -= 1
-            title = _escape_markdown(paper.get("title", "未命名论文"))
-            paper_url = str(paper.get("url") or "")
-            title_text = f"[{title}]({paper_url})" if paper_url else title
-            lines.append(f"{index}. {title_text}")
-
-            author = _escape_markdown(paper.get("first_author", ""))
-            if author:
-                lines.append(f"   - 作者：{author} et al.")
-            code_url = str(paper.get("code") or "")
-            if code_url:
-                lines.append(f"   - 代码：[GitHub]({code_url})")
-            lines.append("")
+            lines.extend(_paper_lines(paper, index))
     return remaining, index
+
+
+def _papers_by_recency(
+    groups: Mapping[str, Sequence[Mapping[str, Any]]],
+) -> List[Tuple[str, Mapping[str, Any]]]:
+    """按发布日期和 arXiv ID 从新到旧展开论文。"""
+    papers = [
+        (str(topic), paper)
+        for topic, topic_papers in groups.items()
+        for paper in topic_papers
+    ]
+    papers.sort(
+        key=lambda item: (
+            str(item[1].get("publish_date") or ""),
+            str(item[1].get("id") or ""),
+        ),
+        reverse=True,
+    )
+    return papers
+
+
+def _render_initial_chunk(
+    papers: Sequence[Tuple[str, Mapping[str, Any]]],
+    *,
+    run_date: date,
+    repo_url: str,
+    total_papers: int,
+    start_index: int,
+    part_number: int,
+    total_parts: int,
+    omitted_count: int,
+    show_topics: bool,
+    message_limit: int,
+) -> str:
+    part_label = (
+        f"（第 {part_number}/{total_parts} 条）" if total_parts > 1 else ""
+    )
+    lines = [
+        "# IRSTD Paper Daily",
+        "",
+        (
+            f"> {run_date.isoformat()} 更新完成：首次同步，共 **{total_papers}** "
+            "篇 IRSTD 论文。"
+        ),
+        "",
+        f"## 完整论文目录{part_label}",
+        "",
+    ]
+
+    current_topic = ""
+    for index, (topic, paper) in enumerate(papers, start=start_index + 1):
+        if show_topics and topic != current_topic:
+            lines.extend([f"### {_escape_markdown(topic)}", ""])
+            current_topic = topic
+        lines.extend(_paper_lines(paper, index))
+
+    if omitted_count:
+        lines.extend(
+            [
+                (
+                    f"> 已达到最多 {message_limit} 条消息的限制，"
+                    f"较早的 **{omitted_count}** 篇论文未展示。"
+                ),
+                "",
+            ]
+        )
+    if repo_url:
+        lines.append(f"[查看完整论文列表]({repo_url})")
+    return "\n".join(lines).strip()
+
+
+def build_initial_digests(
+    papers: Mapping[str, Sequence[Mapping[str, Any]]],
+    *,
+    run_date: date,
+    repo_url: str,
+    max_content_bytes: int = MAX_CONTENT_BYTES,
+    max_messages: int = MAX_INITIAL_MESSAGES,
+) -> List[Tuple[str, str]]:
+    """生成首次全量通知；按 UTF-8 字节分片，并优先保留最新论文。"""
+    if max_content_bytes < 1:
+        raise NotificationError("Server酱单条消息字节上限必须大于 0")
+    if max_messages < 1:
+        raise NotificationError("Server酱首次同步消息数量上限必须大于 0")
+
+    ordered_papers = _papers_by_recency(papers)
+    total = len(ordered_papers)
+    if not total:
+        return []
+
+    show_topics = sum(bool(topic_papers) for topic_papers in papers.values()) > 1
+    chunks: List[List[Tuple[str, Mapping[str, Any]]]] = []
+    current_chunk: List[Tuple[str, Mapping[str, Any]]] = []
+    included_before_chunk = 0
+
+    for paper in ordered_papers:
+        candidate = [*current_chunk, paper]
+        # 预留分片标题、仓库链接和“较早论文未展示”提示的空间。
+        candidate_content = _render_initial_chunk(
+            candidate,
+            run_date=run_date,
+            repo_url=repo_url,
+            total_papers=total,
+            start_index=included_before_chunk,
+            part_number=min(len(chunks) + 1, max_messages),
+            total_parts=max_messages,
+            omitted_count=total,
+            show_topics=show_topics,
+            message_limit=max_messages,
+        )
+        if len(candidate_content.encode("utf-8")) <= max_content_bytes:
+            current_chunk = candidate
+            continue
+
+        if current_chunk:
+            chunks.append(current_chunk)
+            included_before_chunk += len(current_chunk)
+            current_chunk = []
+            if len(chunks) >= max_messages:
+                break
+        current_chunk = [paper]
+
+    if current_chunk and len(chunks) < max_messages:
+        chunks.append(current_chunk)
+
+    included_count = sum(len(chunk) for chunk in chunks)
+    omitted_count = total - included_count
+    total_parts = len(chunks)
+    messages: List[Tuple[str, str]] = []
+    start_index = 0
+    for part_number, chunk in enumerate(chunks, start=1):
+        summary = (
+            f"IRSTD Paper Daily｜首次同步 {total} 篇"
+            if total_parts == 1
+            else f"IRSTD Paper Daily｜首次同步 {part_number}/{total_parts}"
+        )
+        content = _render_initial_chunk(
+            chunk,
+            run_date=run_date,
+            repo_url=repo_url,
+            total_papers=total,
+            start_index=start_index,
+            part_number=part_number,
+            total_parts=total_parts,
+            omitted_count=omitted_count if part_number == total_parts else 0,
+            show_topics=show_topics,
+            message_limit=max_messages,
+        )
+        messages.append(
+            (
+                summary[:MAX_SUMMARY_LENGTH],
+                _truncate_utf8(content, max_content_bytes),
+            )
+        )
+        start_index += len(chunk)
+    return messages
 
 
 def build_daily_digest(
@@ -147,9 +332,7 @@ def build_daily_digest(
     if repo_url:
         lines.append(f"[查看完整论文列表]({repo_url})")
 
-    content = "\n".join(lines).strip()
-    if len(content) > MAX_CONTENT_LENGTH:
-        content = content[: MAX_CONTENT_LENGTH - 20].rstrip() + "\n\n内容已截断。"
+    content = _truncate_utf8("\n".join(lines).strip(), MAX_CONTENT_BYTES)
     return summary[:MAX_SUMMARY_LENGTH], content
 
 
@@ -163,7 +346,7 @@ def send_serverchan_message(
     api_url = build_serverchan_url(sendkey)
     payload: Dict[str, Any] = {
         "title": summary[:MAX_SUMMARY_LENGTH],
-        "desp": content,
+        "desp": _truncate_utf8(content, MAX_CONTENT_BYTES),
         "short": summary[:MAX_SUMMARY_LENGTH],
     }
 
@@ -225,21 +408,28 @@ def notify_daily_update(
         else ""
     )
     repo_url = str(settings.get("url") or default_repo_url)
-    max_papers = int(settings.get("max_papers", 20))
     if initial_sync:
-        max_papers = max(max_papers, total)
-    summary, content = build_daily_digest(
-        new_papers,
-        updated_papers,
-        run_date=run_date,
-        repo_url=repo_url,
-        max_papers=max_papers,
-        initial_sync=initial_sync,
-    )
-    send_serverchan_message(
-        sendkey=sendkey,
-        summary=summary,
-        content=content,
-    )
-    logger.info("Server酱微信通知已提交发送")
+        messages = build_initial_digests(
+            new_papers,
+            run_date=run_date,
+            repo_url=repo_url,
+        )
+    else:
+        messages = [
+            build_daily_digest(
+                new_papers,
+                updated_papers,
+                run_date=run_date,
+                repo_url=repo_url,
+                max_papers=int(settings.get("max_papers", 20)),
+            )
+        ]
+
+    for summary, content in messages:
+        send_serverchan_message(
+            sendkey=sendkey,
+            summary=summary,
+            content=content,
+        )
+    logger.info("Server酱微信通知已提交发送，共 %d 条", len(messages))
     return True
