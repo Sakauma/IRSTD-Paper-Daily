@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 GITHUB_SEARCH_URL = "https://api.github.com/search/repositories"
 GITHUB_REPO_URL = "https://api.github.com/repos"
 REQUEST_TIMEOUT = 15
+SEARCH_RESULT_LIMIT = 5
+
+GITHUB_REPO_PATTERN = re.compile(
+    r"https?://github\.com/[A-Za-z0-9][A-Za-z0-9.-]*/[A-Za-z0-9_.-]+",
+    flags=re.IGNORECASE,
+)
 
 # GitHub Search API 的未认证限制是 10 次/分钟，认证后通常为 30 次/分钟。
 UNAUTHENTICATED_DELAY = 6.5
@@ -32,6 +38,21 @@ def _tokens(text: str) -> Set[str]:
     """把文本切成小写词元，去掉停用词和单字母词。"""
     words = re.findall(r"[a-z0-9]+", text.lower())
     return {word for word in words if word not in _STOPWORDS and len(word) > 1}
+
+
+def extract_code_link(*texts: Optional[str]) -> Optional[str]:
+    """从论文摘要或备注中提取作者提供的 GitHub 仓库地址。"""
+    for text in texts:
+        if not text:
+            continue
+        match = GITHUB_REPO_PATTERN.search(str(text))
+        if not match:
+            continue
+        url = match.group(0).rstrip(".,;:!?)]}'\"")
+        if url.lower().endswith(".git"):
+            url = url[:-4]
+        return url
+    return None
 
 
 def _headers() -> Dict[str, str]:
@@ -55,9 +76,14 @@ def _rate_limit_wait(response: requests.Response) -> int:
     return max(reset_timestamp - int(time.time()), 30)
 
 
-def _search_repositories(query: str) -> Optional[str]:
-    """搜索仓库并返回 star 最多的结果；请求失败返回 ``None``。"""
-    params = {"q": query, "sort": "stars", "order": "desc"}
+def _search_repositories(query: str) -> List[str]:
+    """搜索仓库并返回若干候选地址；请求失败返回空列表。"""
+    params = {
+        "q": query,
+        "sort": "stars",
+        "order": "desc",
+        "per_page": SEARCH_RESULT_LIMIT,
+    }
     response: Optional[requests.Response] = None
 
     for attempt in range(3):
@@ -75,21 +101,23 @@ def _search_repositories(query: str) -> Optional[str]:
                 time.sleep(5)
 
     if response is None:
-        return None
+        return []
 
     if response.status_code in (403, 429):
         wait = _rate_limit_wait(response)
         logger.warning("GitHub API 限流，等待 %d 秒后继续", wait)
         time.sleep(wait)
-        return None
+        return []
     if response.status_code != 200:
         logger.warning("GitHub 搜索失败: HTTP %s", response.status_code)
-        return None
+        return []
 
     items = response.json().get("items") or []
-    if not items:
-        return None
-    return items[0].get("html_url")
+    return [
+        str(item["html_url"])
+        for item in items
+        if isinstance(item, dict) and item.get("html_url")
+    ]
 
 
 def _candidate_queries(arxiv_id: str, title: str) -> List[str]:
@@ -109,12 +137,13 @@ def _candidate_queries(arxiv_id: str, title: str) -> List[str]:
 
 
 def lookup_code_link(arxiv_id: str, title: str) -> Optional[str]:
-    """查找论文对应的候选代码仓库。"""
+    """搜索并逐个校验候选仓库，返回首个可信代码链接。"""
     queries = _candidate_queries(arxiv_id, title)
     for index, query in enumerate(queries):
-        link = _search_repositories(query)
-        if link:
-            return link
+        for candidate in _search_repositories(query):
+            if verify_code_link(arxiv_id, title, candidate):
+                return candidate
+            logger.info("候选代码链接未通过校验，继续尝试: %s", candidate)
         if index < len(queries) - 1:
             time.sleep(_request_delay())
     return None
@@ -199,7 +228,7 @@ def backfill_code_links(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
                 title[:50],
             )
             candidate = lookup_code_link(str(paper_id), title)
-            if candidate and verify_code_link(str(paper_id), title, candidate):
+            if candidate:
                 paper["code"] = candidate
                 updated += 1
                 logger.info("找到并校验通过: %s", candidate)

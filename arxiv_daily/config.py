@@ -2,13 +2,26 @@
 
 from __future__ import annotations
 
+import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 import yaml
 
 
-def build_query(filters: Iterable[str] | None) -> str:
+def _date_boundary(value: str, *, end_of_day: bool) -> str:
+    """把 ISO 日期转换为 arXiv ``submittedDate`` 边界。"""
+    parsed = datetime.date.fromisoformat(value)
+    suffix = "2359" if end_of_day else "0000"
+    return parsed.strftime("%Y%m%d") + suffix
+
+
+def build_query(
+    filters: Iterable[str] | None,
+    *,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> str:
     """把多个过滤词用 ``OR`` 连接成 arXiv 搜索表达式。
 
     含空格的短语会自动加双引号，保证按整体短语搜索；单词保持原样。
@@ -26,7 +39,18 @@ def build_query(filters: Iterable[str] | None) -> str:
             parts.append(f'"{keyword}"')
         else:
             parts.append(keyword)
-    return " OR ".join(parts)
+    keyword_query = " OR ".join(parts)
+    if not start_date:
+        return keyword_query
+
+    effective_end_date = end_date or datetime.date.today().isoformat()
+    start_boundary = _date_boundary(start_date, end_of_day=False)
+    end_boundary = _date_boundary(effective_end_date, end_of_day=True)
+    if start_boundary > end_boundary:
+        raise ValueError("start_date 不能晚于 end_date")
+
+    date_query = f"submittedDate:[{start_boundary} TO {end_boundary}]"
+    return f"({keyword_query}) AND {date_query}" if keyword_query else date_query
 
 
 def load_config(config_path: str | Path) -> Dict[str, Any]:
@@ -46,8 +70,9 @@ def load_config(config_path: str | Path) -> Dict[str, Any]:
         raise ValueError("domains/keywords 必须是 YAML 对象")
 
     global_max_results = config.get("max_results", 10)
+    global_start_date = config.get("start_date")
     kv: Dict[str, str] = {}
-    domain_max_results: Dict[str, int] = {}
+    domain_max_results: Dict[str, Optional[int]] = {}
 
     for topic, domain_config in raw_domains.items():
         if isinstance(domain_config, dict):
@@ -55,10 +80,12 @@ def load_config(config_path: str | Path) -> Dict[str, Any]:
                 continue
             filters = domain_config.get("filters", [])
             max_results = domain_config.get("max_results", global_max_results)
+            start_date = domain_config.get("start_date", global_start_date)
         else:
             # 兼容旧版 keywords: {"Topic": ["keyword", ...]}
             filters = domain_config
             max_results = global_max_results
+            start_date = global_start_date
 
         if isinstance(filters, str):
             filters = [filters]
@@ -67,12 +94,18 @@ def load_config(config_path: str | Path) -> Dict[str, Any]:
         if not isinstance(filters, (list, tuple)):
             raise ValueError(f"领域 {topic!r} 的 filters 必须是列表")
 
-        parsed_max_results = int(max_results)
-        if parsed_max_results < 1:
-            raise ValueError(f"领域 {topic!r} 的 max_results 必须大于 0")
+        parsed_max_results: Optional[int]
+        if max_results is None:
+            parsed_max_results = None
+        else:
+            parsed_max_results = int(max_results)
+            if parsed_max_results < 1:
+                raise ValueError(f"领域 {topic!r} 的 max_results 必须大于 0 或为 null")
+
+        parsed_start_date = str(start_date) if start_date else None
 
         topic_name = str(topic)
-        kv[topic_name] = build_query(filters)
+        kv[topic_name] = build_query(filters, start_date=parsed_start_date)
         domain_max_results[topic_name] = parsed_max_results
 
     config["kv"] = kv

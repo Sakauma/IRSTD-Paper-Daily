@@ -5,8 +5,7 @@ from __future__ import annotations
 import os
 import sys
 import tempfile
-from datetime import datetime
-from datetime import date
+from datetime import date, datetime
 from unittest import mock
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -35,13 +34,22 @@ def test_build_query() -> None:
         '"Infrared Small Target Detection" OR IRSTD'
     )
     assert build_query([]) == ""
+    dated_query = build_query(
+        ["IRSTD"],
+        start_date="2026-01-01",
+        end_date="2026-09-04",
+    )
+    assert dated_query == (
+        "(IRSTD) AND submittedDate:[202601010000 TO 202609042359]"
+    )
 
 
 def test_config() -> None:
     config = load_config(os.path.join(PROJECT_ROOT, "config.yaml"))
     assert list(config["kv"].keys()) == ["IRSTD"]
     assert "Infrared Small Target Detection" in config["kv"]["IRSTD"]
-    assert config["domain_max_results"]["IRSTD"] == 10
+    assert config["domain_max_results"]["IRSTD"] is None
+    assert "submittedDate:[202601010000 TO" in config["kv"]["IRSTD"]
     assert config["publish_wechat"] is True
 
 
@@ -86,14 +94,17 @@ def test_wechat_render() -> None:
 def test_lookup_and_verify_code_link() -> None:
     from arxiv_daily import codelink
 
-    fake_search_response = mock.Mock()
-    fake_search_response.status_code = 200
-    fake_search_response.headers = {}
-    fake_search_response.json.return_value = {
-        "items": [{"html_url": "https://github.com/foo/bar"}]
-    }
     with mock.patch.object(
-        codelink.requests, "get", return_value=fake_search_response
+        codelink,
+        "_search_repositories",
+        return_value=[
+            "https://github.com/unrelated/project",
+            "https://github.com/foo/bar",
+        ],
+    ), mock.patch.object(
+        codelink,
+        "verify_code_link",
+        side_effect=[False, True],
     ), mock.patch.object(codelink.time, "sleep"):
         assert codelink.lookup_code_link("2608.07015", "Demo Title") == (
             "https://github.com/foo/bar"
@@ -113,6 +124,16 @@ def test_lookup_and_verify_code_link() -> None:
         )
 
 
+def test_extract_code_link_from_arxiv_metadata() -> None:
+    from arxiv_daily.codelink import extract_code_link
+
+    summary = (
+        "Code is available at https://github.com/Sakauma/SPARK-SAM. "
+        "The repository contains the official implementation."
+    )
+    assert extract_code_link(summary) == "https://github.com/Sakauma/SPARK-SAM"
+
+
 def test_fetcher_reuses_cached_code_when_lookup_is_disabled() -> None:
     from arxiv_daily import fetcher
 
@@ -122,6 +143,8 @@ def test_fetcher_reuses_cached_code_when_lookup_is_disabled() -> None:
     result.authors = ["Alice", "Bob"]
     result.updated = datetime(2026, 8, 7)
     result.published = datetime(2026, 8, 6)
+    result.summary = ""
+    result.comment = None
 
     fake_client = mock.Mock()
     fake_client.results.return_value = [result]
@@ -139,6 +162,37 @@ def test_fetcher_reuses_cached_code_when_lookup_is_disabled() -> None:
     lookup.assert_not_called()
     assert papers[0]["id"] == "2608.07015"
     assert papers[0]["code"] == "https://github.com/foo/bar"
+
+
+def test_fetcher_prefers_official_arxiv_code_link() -> None:
+    from arxiv_daily import fetcher
+
+    result = mock.Mock()
+    result.get_short_id.return_value = "2608.20754v2"
+    result.title = "SPARK-SAM: Learning How to Prompt and Respond"
+    result.authors = ["Aji Mao"]
+    result.updated = datetime(2026, 8, 26)
+    result.published = datetime(2026, 8, 21)
+    result.summary = (
+        "Code is available at https://github.com/Sakauma/SPARK-SAM."
+    )
+    result.comment = None
+
+    fake_client = mock.Mock()
+    fake_client.results.return_value = [result]
+    with mock.patch.object(fetcher.arxiv, "Search"), mock.patch.object(
+        fetcher.arxiv, "Client", return_value=fake_client
+    ), mock.patch.object(fetcher, "lookup_code_link") as lookup:
+        papers = fetcher.fetch_daily_papers(
+            "IRSTD",
+            "IRSTD",
+            None,
+            known_codes={"2608.20754": "https://github.com/wrong/repository"},
+            known_paper_ids={"2608.20754"},
+        )
+
+    lookup.assert_not_called()
+    assert papers[0]["code"] == "https://github.com/Sakauma/SPARK-SAM"
 
 
 def test_run_renders_all_enabled_outputs() -> None:
@@ -161,7 +215,7 @@ def test_run_renders_all_enabled_outputs() -> None:
             "show_links": True,
             "enable_code_lookup": False,
             "kv": {"IRSTD": "IRSTD"},
-            "domain_max_results": {"IRSTD": 1},
+            "domain_max_results": {"IRSTD": None},
         }
         with mock.patch.object(
             daily_arxiv,
@@ -190,7 +244,9 @@ if __name__ == "__main__":
         test_render_markdown,
         test_wechat_render,
         test_lookup_and_verify_code_link,
+        test_extract_code_link_from_arxiv_metadata,
         test_fetcher_reuses_cached_code_when_lookup_is_disabled,
+        test_fetcher_prefers_official_arxiv_code_link,
         test_run_renders_all_enabled_outputs,
         test_date_is_available,
     ]

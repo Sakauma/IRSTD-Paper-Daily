@@ -1,6 +1,8 @@
 # IRSTD Paper Daily 使用说明
 
-本项目每天从 arXiv 搜索红外小目标检测（IRSTD）相关论文，维护历史 JSON 数据，并生成三种输出：
+本项目每天从 arXiv 搜索红外小目标检测（IRSTD）相关论文。默认收录从
+2026-01-01 首次提交到 arXiv 的全部高相关论文，不限制返回数量，并维护历史
+JSON 数据和三种输出：
 
 - 根目录 `README.md`：GitHub 仓库主页表格。
 - `docs/index.md`：可选的 GitHub Pages 页面。
@@ -24,7 +26,9 @@ python -m pip install -r requirements.txt
 python daily_arxiv.py
 ```
 
-本地首次运行会访问 arXiv API；启用代码匹配后还会访问 GitHub Search API。GitHub Search API 未认证时限流较低，建议在 Actions 中运行完整更新。
+本地首次运行会访问 arXiv API；启用代码匹配后还会访问 GitHub Search API。
+程序优先采用论文作者写在 arXiv 摘要或备注中的 GitHub 地址，再对搜索结果逐个
+校验。GitHub Search API 未认证时限流较低，建议在 Actions 中运行完整更新。
 
 要为历史论文补齐代码链接：
 
@@ -42,13 +46,20 @@ python daily_arxiv.py --backfill_code
 domains:
     "New Domain":
         enable: true
-        max_results: 10
+        max_results: null
+        start_date: "2026-01-01"
         filters:
             - "keyword1"
             - "keyword phrase 2"
 ```
 
-`enable: false` 会停止抓取该领域的新论文，但不会删除历史数据。含空格的过滤词会按完整短语搜索，多个过滤词以 `OR` 连接。
+`max_results: null` 表示抓取日期范围内的全部结果；正整数表示只取最新的指定
+数量。`start_date` 的结束日期自动取运行当天。`enable: false` 会停止抓取该领域
+的新论文，但不会删除历史数据。含空格的过滤词按完整短语搜索，多个过滤词以
+`OR` 连接。
+
+默认 IRSTD 关键词只保留明确包含 infrared、IRSTD 或 SIRST 的检索词，避免把
+声呐小目标、普通 UAV 检测等论文误收进列表。
 
 ## 微信版输出说明
 

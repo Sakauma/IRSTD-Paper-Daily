@@ -87,10 +87,21 @@ def _known_code_links(data: Dict[str, Any]) -> Dict[str, str]:
     return known
 
 
+def _known_paper_ids(data: Dict[str, Any]) -> set[str]:
+    """收集所有历史论文 ID，用于跳过重复的 GitHub 搜索。"""
+    return {
+        str(paper_id)
+        for papers in data.values()
+        if isinstance(papers, dict)
+        for paper_id in papers
+    }
+
+
 def run(config: Dict[str, Any]) -> None:
     """主流程：读取历史 -> 抓取 -> 合并 -> 渲染。"""
     data = load_data(config["data_path"])
     known_codes: Dict[str, str] = _known_code_links(data)
+    known_paper_ids = _known_paper_ids(data)
     lookup_missing_code = bool(config.get("enable_code_lookup", True))
 
     new_papers_by_topic: Dict[str, Any] = {}
@@ -99,12 +110,18 @@ def run(config: Dict[str, Any]) -> None:
             topic,
             config.get("max_results", 10),
         )
-        logger.info("开始抓取领域 %s（最多 %d 篇）", topic, max_results)
+        limit_description = (
+            "日期范围内全部论文"
+            if max_results is None
+            else f"最多 {max_results} 篇"
+        )
+        logger.info("开始抓取领域 %s（%s）", topic, limit_description)
         new_papers_by_topic[topic] = fetch_daily_papers(
             topic,
             query,
             max_results,
             known_codes=known_codes,
+            known_paper_ids=known_paper_ids,
             lookup_missing_code=lookup_missing_code,
         )
 

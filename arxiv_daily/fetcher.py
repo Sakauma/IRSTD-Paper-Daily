@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import arxiv
 
-from .codelink import lookup_code_link, verify_code_link
+from .codelink import extract_code_link, lookup_code_link
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +25,15 @@ def _strip_version(paper_id: str) -> str:
 def fetch_daily_papers(
     topic: str,
     query: str,
-    max_results: int,
+    max_results: Optional[int],
     known_codes: Optional[Dict[str, str]] = None,
+    known_paper_ids: Optional[Set[str]] = None,
     lookup_missing_code: bool = True,
 ) -> List[Dict[str, Any]]:
     """按搜索表达式抓取指定数量的最新论文。
 
-    ``known_codes`` 用于复用历史链接；``lookup_missing_code`` 控制是否为
-    没有缓存链接的新论文访问 GitHub Search API。
+    论文摘要/备注中的 GitHub 地址优先级最高。``known_codes`` 用于复用历史
+    链接；``known_paper_ids`` 避免每天为已有但无代码的论文重复搜索 GitHub。
     """
     search = arxiv.Search(
         query=query,
@@ -46,15 +47,18 @@ def fetch_daily_papers(
         paper_id = _strip_version(result.get_short_id())
         logger.info("抓取到论文 %s | %s", paper_id, result.title)
 
-        code: Optional[str] = None
-        if known_codes is not None:
+        code = extract_code_link(
+            getattr(result, "summary", None),
+            getattr(result, "comment", None),
+        )
+        if code:
+            logger.info("从 arXiv 元数据提取到官方代码链接: %s", code)
+        elif known_codes is not None:
             code = known_codes.get(paper_id)
-            if lookup_missing_code and not code:
-                candidate = lookup_code_link(paper_id, result.title)
-                if candidate and verify_code_link(paper_id, result.title, candidate):
-                    code = candidate
-                elif candidate:
-                    logger.info("候选代码链接未通过校验，忽略: %s", candidate)
+
+        is_new_paper = known_paper_ids is None or paper_id not in known_paper_ids
+        if lookup_missing_code and is_new_paper and not code:
+            code = lookup_code_link(paper_id, result.title)
 
         authors = [str(author) for author in (result.authors or [])]
         updated = result.updated or result.published
