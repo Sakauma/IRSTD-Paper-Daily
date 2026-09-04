@@ -1,1 +1,94 @@
-{}
+{
+  "IRSTD": {
+    "2609.00853": {
+      "id": "2609.00853",
+      "publish_date": "2026-09-01",
+      "title": "ADGNet: Asymmetric Dual-text Guided Network for Infrared Small Target Detection",
+      "first_author": "Tongtong Wang",
+      "authors": "Tongtong Wang, Mingzhu Xu, Chenglong Yu, Jing Wang, Xiaohui Lin, Weili Guan",
+      "url": "http://arxiv.org/abs/2609.00853",
+      "code": null
+    },
+    "2609.00666": {
+      "id": "2609.00666",
+      "publish_date": "2026-09-01",
+      "title": "DGNet: Dual-knowledge Guided Network for Infrared Small Target Detection",
+      "first_author": "Chenglong Yu",
+      "authors": "Chenglong Yu, Mingzhu Xu, Jing Wang, Tongtong Wang, Pingping Miao, Liqiang Nie",
+      "url": "http://arxiv.org/abs/2609.00666",
+      "code": "https://github.com/GewelsJI/DGNet"
+    },
+    "2608.20870": {
+      "id": "2608.20870",
+      "publish_date": "2026-08-21",
+      "title": "RDANet: Relative Degradation Aware Network for Infrared Small Target Detection",
+      "first_author": "Rui Liu",
+      "authors": "Rui Liu, Jing Nie, Ying Fu",
+      "url": "http://arxiv.org/abs/2608.20870",
+      "code": "https://github.com/BIT-RuiLiu/RDANet"
+    },
+    "2608.20754": {
+      "id": "2608.20754",
+      "publish_date": "2026-08-26",
+      "title": "SPARK-SAM: Learning How to Prompt and Respond for Infrared Small Target Segmentation",
+      "first_author": "Aji Mao",
+      "authors": "Aji Mao, Zhenming Peng, Bailin Mu, Tian Pu",
+      "url": "http://arxiv.org/abs/2608.20754",
+      "code": null
+    },
+    "2608.07015": {
+      "id": "2608.07015",
+      "publish_date": "2026-08-07",
+      "title": "Understand Before Detect: Vision--Language Learning for Omni-Domain Infrared Small Target Detection",
+      "first_author": "Haoyang Yuan",
+      "authors": "Haoyang Yuan, Boyang Li, Yingqian Wang, Yimian Dai, Nuo Chen, Xinfei Huang, Shuqi Yi, Zaiping Lin, Weidong Sheng, Wei An",
+      "url": "http://arxiv.org/abs/2608.07015",
+      "code": null
+    },
+    "2608.05771": {
+      "id": "2608.05771",
+      "publish_date": "2026-08-07",
+      "title": "HyTBE: Hyperbolic Target-Background Expert Model for Cross-Domain Infrared Small Target Detection",
+      "first_author": "Aohua Li",
+      "authors": "Aohua Li, Jin Kuang, Yubing Lu, Pingping Liu",
+      "url": "http://arxiv.org/abs/2608.05771",
+      "code": "https://github.com/PepperCS/HyTBE"
+    },
+    "2607.24184": {
+      "id": "2607.24184",
+      "publish_date": "2026-07-27",
+      "title": "LCMamNet: A Lightweight Cross-scale Mamba Network for Infrared Small Target Detection",
+      "first_author": "Yuhao Fan",
+      "authors": "Yuhao Fan, Le Hui, Yuchao Dai",
+      "url": "http://arxiv.org/abs/2607.24184",
+      "code": "https://github.com/Haoyu096/LCMamNet"
+    },
+    "2607.23994": {
+      "id": "2607.23994",
+      "publish_date": "2026-07-28",
+      "title": "Effective Receptive Field Ordering Matters for Infrared Small Target Detection",
+      "first_author": "Guoyi Zhang",
+      "authors": "Guoyi Zhang, Yanjin Du, Zhengyao Zhao, Tongsu Zhang, Guangsheng Xu, Siyang Chen, Xiangpeng Xu, Han Wang, Xiaohu Zhang",
+      "url": "http://arxiv.org/abs/2607.23994",
+      "code": null
+    },
+    "2607.19040": {
+      "id": "2607.19040",
+      "publish_date": "2026-07-21",
+      "title": "Gaze-DETR: Top-Down Guidance Through Priority Maps for Infrared Weak-Small UAV Detection with DETR",
+      "first_author": "Nian Liu",
+      "authors": "Nian Liu, Yuxin Yang, Shubo Lin, Sikui Zhang, Liang Li, Boyu Cai, Yizheng Wang, Weiming Hu, Jin Gao",
+      "url": "http://arxiv.org/abs/2607.19040",
+      "code": null
+    },
+    "2607.17148": {
+      "id": "2607.17148",
+      "publish_date": "2026-07-19",
+      "title": "Noise-Robust Box-Supervised Infrared Small Target Detection via Physics-Inspired Soft Label Optimization",
+      "first_author": "Xizhe Zhang",
+      "authors": "Xizhe Zhang, Fan Shi, Mianzhao Wang, Jiangpeng Zheng, Xu Cheng, Shengyong Chen",
+      "url": "http://arxiv.org/abs/2607.17148",
+      "code": null
+    }
+  }
+}
