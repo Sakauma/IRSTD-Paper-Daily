@@ -1,5 +1,9 @@
 {
   "last_successful_update": {
     "IRSTD": "2026-09-04"
+  },
+  "wechat_notification": {
+    "initialized": true,
+    "last_successful_notification": "2026-09-04"
   }
 }
