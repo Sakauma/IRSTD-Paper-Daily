@@ -350,6 +350,402 @@
       "authors": "Yuteng Liu, Duanni Meng, Yimian Dai, Maoxun Yuan, Xingxing Wei, Bo li",
       "url": "http://arxiv.org/abs/2601.02837",
       "code": null
+    },
+    "2512.11170": {
+      "id": "2512.11170",
+      "publish_date": "2026-06-23",
+      "title": "A Unified Analysis for Dynamic Programming Track-Before-Detect Algorithms: Error Convergence and Spatial Uncertainty",
+      "first_author": "Nicholas Bampton",
+      "authors": "Nicholas Bampton, Tian J. Ma, Minh N. Do",
+      "url": "http://arxiv.org/abs/2512.11170",
+      "code": null
+    },
+    "2512.09497": {
+      "id": "2512.09497",
+      "publish_date": "2025-12-10",
+      "title": "Gradient-Guided Learning Network for Infrared Small Target Detection",
+      "first_author": "Jinmiao Zhao",
+      "authors": "Jinmiao Zhao, Chuang Yu, Zelin Shi, Yunpeng Liu, Yingdi Zhang",
+      "url": "http://arxiv.org/abs/2512.09497",
+      "code": "https://github.com/YuChuang1205/MSDA-Net"
+    },
+    "2512.05511": {
+      "id": "2512.05511",
+      "publish_date": "2025-12-05",
+      "title": "Rethinking Infrared Small Target Detection: A Foundation-Driven Efficient Paradigm",
+      "first_author": "Chuang Yu",
+      "authors": "Chuang Yu, Jinmiao Zhao, Yunpeng Liu, Yaokun Li, Xiujun Shu, Yuanhao Feng, Bo Wang, Yimian Dai, Xiangyu Yue",
+      "url": "http://arxiv.org/abs/2512.05511",
+      "code": "https://github.com/YuChuang1205/FDEP-Framework"
+    },
+    "2512.03752": {
+      "id": "2512.03752",
+      "publish_date": "2025-12-03",
+      "title": "A BTR-Based Approach for Detection of Infrared Small Targets",
+      "first_author": "Ke-Xin Li",
+      "authors": "Ke-Xin Li",
+      "url": "http://arxiv.org/abs/2512.03752",
+      "code": null
+    },
+    "2512.03470": {
+      "id": "2512.03470",
+      "publish_date": "2026-06-08",
+      "title": "STGBD-Net: Spatio-temporal Gradient Basis Decomposition Network for Infrared Small Target Detection",
+      "first_author": "Chen Hu",
+      "authors": "Chen Hu, Mingyu Zhou, Shuai Yuan, Hongbo Hu, Zhenming Peng, Tian Pu, Xiying Li",
+      "url": "http://arxiv.org/abs/2512.03470",
+      "code": "https://github.com/greekinRoma/IRSTD_HC_Platform"
+    },
+    "2511.20319": {
+      "id": "2511.20319",
+      "publish_date": "2025-11-25",
+      "title": "IrisNet: Infrared Image Status Awareness Meta Decoder for Infrared Small Targets Detection",
+      "first_author": "Xuelin Qian",
+      "authors": "Xuelin Qian, Jiaming Lu, Zixuan Wang, Wenxuan Wang, Zhongling Huang, Dingwen Zhang, Junwei Han",
+      "url": "http://arxiv.org/abs/2511.20319",
+      "code": null
+    },
+    "2511.19306": {
+      "id": "2511.19306",
+      "publish_date": "2025-11-24",
+      "title": "Dual-Granularity Semantic Prompting for Language Guidance Infrared Small Target Detection",
+      "first_author": "Zixuan Wang",
+      "authors": "Zixuan Wang, Haoran Sun, Jiaming Lu, Wenxuan Wang, Zhongling Huang, Dingwen Zhang, Xuelin Qian, Junwei Han",
+      "url": "http://arxiv.org/abs/2511.19306",
+      "code": null
+    },
+    "2511.13013": {
+      "id": "2511.13013",
+      "publish_date": "2026-07-30",
+      "title": "You Only Look Omni Gradient Backpropagation for Moving Infrared Small Target Detection",
+      "first_author": "Guoyi Zhang",
+      "authors": "Guoyi Zhang, Guangsheng Xu, Siyang Chen, Han Wang, Xiaohu Zhang",
+      "url": "http://arxiv.org/abs/2511.13013",
+      "code": null
+    },
+    "2511.09352": {
+      "id": "2511.09352",
+      "publish_date": "2025-11-16",
+      "title": "Spatio-Temporal Context Learning with Temporal Difference Convolution for Moving Infrared Small Target Detection",
+      "first_author": "Houzhang Fang",
+      "authors": "Houzhang Fang, Shukai Guo, Qiuhuan Chen, Yi Chang, Luxin Yan",
+      "url": "http://arxiv.org/abs/2511.09352",
+      "code": null
+    },
+    "2510.12241": {
+      "id": "2510.12241",
+      "publish_date": "2025-10-14",
+      "title": "Ivan-ISTD: Rethinking Cross-domain Heteroscedastic Noise Perturbations in Infrared Small Target Detection",
+      "first_author": "Yuehui Li",
+      "authors": "Yuehui Li, Yahao Lu, Haoyuan Wu, Sen Zhang, Liang Lin, Yukai Shi",
+      "url": "http://arxiv.org/abs/2510.12241",
+      "code": "https://github.com/nanjin1/Ivan-ISTD"
+    },
+    "2510.04741": {
+      "id": "2510.04741",
+      "publish_date": "2025-10-06",
+      "title": "Anomaly-Aware YOLO: A Frugal yet Robust Approach to Infrared Small Target Detection",
+      "first_author": "Alina Ciocarlan",
+      "authors": "Alina Ciocarlan, Sylvie Le Hégarat-Mascle, Sidonie Lefebvre",
+      "url": "http://arxiv.org/abs/2510.04741",
+      "code": null
+    },
+    "2509.22909": {
+      "id": "2509.22909",
+      "publish_date": "2025-09-26",
+      "title": "TY-RIST: Tactical YOLO Tricks for Real-time Infrared Small Target Detection",
+      "first_author": "Abdulkarim Atrash",
+      "authors": "Abdulkarim Atrash, Omar Moured, Yufan Chen, Jiaming Zhang, Seyda Ertekin, Omur Ugur",
+      "url": "http://arxiv.org/abs/2509.22909",
+      "code": null
+    },
+    "2509.20701": {
+      "id": "2509.20701",
+      "publish_date": "2025-09-25",
+      "title": "DENet: Dual-Path Edge Network with Global-Local Attention for Infrared Small Target Detection",
+      "first_author": "Jiayi Zuo",
+      "authors": "Jiayi Zuo, Songwei Pei, Qian Li",
+      "url": "http://arxiv.org/abs/2509.20701",
+      "code": null
+    },
+    "2509.16888": {
+      "id": "2509.16888",
+      "publish_date": "2025-09-23",
+      "title": "Rethinking Evaluation of Infrared Small Target Detection",
+      "first_author": "Youwei Pang",
+      "authors": "Youwei Pang, Xiaoqi Zhao, Lihe Zhang, Huchuan Lu, Georges El Fakhri, Xiaofeng Liu, Shijian Lu",
+      "url": "http://arxiv.org/abs/2509.16888",
+      "code": "https://github.com/lartpang/PyIRSTDMetrics"
+    },
+    "2509.08205": {
+      "id": "2509.08205",
+      "publish_date": "2025-09-10",
+      "title": "Lightweight Deep Unfolding Networks with Enhanced Robustness for Infrared Small Target Detection",
+      "first_author": "Jingjing Liu",
+      "authors": "Jingjing Liu, Yinchao Han, Xianchao Xiu, Jianhua Zhang, Wanquan Liu",
+      "url": "http://arxiv.org/abs/2509.08205",
+      "code": "https://github.com/xianchaoxiu/L-RPCANet"
+    },
+    "2509.07654": {
+      "id": "2509.07654",
+      "publish_date": "2026-08-05",
+      "title": "Beyond Motion Cues and Structural Sparsity: Revisiting Small Moving Target Detection",
+      "first_author": "Guoyi Zhang",
+      "authors": "Guoyi Zhang, Han Wang, Xiaohu Zhang",
+      "url": "http://arxiv.org/abs/2509.07654",
+      "code": null
+    },
+    "2508.15415": {
+      "id": "2508.15415",
+      "publish_date": "2025-08-21",
+      "title": "Bidirectional Temporal Information Propagation for Moving Infrared Small Target Detection",
+      "first_author": "Dengyan Luo",
+      "authors": "Dengyan Luo, Yanping Xiang, Hu Wang, Luping Ji. Shuai Li, Mao Ye",
+      "url": "http://arxiv.org/abs/2508.15415",
+      "code": null
+    },
+    "2508.10678": {
+      "id": "2508.10678",
+      "publish_date": "2026-05-18",
+      "title": "HyperTea: A Hypergraph-based Temporal Enhancement and Alignment Network for Moving Infrared Small Target Detection",
+      "first_author": "Zhaoyuan Qi",
+      "authors": "Zhaoyuan Qi, Weihua Gao, Wenlong Niu, Jie Tang, Yun Li, Xiaodong Peng",
+      "url": "http://arxiv.org/abs/2508.10678",
+      "code": "https://github.com/Lurenjia-LRJ/HyperTea"
+    },
+    "2508.06878": {
+      "id": "2508.06878",
+      "publish_date": "2026-02-24",
+      "title": "Seeing Through the Noise: Improving Infrared Small Target Detection and Segmentation from Noise Suppression Perspective",
+      "first_author": "Maoxun Yuan",
+      "authors": "Maoxun Yuan, Duanni Meng, Ziteng Xi, Tianyi Zhao, Shiji Zhao, Yimian Dai, Xingxing Wei",
+      "url": "http://arxiv.org/abs/2508.06878",
+      "code": null
+    },
+    "2508.01322": {
+      "id": "2508.01322",
+      "publish_date": "2025-08-02",
+      "title": "SWAN: Synergistic Wavelet-Attention Network for Infrared Small Target Detection",
+      "first_author": "Yuxin Jing",
+      "authors": "Yuxin Jing, Jufeng Zhao, Tianpei Zhang, Yiming Zhu",
+      "url": "http://arxiv.org/abs/2508.01322",
+      "code": null
+    },
+    "2507.18260": {
+      "id": "2507.18260",
+      "publish_date": "2025-07-24",
+      "title": "Exploiting Gaussian Agnostic Representation Learning with Diffusion Priors for Enhanced Infrared Small Target Detection",
+      "first_author": "Junyao Li",
+      "authors": "Junyao Li, Yahao Lu, Xingyuan Guo, Xiaoyu Xian, Tiantian Wang, Yukai Shi",
+      "url": "http://arxiv.org/abs/2507.18260",
+      "code": null
+    },
+    "2507.13113": {
+      "id": "2507.13113",
+      "publish_date": "2025-07-17",
+      "title": "Leveraging Language Prior for Infrared Small Target Detection",
+      "first_author": "Pranav Singh",
+      "authors": "Pranav Singh, Pravendra Singh",
+      "url": "http://arxiv.org/abs/2507.13113",
+      "code": null
+    },
+    "2507.09556": {
+      "id": "2507.09556",
+      "publish_date": "2025-07-13",
+      "title": "SeqCSIST: Sequential Closely-Spaced Infrared Small Target Unmixing",
+      "first_author": "Ximeng Zhai",
+      "authors": "Ximeng Zhai, Bohan Xu, Yaohong Chen, Hao Wang, Kehua Guo, Yimian Dai",
+      "url": "http://arxiv.org/abs/2507.09556",
+      "code": "https://github.com/GrokCV/SeqCSIST"
+    },
+    "2507.09541": {
+      "id": "2507.09541",
+      "publish_date": "2025-07-13",
+      "title": "DRPCA-Net: Make Robust PCA Great Again for Infrared Small Target Detection",
+      "first_author": "Zihao Xiong",
+      "authors": "Zihao Xiong, Fei Zhou, Fengyi Wu, Shuai Yuan, Maixia Fu, Zhenming Peng, Jian Yang, Yimian Dai",
+      "url": "http://arxiv.org/abs/2507.09541",
+      "code": "https://github.com/GrokCV/DRPCA-Net"
+    },
+    "2507.02454": {
+      "id": "2507.02454",
+      "publish_date": "2026-02-01",
+      "title": "Weakly-supervised Contrastive Learning with Quantity Prompts for Moving Infrared Small Target Detection",
+      "first_author": "Weiwei Duan",
+      "authors": "Weiwei Duan, Luping Ji, Shengjia Chen, Sicheng Zhu, Jianghong Huang, Mao Ye",
+      "url": "http://arxiv.org/abs/2507.02454",
+      "code": null
+    },
+    "2506.12766": {
+      "id": "2506.12766",
+      "publish_date": "2026-03-27",
+      "title": "Probing Deep into Temporal Profile Makes the Infrared Small Target Detector Much Better",
+      "first_author": "Ruojing Li",
+      "authors": "Ruojing Li, Wei An, Yingqian Wang, Xinyi Ying, Yimian Dai, Longguang Wang, Miao Li, Yulan Guo, Li Liu",
+      "url": "http://arxiv.org/abs/2506.12766",
+      "code": null
+    },
+    "2506.10425": {
+      "id": "2506.10425",
+      "publish_date": "2025-12-28",
+      "title": "It's Not the Target, It's the Background: Rethinking Infrared Small Target Detection via Deep Patch-Free Low-Rank Representations",
+      "first_author": "Guoyi Zhang",
+      "authors": "Guoyi Zhang, Guangsheng Xu, Siyang Chen, Han Wang, Xiaohu Zhang",
+      "url": "http://arxiv.org/abs/2506.10425",
+      "code": null
+    },
+    "2506.06042": {
+      "id": "2506.06042",
+      "publish_date": "2025-06-06",
+      "title": "SDS-Net: Shallow-Deep Synergism-detection Network for infrared small target detection",
+      "first_author": "Taoran Yue",
+      "authors": "Taoran Yue, Xiaojin Lu, Jiaxi Cai, Yuanping Chen, Shibing Chu",
+      "url": "http://arxiv.org/abs/2506.06042",
+      "code": "https://github.com/PhysiLearn/SDS-Net"
+    },
+    "2506.02393": {
+      "id": "2506.02393",
+      "publish_date": "2025-10-30",
+      "title": "RRCANet: Recurrent Reusable-Convolution Attention Network for Infrared Small Target Detection",
+      "first_author": "Yongxian Liu",
+      "authors": "Yongxian Liu, Boyang Li, Ting Liu, Zaiping Lin, Wei An",
+      "url": "http://arxiv.org/abs/2506.02393",
+      "code": null
+    },
+    "2506.01349": {
+      "id": "2506.01349",
+      "publish_date": "2025-06-02",
+      "title": "Target Driven Adaptive Loss For Infrared Small Target Detection",
+      "first_author": "Yuho Shoji",
+      "authors": "Yuho Shoji, Takahiro Toizumi, Atsushi Ito",
+      "url": "http://arxiv.org/abs/2506.01349",
+      "code": null
+    },
+    "2505.23214": {
+      "id": "2505.23214",
+      "publish_date": "2025-05-29",
+      "title": "SAMamba: Adaptive State Space Modeling with Hierarchical Vision for Infrared Small Target Detection",
+      "first_author": "Wenhao Xu",
+      "authors": "Wenhao Xu, Shuchen Zheng, Changwei Wang, Zherui Zhang, Chuan Ren, Rongtao Xu, Shibiao Xu",
+      "url": "http://arxiv.org/abs/2505.23214",
+      "code": "https://github.com/zhengshuchen/SAMamba"
+    },
+    "2505.19148": {
+      "id": "2505.19148",
+      "publish_date": "2025-12-10",
+      "title": "DISTA-Net: Dynamic Closely-Spaced Infrared Small Target Unmixing",
+      "first_author": "Shengdong Han",
+      "authors": "Shengdong Han, Shangdong Yang, Xin Zhang, Yuxuan Li, Xiang Li, Jian Yang, Ming-Ming Cheng, Yimian Dai",
+      "url": "http://arxiv.org/abs/2505.19148",
+      "code": "https://github.com/GrokCV/GrokCSO"
+    },
+    "2505.15184": {
+      "id": "2505.15184",
+      "publish_date": "2025-10-07",
+      "title": "AuxDet: Auxiliary Metadata Matters for Omni-Domain Infrared Small Target Detection",
+      "first_author": "Yangting Shi",
+      "authors": "Yangting Shi, Yinfei Zhu, Renjie He, Le Hui, Meng Cai, Ming-Ming Cheng, Yimian Dai",
+      "url": "http://arxiv.org/abs/2505.15184",
+      "code": "https://github.com/GrokCV/AuxDet"
+    },
+    "2505.10595": {
+      "id": "2505.10595",
+      "publish_date": "2025-05-23",
+      "title": "ARFC-WAHNet: Adaptive Receptive Field Convolution and Wavelet-Attentive Hierarchical Network for Infrared Small Target Detection",
+      "first_author": "Xingye Cui",
+      "authors": "Xingye Cui, Junhai Luo, Jiakun Deng, Kexuan Li, Xiangyu Qiu, Zhenming Peng",
+      "url": "http://arxiv.org/abs/2505.10595",
+      "code": "https://github.com/Leaf2001/ARFC-WAHNet"
+    },
+    "2505.09943": {
+      "id": "2505.09943",
+      "publish_date": "2025-05-15",
+      "title": "CSPENet: Contour-Aware and Saliency Priors Embedding Network for Infrared Small Target Detection",
+      "first_author": "Jiakun Deng",
+      "authors": "Jiakun Deng, Kexuan Li, Xingye Cui, Jiaxuan Li, Chang Long, Tian Pu, Zhenming Peng",
+      "url": "http://arxiv.org/abs/2505.09943",
+      "code": "https://github.com/IDIP2025/CSPENet"
+    },
+    "2504.21612": {
+      "id": "2504.21612",
+      "publish_date": "2025-07-13",
+      "title": "Selective Variable Convolution Meets Dynamic Content-Guided Attention for Infrared Small Target Detection",
+      "first_author": "Yirui Chen",
+      "authors": "Yirui Chen, Yiming Zhu, Yuxin Jing, Tianpei Zhang, Jufeng Zhao",
+      "url": "http://arxiv.org/abs/2504.21612",
+      "code": null
+    },
+    "2504.21581": {
+      "id": "2504.21581",
+      "publish_date": "2025-08-02",
+      "title": "Make Both Ends Meet: A Synergistic Optimization Infrared Small Target Detection with Streamlined Computational Overhead",
+      "first_author": "Yuxin Jing",
+      "authors": "Yuxin Jing, Yuchen Zheng, Jufeng Zhao, Guangmang Cui, Tianpei Zhang",
+      "url": "http://arxiv.org/abs/2504.21581",
+      "code": null
+    },
+    "2504.16487": {
+      "id": "2504.16487",
+      "publish_date": "2025-04-23",
+      "title": "Rethinking Generalizable Infrared Small Target Detection: A Real-scene Benchmark and Cross-view Representation Learning",
+      "first_author": "Yahao Lu",
+      "authors": "Yahao Lu, Yuehui Li, Xingyuan Guo, Shuai Yuan, Yukai Shi, Liang Lin",
+      "url": "http://arxiv.org/abs/2504.16487",
+      "code": "https://github.com/luy0222/RealScene-ISTD"
+    },
+    "2504.14481": {
+      "id": "2504.14481",
+      "publish_date": "2025-10-13",
+      "title": "LSP-ST: Ladder Shape-Biased Side-Tuning for Robust Infrared Small Target Detection",
+      "first_author": "Guoyi Zhang",
+      "authors": "Guoyi Zhang, Siyang Chen, Guangsheng Xu, Han Wang, Donghe Wang, Xiaohu Zhang",
+      "url": "http://arxiv.org/abs/2504.14481",
+      "code": null
+    },
+    "2504.14289": {
+      "id": "2504.14289",
+      "publish_date": "2025-04-19",
+      "title": "ISTD-YOLO: A Multi-Scale Lightweight High-Performance Infrared Small Target Detection Algorithm",
+      "first_author": "Shang Zhang",
+      "authors": "Shang Zhang, Yujie Cui, Ruoyan Xiong, Huanbin Zhang",
+      "url": "http://arxiv.org/abs/2504.14289",
+      "code": null
+    },
+    "2503.17193": {
+      "id": "2503.17193",
+      "publish_date": "2025-06-20",
+      "title": "MSCA-Net:Multi-Scale Context Aggregation Network for Infrared Small Target Detection",
+      "first_author": "Xiaojin Lu",
+      "authors": "Xiaojin Lu, Taoran yue, Jiaxi cai, Yuanping Chen, Cuihong Lv, Shibing Chu",
+      "url": "http://arxiv.org/abs/2503.17193",
+      "code": null
+    },
+    "2503.07249": {
+      "id": "2503.07249",
+      "publish_date": "2025-03-10",
+      "title": "Text-IRSTD: Leveraging Semantic Text to Promote Infrared Small Target Detection in Complex Scenes",
+      "first_author": "Feng Huang",
+      "authors": "Feng Huang, Shuyuan Zheng, Zhaobing Qiu, Huanxian Liu, Huanxin Bai, Liqiong Chen",
+      "url": "http://arxiv.org/abs/2503.07249",
+      "code": null
+    },
+    "2503.02662": {
+      "id": "2503.02662",
+      "publish_date": "2025-08-04",
+      "title": "10K is Enough: An Ultra-Lightweight Binarized Network for Infrared Small-Target Detection",
+      "first_author": "Biqiao Xin",
+      "authors": "Biqiao Xin, Qianchen Mao, Bingshu Wang, Jiangbin Zheng, Yong Zhao, C. L. Philip Chen",
+      "url": "http://arxiv.org/abs/2503.02662",
+      "code": null
+    },
+    "2503.02220": {
+      "id": "2503.02220",
+      "publish_date": "2025-03-04",
+      "title": "Low-Level Matters: An Efficient Hybrid Architecture for Robust Multi-frame Infrared Small Target Detection",
+      "first_author": "Zhihua Shen",
+      "authors": "Zhihua Shen, Siyang Chen, Han Wang, Tongsu Zhang, Xiaohu Zhang, Xiangpeng Xu, Xia Yang",
+      "url": "http://arxiv.org/abs/2503.02220",
+      "code": "https://github.com/ZhihuaShen/LVNet"
     }
   }
 }

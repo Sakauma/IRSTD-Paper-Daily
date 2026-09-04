@@ -36,11 +36,11 @@ def test_build_query() -> None:
     assert build_query([]) == ""
     dated_query = build_query(
         ["IRSTD"],
-        start_date="2026-01-01",
+        start_date="2025-01-01",
         end_date="2026-09-04",
     )
     assert dated_query == (
-        "(IRSTD) AND submittedDate:[202601010000 TO 202609042359]"
+        "(IRSTD) AND submittedDate:[202501010000 TO 202609042359]"
     )
     assert add_date_range(
         "IRSTD",
@@ -55,7 +55,7 @@ def test_config() -> None:
     assert "Infrared Small Target Detection" in config["kv"]["IRSTD"]
     assert config["domain_max_results"]["IRSTD"] is None
     assert "submittedDate" not in config["kv"]["IRSTD"]
-    assert config["domain_start_dates"]["IRSTD"] == "2026-01-01"
+    assert config["domain_start_dates"]["IRSTD"] == "2025-01-01"
     assert config["domain_lookback_days"]["IRSTD"] == 3
     assert config["publish_wechat"] is True
 
@@ -224,7 +224,7 @@ def test_run_renders_all_enabled_outputs() -> None:
             "enable_code_lookup": False,
             "kv": {"IRSTD": "IRSTD"},
             "domain_max_results": {"IRSTD": None},
-            "domain_start_dates": {"IRSTD": "2026-01-01"},
+            "domain_start_dates": {"IRSTD": "2025-01-01"},
             "domain_lookback_days": {"IRSTD": 3},
         }
         with mock.patch.object(
@@ -267,7 +267,7 @@ def test_incremental_and_full_refresh_windows() -> None:
             "incremental_lookback_days": 3,
             "kv": {"IRSTD": "IRSTD"},
             "domain_max_results": {"IRSTD": None},
-            "domain_start_dates": {"IRSTD": "2026-01-01"},
+            "domain_start_dates": {"IRSTD": "2025-01-01"},
             "domain_lookback_days": {"IRSTD": 3},
         }
 
@@ -288,7 +288,7 @@ def test_incremental_and_full_refresh_windows() -> None:
                 today=date(2026, 9, 6),
             )
             full_query = fetch.call_args.args[1]
-            assert "submittedDate:[202601010000 TO 202609062359]" in full_query
+            assert "submittedDate:[202501010000 TO 202609062359]" in full_query
 
         assert load_data(state_path)["last_successful_update"]["IRSTD"] == (
             "2026-09-06"

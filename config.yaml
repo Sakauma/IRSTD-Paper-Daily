@@ -16,7 +16,7 @@ show_badge: true
 max_results: null
 
 # 只收录从该日期起首次提交到 arXiv 的论文，结束日期自动取运行当天。
-start_date: "2026-01-01"
+start_date: "2025-01-01"
 
 # 每日增量抓取会从上次成功日期向前回看，容忍 arXiv 收录延迟。
 incremental_lookback_days: 3
@@ -56,7 +56,7 @@ domains:
     # "New Domain":
     #     enable: true
     #     max_results: null
-    #     start_date: "2026-01-01"
+    #     start_date: "2025-01-01"
     #     incremental_lookback_days: 3
     #     filters:
     #         - "keyword1"

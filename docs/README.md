@@ -1,7 +1,7 @@
 # IRSTD Paper Daily 使用说明
 
 本项目每天从 arXiv 搜索红外小目标检测（IRSTD）相关论文。历史数据收录从
-2026-01-01 首次提交到 arXiv 的全部高相关论文，不限制总数量，并维护论文
+2025-01-01 首次提交到 arXiv 的全部高相关论文，不限制总数量，并维护论文
 JSON、增量状态和三种输出：
 
 - 根目录 `README.md`：GitHub 仓库主页表格。
@@ -64,7 +64,7 @@ domains:
     "New Domain":
         enable: true
         max_results: null
-        start_date: "2026-01-01"
+        start_date: "2025-01-01"
         incremental_lookback_days: 3
         filters:
             - "keyword1"
