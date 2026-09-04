@@ -4,6 +4,7 @@
     python daily_arxiv.py [--config_path config.yaml]
     python daily_arxiv.py --backfill_code
     python daily_arxiv.py --full-refresh
+    python daily_arxiv.py --notify-wechat
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from typing import Any, Dict, Optional
 from arxiv_daily.codelink import backfill_code_links
 from arxiv_daily.config import add_date_range, load_config
 from arxiv_daily.fetcher import fetch_daily_papers
+from arxiv_daily.notifier import notify_daily_update
 from arxiv_daily.renderer import render_markdown
 from arxiv_daily.storage import load_data, merge_papers, save_data
 from arxiv_daily.wechat import build_wechat_data, render_wechat_markdown
@@ -99,6 +101,27 @@ def _known_paper_ids(data: Dict[str, Any]) -> set[str]:
     }
 
 
+def _classify_changes(
+    data: Dict[str, Any],
+    topic: str,
+    papers: list[Dict[str, Any]],
+) -> tuple[list[Dict[str, Any]], list[Dict[str, Any]]]:
+    """把本次结果分为新增论文和元数据发生变化的论文。"""
+    existing = data.get(topic, {})
+    if not isinstance(existing, dict):
+        existing = {}
+
+    new_papers: list[Dict[str, Any]] = []
+    updated_papers: list[Dict[str, Any]] = []
+    for paper in papers:
+        paper_id = str(paper.get("id") or "")
+        if paper_id not in existing:
+            new_papers.append(paper)
+        elif existing[paper_id] != paper:
+            updated_papers.append(paper)
+    return new_papers, updated_papers
+
+
 def _last_successful_dates(state: Dict[str, Any]) -> Dict[str, str]:
     """读取每个领域最近一次成功更新日期。"""
     values = state.get("last_successful_update", {})
@@ -140,6 +163,7 @@ def run(
     config: Dict[str, Any],
     *,
     full_refresh: bool = False,
+    notify_wechat: bool = False,
     today: Optional[date] = None,
 ) -> None:
     """读取缓存，执行增量或全量抓取，然后合并并渲染。"""
@@ -153,6 +177,8 @@ def run(
     lookup_missing_code = bool(config.get("enable_code_lookup", True))
 
     new_papers_by_topic: Dict[str, Any] = {}
+    notification_new: Dict[str, Any] = {}
+    notification_updated: Dict[str, Any] = {}
     for topic, base_query in config["kv"].items():
         max_results = config["domain_max_results"].get(
             topic,
@@ -182,7 +208,7 @@ def run(
         )
         mode = "增量" if is_incremental else "全量"
         logger.info("开始%s抓取领域 %s（%s）", mode, topic, limit_description)
-        new_papers_by_topic[topic] = fetch_daily_papers(
+        fetched_papers = fetch_daily_papers(
             topic,
             query,
             max_results,
@@ -190,6 +216,10 @@ def run(
             known_paper_ids=known_paper_ids,
             lookup_missing_code=lookup_missing_code,
         )
+        new_papers_by_topic[topic] = fetched_papers
+        new_items, updated_items = _classify_changes(data, topic, fetched_papers)
+        notification_new[topic] = new_items
+        notification_updated[topic] = updated_items
 
     for topic, papers in new_papers_by_topic.items():
         data = merge_papers(data, papers, topic)
@@ -197,6 +227,13 @@ def run(
     logger.info("数据已写入 %s", config["data_path"])
 
     _render_outputs(config, data)
+    if notify_wechat:
+        notify_daily_update(
+            config,
+            notification_new,
+            notification_updated,
+            run_date=run_date,
+        )
     successful_dates.update(
         {topic: run_date.isoformat() for topic in new_papers_by_topic}
     )
@@ -235,18 +272,27 @@ def main() -> None:
         action="store_true",
         help="忽略增量水位，重新抓取配置起始日期以来的全部论文",
     )
+    parser.add_argument(
+        "--notify-wechat",
+        action="store_true",
+        help="更新完成后通过 WxPusher 向指定微信用户发送当日摘要",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config_path)
     logger.info("配置加载完成，启用领域: %s", list(config["kv"].keys()))
     if args.full_refresh:
-        run(config, full_refresh=True)
+        run(
+            config,
+            full_refresh=True,
+            notify_wechat=args.notify_wechat,
+        )
         if args.backfill_code:
             run_backfill(config)
     elif args.backfill_code:
         run_backfill(config)
     else:
-        run(config)
+        run(config, notify_wechat=args.notify_wechat)
 
 
 if __name__ == "__main__":

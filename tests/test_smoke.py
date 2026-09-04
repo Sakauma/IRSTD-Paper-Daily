@@ -12,6 +12,13 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
 from arxiv_daily.config import add_date_range, build_query, load_config  # noqa: E402
+from arxiv_daily.notifier import (  # noqa: E402
+    NotificationError,
+    build_daily_digest,
+    notify_daily_update,
+    parse_wxpusher_uids,
+    send_wxpusher_message,
+)
 from arxiv_daily.renderer import render_markdown  # noqa: E402
 from arxiv_daily.storage import load_data, merge_papers, save_data  # noqa: E402
 from arxiv_daily.wechat import build_wechat_data, render_wechat_markdown  # noqa: E402
@@ -58,6 +65,8 @@ def test_config() -> None:
     assert config["domain_start_dates"]["IRSTD"] == "2025-01-01"
     assert config["domain_lookback_days"]["IRSTD"] == 3
     assert config["publish_wechat"] is True
+    assert config["wechat_notification"]["provider"] == "wxpusher"
+    assert config["wechat_notification"]["notify_on_empty"] is True
 
 
 def test_merge_and_storage() -> None:
@@ -96,6 +105,117 @@ def test_wechat_render() -> None:
     )
     assert "## IRSTD" in output
     assert "Paper: [http://arxiv.org/abs/2608.07015]" in output
+
+
+def test_parse_wxpusher_uids() -> None:
+    assert parse_wxpusher_uids("UID_first, UID_second;UID_first\nUID_third") == [
+        "UID_first",
+        "UID_second",
+        "UID_third",
+    ]
+
+    try:
+        parse_wxpusher_uids("not-a-uid")
+    except NotificationError as exc:
+        assert "无效 UID" in str(exc)
+    else:
+        raise AssertionError("无效 WxPusher UID 应当被拒绝")
+
+
+def test_build_daily_digest() -> None:
+    new_paper = sample_paper("https://github.com/foo/new")
+    updated_paper = sample_paper("https://github.com/foo/updated")
+    updated_paper["id"] = "2608.07016"
+    updated_paper["title"] = "Updated Demo Paper"
+
+    summary, content = build_daily_digest(
+        {"IRSTD": [new_paper]},
+        {"IRSTD": [updated_paper]},
+        run_date=date(2026, 9, 4),
+        repo_url="https://github.com/Sakauma/IRSTD-Paper-Daily",
+    )
+    assert "新增 1 篇，更新 1 篇" in summary
+    assert "## 新增论文" in content
+    assert "## 更新论文" in content
+    assert "Demo Paper" in content
+    assert "Updated Demo Paper" in content
+    assert "https://github.com/foo/new" in content
+
+    empty_summary, empty_content = build_daily_digest(
+        {},
+        {},
+        run_date=date(2026, 9, 4),
+        repo_url="",
+    )
+    assert "今日无新增" in empty_summary
+    assert "未发现新增或发生变化" in empty_content
+
+
+def test_send_wxpusher_message() -> None:
+    response = mock.Mock()
+    response.json.return_value = {"code": 1000, "msg": "处理成功"}
+    with mock.patch(
+        "arxiv_daily.notifier.requests.post",
+        return_value=response,
+    ) as post:
+        result = send_wxpusher_message(
+            app_token="AT_test-token",
+            uids=["UID_first", "UID_second"],
+            summary="测试摘要",
+            content="# 测试内容",
+            url="https://github.com/Sakauma/IRSTD-Paper-Daily",
+        )
+
+    assert result["code"] == 1000
+    response.raise_for_status.assert_called_once_with()
+    payload = post.call_args.kwargs["json"]
+    assert payload["contentType"] == 3
+    assert payload["uids"] == ["UID_first", "UID_second"]
+    assert post.call_args.kwargs["timeout"] == 15
+
+
+def test_wxpusher_business_failure() -> None:
+    response = mock.Mock()
+    response.json.return_value = {"code": 1001, "msg": "发送失败"}
+    with mock.patch(
+        "arxiv_daily.notifier.requests.post",
+        return_value=response,
+    ):
+        try:
+            send_wxpusher_message(
+                app_token="AT_test-token",
+                uids=["UID_first"],
+                summary="测试摘要",
+                content="# 测试内容",
+            )
+        except NotificationError as exc:
+            assert "发送失败" in str(exc)
+        else:
+            raise AssertionError("WxPusher 业务失败应当抛出 NotificationError")
+
+
+def test_notify_without_secrets_skips_safely() -> None:
+    with mock.patch.dict(os.environ, {}, clear=True), mock.patch(
+        "arxiv_daily.notifier.send_wxpusher_message"
+    ) as send:
+        sent = notify_daily_update({}, {}, {}, run_date=date(2026, 9, 4))
+
+    assert sent is False
+    send.assert_not_called()
+
+
+def test_notify_requires_both_secrets() -> None:
+    with mock.patch.dict(
+        os.environ,
+        {"WXPUSHER_APP_TOKEN": "AT_only-token"},
+        clear=True,
+    ):
+        try:
+            notify_daily_update({}, {}, {}, run_date=date(2026, 9, 4))
+        except NotificationError as exc:
+            assert "必须同时配置" in str(exc)
+        else:
+            raise AssertionError("只配置一个 WxPusher Secret 应当报错")
 
 
 def test_lookup_and_verify_code_link() -> None:
@@ -295,6 +415,61 @@ def test_incremental_and_full_refresh_windows() -> None:
         )
 
 
+def test_run_notifies_only_new_and_updated_papers() -> None:
+    import daily_arxiv
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        data_path = os.path.join(tmp_dir, "data.json")
+        state_path = os.path.join(tmp_dir, "state.json")
+        unchanged = sample_paper()
+        old_version = sample_paper()
+        old_version["id"] = "2608.07016"
+        old_version["title"] = "Old title"
+        save_data(
+            data_path,
+            {
+                "IRSTD": {
+                    str(unchanged["id"]): unchanged,
+                    str(old_version["id"]): old_version,
+                }
+            },
+        )
+
+        updated = dict(old_version)
+        updated["title"] = "New title"
+        new_paper = sample_paper()
+        new_paper["id"] = "2608.07017"
+        new_paper["title"] = "Brand new paper"
+        config = {
+            "data_path": data_path,
+            "state_path": state_path,
+            "publish_readme": False,
+            "publish_gitpage": False,
+            "publish_wechat": False,
+            "enable_code_lookup": False,
+            "kv": {"IRSTD": "IRSTD"},
+            "domain_max_results": {"IRSTD": None},
+            "domain_start_dates": {"IRSTD": "2025-01-01"},
+            "domain_lookback_days": {"IRSTD": 3},
+        }
+        with mock.patch.object(
+            daily_arxiv,
+            "fetch_daily_papers",
+            return_value=[unchanged, updated, new_paper],
+        ), mock.patch.object(daily_arxiv, "notify_daily_update") as notify:
+            daily_arxiv.run(
+                config,
+                notify_wechat=True,
+                today=date(2026, 9, 4),
+            )
+
+        notify.assert_called_once()
+        notified_new = notify.call_args.args[1]["IRSTD"]
+        notified_updated = notify.call_args.args[2]["IRSTD"]
+        assert [paper["id"] for paper in notified_new] == ["2608.07017"]
+        assert [paper["id"] for paper in notified_updated] == ["2608.07016"]
+
+
 def test_date_is_available() -> None:
     assert date.today().isoformat()
 
@@ -306,12 +481,19 @@ if __name__ == "__main__":
         test_merge_and_storage,
         test_render_markdown,
         test_wechat_render,
+        test_parse_wxpusher_uids,
+        test_build_daily_digest,
+        test_send_wxpusher_message,
+        test_wxpusher_business_failure,
+        test_notify_without_secrets_skips_safely,
+        test_notify_requires_both_secrets,
         test_lookup_and_verify_code_link,
         test_extract_code_link_from_arxiv_metadata,
         test_fetcher_reuses_cached_code_when_lookup_is_disabled,
         test_fetcher_prefers_official_arxiv_code_link,
         test_run_renders_all_enabled_outputs,
         test_incremental_and_full_refresh_windows,
+        test_run_notifies_only_new_and_updated_papers,
         test_date_is_available,
     ]
     for test in tests:

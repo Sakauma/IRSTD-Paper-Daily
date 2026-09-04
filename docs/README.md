@@ -77,11 +77,38 @@ domains:
 论文，但不会删除历史数据。含空格的过滤词按完整短语搜索，多个过滤词以 `OR`
 连接。
 
-GitHub Actions 每天北京时间 08:00 执行增量更新，每周一北京时间 16:00 执行
-全量论文刷新和历史代码链接补查。
+GitHub Actions 每天北京时间 08:00 执行增量更新，并在更新完成后发送微信通知。
+每周一北京时间 16:00 执行全量论文刷新和历史代码链接补查，但不重复发送通知。
 
 默认 IRSTD 关键词只保留明确包含 infrared、IRSTD 或 SIRST 的检索词，避免把
 声呐小目标、普通 UAV 检测等论文误收进列表。
+
+## 微信通知配置
+
+每日工作流使用 [WxPusher](https://wxpusher.zjiecode.com/) 将论文变化推送到指定
+个人微信。配置步骤如下：
+
+1. 登录 WxPusher 后创建一个应用，复制以 `AT_` 开头的 `appToken`。
+2. 让接收者用微信扫描该应用的关注二维码，在应用用户列表中复制其 `UID_...`。
+3. 打开 GitHub 仓库的 **Settings → Secrets and variables → Actions**，新建两个
+   Repository secrets：
+   - `WXPUSHER_APP_TOKEN`：上一步获得的 `AT_...`。
+   - `WXPUSHER_UIDS`：目标微信的 `UID_...`；多个 UID 使用英文逗号分隔。
+4. 在 GitHub Actions 页面手动运行 **Update IRSTD Paper Daily** 测试推送。
+
+通知包含本次新增论文、元数据或代码链接发生变化的论文，以及完整仓库入口。默认
+最多展示 20 篇；可通过 `config.yaml` 的 `wechat_notification.max_papers` 修改。
+当天没有变化时默认发送“今日无新增”，将 `notify_on_empty` 设为 `false` 可关闭。
+
+两个 Secrets 都没有配置时，程序会安全跳过通知，论文更新仍正常完成。只配置其中
+一个会视为配置错误并让工作流失败，以免误以为通知已经送达。Token 和 UID 只从
+GitHub Secrets 读取，不应写入 `config.yaml` 或提交到仓库。
+
+本地测试通知可先设置同名环境变量，再运行：
+
+```bash
+python daily_arxiv.py --notify-wechat
+```
 
 ## 微信版输出说明
 
@@ -90,7 +117,8 @@ GitHub Actions 每天北京时间 08:00 执行增量更新，每周一北京时�
 - `docs/irstd-paper-daily-wechat.json`：微信版条目的结构化索引。
 - `docs/wechat.md`：按领域分组的项目符号列表，包含论文和代码链接。
 
-该功能生成可复制的微信版日报，不直接调用微信 API，也不会发送消息。若需要自动发送，应在仓库外另行配置合规的企业微信/微信公众号服务。
+微信版文件与 WxPusher 通知互相独立：前者是可复制的完整 Markdown 日报，后者是
+每日工作流自动发送的精简变化摘要。
 
 ## 测试
 
@@ -99,7 +127,7 @@ python tests/test_smoke.py
 ```
 
 测试不访问网络，覆盖配置解析、增量与全量日期窗口、数据合并、Markdown 渲染、
-微信渲染以及代码链接校验的基本行为。
+微信渲染、WxPusher 通知以及代码链接校验的基本行为。
 
 ## 参考项目
 
