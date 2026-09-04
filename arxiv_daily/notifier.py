@@ -87,6 +87,7 @@ def build_daily_digest(
     run_date: date,
     repo_url: str,
     max_papers: int = 20,
+    initial_sync: bool = False,
 ) -> Tuple[str, str]:
     """生成适合 WxPusher 的 Markdown 摘要和通知标题。"""
     if max_papers < 1:
@@ -95,7 +96,10 @@ def build_daily_digest(
     new_count = _change_count(new_papers)
     updated_count = _change_count(updated_papers)
     total = new_count + updated_count
-    if total:
+    if initial_sync:
+        summary = f"IRSTD Paper Daily｜首次同步 {total} 篇"
+        status = f"首次同步，共 **{total}** 篇 IRSTD 论文。"
+    elif total:
         summary = (
             f"IRSTD Paper Daily｜新增 {new_count} 篇，更新 {updated_count} 篇"
         )
@@ -111,20 +115,29 @@ def build_daily_digest(
         "",
     ]
     remaining = max_papers
-    remaining, index = _append_papers(
-        lines,
-        new_papers,
-        heading="新增论文",
-        remaining=remaining,
-        start_index=0,
-    )
-    remaining, _ = _append_papers(
-        lines,
-        updated_papers,
-        heading="更新论文",
-        remaining=remaining,
-        start_index=index,
-    )
+    if initial_sync:
+        remaining, _ = _append_papers(
+            lines,
+            new_papers,
+            heading="完整论文目录",
+            remaining=remaining,
+            start_index=0,
+        )
+    else:
+        remaining, index = _append_papers(
+            lines,
+            new_papers,
+            heading="新增论文",
+            remaining=remaining,
+            start_index=0,
+        )
+        remaining, _ = _append_papers(
+            lines,
+            updated_papers,
+            heading="更新论文",
+            remaining=remaining,
+            start_index=index,
+        )
     if total > max_papers:
         lines.extend(
             [
@@ -186,6 +199,7 @@ def notify_daily_update(
     updated_papers: Mapping[str, Sequence[Mapping[str, Any]]],
     *,
     run_date: date,
+    initial_sync: bool = False,
 ) -> bool:
     """读取 GitHub Secrets 对应环境变量并推送每日变化。"""
     app_token = os.environ.get("WXPUSHER_APP_TOKEN", "").strip()
@@ -206,8 +220,8 @@ def notify_daily_update(
         raise NotificationError(f"暂不支持微信通知提供方: {provider}")
 
     total = _change_count(new_papers) + _change_count(updated_papers)
-    if not total and not bool(settings.get("notify_on_empty", True)):
-        logger.info("今日无论文变化，按配置跳过微信通知")
+    if not total:
+        logger.info("论文目录没有变化，跳过微信通知")
         return False
 
     user_name = str(config.get("user_name", "")).strip()
@@ -218,12 +232,16 @@ def notify_daily_update(
         else ""
     )
     repo_url = str(settings.get("url") or default_repo_url)
+    max_papers = int(settings.get("max_papers", 20))
+    if initial_sync:
+        max_papers = max(max_papers, total)
     summary, content = build_daily_digest(
         new_papers,
         updated_papers,
         run_date=run_date,
         repo_url=repo_url,
-        max_papers=int(settings.get("max_papers", 20)),
+        max_papers=max_papers,
+        initial_sync=initial_sync,
     )
     uids = parse_wxpusher_uids(raw_uids)
     send_wxpusher_message(

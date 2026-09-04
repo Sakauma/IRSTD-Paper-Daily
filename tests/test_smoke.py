@@ -66,7 +66,7 @@ def test_config() -> None:
     assert config["domain_lookback_days"]["IRSTD"] == 3
     assert config["publish_wechat"] is True
     assert config["wechat_notification"]["provider"] == "wxpusher"
-    assert config["wechat_notification"]["notify_on_empty"] is True
+    assert config["wechat_notification"]["max_papers"] == 20
 
 
 def test_merge_and_storage() -> None:
@@ -150,6 +150,17 @@ def test_build_daily_digest() -> None:
     assert "今日无新增" in empty_summary
     assert "未发现新增或发生变化" in empty_content
 
+    initial_summary, initial_content = build_daily_digest(
+        {"IRSTD": [new_paper, updated_paper]},
+        {},
+        run_date=date(2026, 9, 4),
+        repo_url="",
+        max_papers=2,
+        initial_sync=True,
+    )
+    assert "首次同步 2 篇" in initial_summary
+    assert "## 完整论文目录" in initial_content
+
 
 def test_send_wxpusher_message() -> None:
     response = mock.Mock()
@@ -216,6 +227,36 @@ def test_notify_requires_both_secrets() -> None:
             assert "必须同时配置" in str(exc)
         else:
             raise AssertionError("只配置一个 WxPusher Secret 应当报错")
+
+
+def test_initial_notification_ignores_incremental_display_limit() -> None:
+    first = sample_paper()
+    second = sample_paper()
+    second["id"] = "2608.07016"
+    second["title"] = "Second paper"
+    config = {
+        "wechat_notification": {"provider": "wxpusher", "max_papers": 1}
+    }
+    with mock.patch.dict(
+        os.environ,
+        {
+            "WXPUSHER_APP_TOKEN": "AT_test-token",
+            "WXPUSHER_UIDS": "UID_first",
+        },
+        clear=True,
+    ), mock.patch("arxiv_daily.notifier.send_wxpusher_message") as send:
+        sent = notify_daily_update(
+            config,
+            {"IRSTD": [first, second]},
+            {},
+            run_date=date(2026, 9, 4),
+            initial_sync=True,
+        )
+
+    assert sent is True
+    assert "Demo Paper" in send.call_args.kwargs["content"]
+    assert "Second paper" in send.call_args.kwargs["content"]
+    assert "仅展示前" not in send.call_args.kwargs["content"]
 
 
 def test_lookup_and_verify_code_link() -> None:
@@ -434,6 +475,10 @@ def test_run_notifies_only_new_and_updated_papers() -> None:
                 }
             },
         )
+        save_data(
+            state_path,
+            {"wechat_notification": {"initialized": True}},
+        )
 
         updated = dict(old_version)
         updated["title"] = "New title"
@@ -468,6 +513,117 @@ def test_run_notifies_only_new_and_updated_papers() -> None:
         notified_updated = notify.call_args.args[2]["IRSTD"]
         assert [paper["id"] for paper in notified_new] == ["2608.07017"]
         assert [paper["id"] for paper in notified_updated] == ["2608.07016"]
+        assert notify.call_args.kwargs["initial_sync"] is False
+
+
+def test_first_run_notifies_with_full_catalog_then_skips_unchanged() -> None:
+    import daily_arxiv
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        data_path = os.path.join(tmp_dir, "data.json")
+        state_path = os.path.join(tmp_dir, "state.json")
+        first = sample_paper()
+        second = sample_paper()
+        second["id"] = "2608.07016"
+        second["title"] = "Second paper"
+        save_data(
+            data_path,
+            {"IRSTD": {str(first["id"]): first, str(second["id"]): second}},
+        )
+        config = {
+            "data_path": data_path,
+            "state_path": state_path,
+            "publish_readme": False,
+            "publish_gitpage": False,
+            "publish_wechat": False,
+            "enable_code_lookup": False,
+            "kv": {"IRSTD": "IRSTD"},
+            "domain_max_results": {"IRSTD": None},
+            "domain_start_dates": {"IRSTD": "2025-01-01"},
+            "domain_lookback_days": {"IRSTD": 3},
+        }
+        with mock.patch.object(
+            daily_arxiv,
+            "fetch_daily_papers",
+            return_value=[first, second],
+        ), mock.patch.object(
+            daily_arxiv,
+            "notify_daily_update",
+            return_value=True,
+        ) as notify:
+            daily_arxiv.run(
+                config,
+                notify_wechat=True,
+                today=date(2026, 9, 4),
+            )
+
+            full_catalog = notify.call_args.args[1]["IRSTD"]
+            assert [paper["id"] for paper in full_catalog] == [
+                "2608.07015",
+                "2608.07016",
+            ]
+            assert notify.call_args.kwargs["initial_sync"] is True
+            assert load_data(state_path)["wechat_notification"]["initialized"]
+
+            notify.reset_mock()
+            daily_arxiv.run(
+                config,
+                notify_wechat=True,
+                today=date(2026, 9, 5),
+            )
+            notify.assert_not_called()
+
+
+def test_full_refresh_notifies_after_code_backfill() -> None:
+    import daily_arxiv
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        data_path = os.path.join(tmp_dir, "data.json")
+        state_path = os.path.join(tmp_dir, "state.json")
+        paper = sample_paper()
+        save_data(data_path, {"IRSTD": {str(paper["id"]): paper}})
+        save_data(
+            state_path,
+            {"wechat_notification": {"initialized": True}},
+        )
+        config = {
+            "data_path": data_path,
+            "state_path": state_path,
+            "publish_readme": False,
+            "publish_gitpage": False,
+            "publish_wechat": False,
+            "enable_code_lookup": False,
+            "kv": {"IRSTD": "IRSTD"},
+            "domain_max_results": {"IRSTD": None},
+            "domain_start_dates": {"IRSTD": "2025-01-01"},
+            "domain_lookback_days": {"IRSTD": 3},
+        }
+
+        def add_code_link(data: dict[str, object]) -> tuple[dict[str, object], int]:
+            topics = data["IRSTD"]
+            assert isinstance(topics, dict)
+            topics["2608.07015"]["code"] = "https://github.com/foo/new-code"
+            return data, 1
+
+        with mock.patch.object(
+            daily_arxiv,
+            "fetch_daily_papers",
+            return_value=[paper],
+        ), mock.patch.object(
+            daily_arxiv,
+            "backfill_code_links",
+            side_effect=add_code_link,
+        ), mock.patch.object(daily_arxiv, "notify_daily_update") as notify:
+            daily_arxiv.run(
+                config,
+                full_refresh=True,
+                backfill_code=True,
+                notify_wechat=True,
+                today=date(2026, 9, 4),
+            )
+
+        notified_updated = notify.call_args.args[2]["IRSTD"]
+        assert notified_updated[0]["code"] == "https://github.com/foo/new-code"
 
 
 def test_date_is_available() -> None:
@@ -487,6 +643,7 @@ if __name__ == "__main__":
         test_wxpusher_business_failure,
         test_notify_without_secrets_skips_safely,
         test_notify_requires_both_secrets,
+        test_initial_notification_ignores_incremental_display_limit,
         test_lookup_and_verify_code_link,
         test_extract_code_link_from_arxiv_metadata,
         test_fetcher_reuses_cached_code_when_lookup_is_disabled,
@@ -494,6 +651,8 @@ if __name__ == "__main__":
         test_run_renders_all_enabled_outputs,
         test_incremental_and_full_refresh_windows,
         test_run_notifies_only_new_and_updated_papers,
+        test_first_run_notifies_with_full_catalog_then_skips_unchanged,
+        test_full_refresh_notifies_after_code_backfill,
         test_date_is_available,
     ]
     for test in tests:

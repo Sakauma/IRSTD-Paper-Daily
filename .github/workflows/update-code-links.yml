@@ -32,7 +32,9 @@ jobs:
       - name: Full refresh papers and code links
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python daily_arxiv.py --full-refresh --backfill_code
+          WXPUSHER_APP_TOKEN: ${{ secrets.WXPUSHER_APP_TOKEN }}
+          WXPUSHER_UIDS: ${{ secrets.WXPUSHER_UIDS }}
+        run: python daily_arxiv.py --full-refresh --backfill_code --notify-wechat
 
       - name: Commit generated files
         uses: stefanzweifel/git-auto-commit-action@v5

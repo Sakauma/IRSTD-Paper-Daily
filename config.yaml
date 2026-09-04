@@ -33,7 +33,6 @@ publish_wechat: true
 # WXPUSHER_APP_TOKEN、WXPUSHER_UIDS（多个 UID 用逗号分隔）。
 wechat_notification:
     provider: "wxpusher"
-    notify_on_empty: true
     max_papers: 20
 
 # 文件路径

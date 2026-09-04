@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from copy import deepcopy
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -101,25 +102,91 @@ def _known_paper_ids(data: Dict[str, Any]) -> set[str]:
     }
 
 
-def _classify_changes(
-    data: Dict[str, Any],
-    topic: str,
-    papers: list[Dict[str, Any]],
-) -> tuple[list[Dict[str, Any]], list[Dict[str, Any]]]:
-    """把本次结果分为新增论文和元数据发生变化的论文。"""
-    existing = data.get(topic, {})
-    if not isinstance(existing, dict):
-        existing = {}
+def _all_papers(data: Dict[str, Any]) -> Dict[str, Any]:
+    """按领域收集当前目录中的全部结构化论文。"""
+    return {
+        str(topic): [paper for paper in papers.values() if isinstance(paper, dict)]
+        for topic, papers in data.items()
+        if isinstance(papers, dict)
+    }
 
-    new_papers: list[Dict[str, Any]] = []
-    updated_papers: list[Dict[str, Any]] = []
-    for paper in papers:
-        paper_id = str(paper.get("id") or "")
-        if paper_id not in existing:
-            new_papers.append(paper)
-        elif existing[paper_id] != paper:
-            updated_papers.append(paper)
+
+def _classify_catalog_changes(
+    previous: Dict[str, Any],
+    current: Dict[str, Any],
+) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    """比较更新前后的完整目录，找出新增和字段发生变化的论文。"""
+    new_papers: Dict[str, Any] = {}
+    updated_papers: Dict[str, Any] = {}
+    for topic, papers in current.items():
+        if not isinstance(papers, dict):
+            continue
+        previous_papers = previous.get(topic, {})
+        if not isinstance(previous_papers, dict):
+            previous_papers = {}
+
+        topic_new = []
+        topic_updated = []
+        for paper_id, paper in papers.items():
+            if not isinstance(paper, dict):
+                continue
+            if paper_id not in previous_papers:
+                topic_new.append(paper)
+            elif previous_papers[paper_id] != paper:
+                topic_updated.append(paper)
+        new_papers[str(topic)] = topic_new
+        updated_papers[str(topic)] = topic_updated
     return new_papers, updated_papers
+
+
+def _change_count(groups: Dict[str, Any]) -> int:
+    return sum(len(papers) for papers in groups.values())
+
+
+def _notification_initialized(state: Dict[str, Any]) -> bool:
+    notification_state = state.get("wechat_notification", {})
+    return isinstance(notification_state, dict) and bool(
+        notification_state.get("initialized")
+    )
+
+
+def _notify_catalog_update(
+    config: Dict[str, Any],
+    state: Dict[str, Any],
+    previous_data: Dict[str, Any],
+    current_data: Dict[str, Any],
+    *,
+    run_date: date,
+) -> None:
+    """首次发送完整目录，之后只在目录实际变化时发送。"""
+    initial_sync = not _notification_initialized(state)
+    if initial_sync:
+        new_papers = _all_papers(current_data)
+        updated_papers: Dict[str, Any] = {}
+        if not _change_count(new_papers):
+            logger.info("论文目录为空，暂不初始化微信通知")
+            return
+    else:
+        new_papers, updated_papers = _classify_catalog_changes(
+            previous_data,
+            current_data,
+        )
+        if not (_change_count(new_papers) + _change_count(updated_papers)):
+            logger.info("论文目录没有变化，跳过微信通知")
+            return
+
+    sent = notify_daily_update(
+        config,
+        new_papers,
+        updated_papers,
+        run_date=run_date,
+        initial_sync=initial_sync,
+    )
+    if sent:
+        state["wechat_notification"] = {
+            "initialized": True,
+            "last_successful_notification": run_date.isoformat(),
+        }
 
 
 def _last_successful_dates(state: Dict[str, Any]) -> Dict[str, str]:
@@ -163,12 +230,14 @@ def run(
     config: Dict[str, Any],
     *,
     full_refresh: bool = False,
+    backfill_code: bool = False,
     notify_wechat: bool = False,
     today: Optional[date] = None,
 ) -> None:
     """读取缓存，执行增量或全量抓取，然后合并并渲染。"""
     run_date = today or date.today()
     data = load_data(config["data_path"])
+    previous_data = deepcopy(data)
     state_path = config.get("state_path", "./docs/irstd-paper-daily-state.json")
     state = load_data(state_path)
     successful_dates = _last_successful_dates(state)
@@ -177,8 +246,6 @@ def run(
     lookup_missing_code = bool(config.get("enable_code_lookup", True))
 
     new_papers_by_topic: Dict[str, Any] = {}
-    notification_new: Dict[str, Any] = {}
-    notification_updated: Dict[str, Any] = {}
     for topic, base_query in config["kv"].items():
         max_results = config["domain_max_results"].get(
             topic,
@@ -217,21 +284,22 @@ def run(
             lookup_missing_code=lookup_missing_code,
         )
         new_papers_by_topic[topic] = fetched_papers
-        new_items, updated_items = _classify_changes(data, topic, fetched_papers)
-        notification_new[topic] = new_items
-        notification_updated[topic] = updated_items
 
     for topic, papers in new_papers_by_topic.items():
         data = merge_papers(data, papers, topic)
+    if backfill_code:
+        data, updated = backfill_code_links(data)
+        logger.info("代码链接回填完成，共补齐 %d 篇", updated)
     save_data(config["data_path"], data)
     logger.info("数据已写入 %s", config["data_path"])
 
     _render_outputs(config, data)
     if notify_wechat:
-        notify_daily_update(
+        _notify_catalog_update(
             config,
-            notification_new,
-            notification_updated,
+            state,
+            previous_data,
+            data,
             run_date=run_date,
         )
     successful_dates.update(
@@ -243,12 +311,33 @@ def run(
     logger.info("全部任务完成")
 
 
-def run_backfill(config: Dict[str, Any]) -> None:
+def run_backfill(
+    config: Dict[str, Any],
+    *,
+    notify_wechat: bool = False,
+    today: Optional[date] = None,
+) -> None:
     """为历史论文补齐代码链接并重新生成所有开启的输出。"""
+    run_date = today or date.today()
     data = load_data(config["data_path"])
+    previous_data = deepcopy(data)
     data, updated = backfill_code_links(data)
     save_data(config["data_path"], data)
     _render_outputs(config, data)
+    if notify_wechat:
+        state_path = config.get(
+            "state_path",
+            "./docs/irstd-paper-daily-state.json",
+        )
+        state = load_data(state_path)
+        _notify_catalog_update(
+            config,
+            state,
+            previous_data,
+            data,
+            run_date=run_date,
+        )
+        save_data(state_path, state)
     logger.info("代码链接回填完成，共补齐 %d 篇", updated)
 
 
@@ -285,12 +374,11 @@ def main() -> None:
         run(
             config,
             full_refresh=True,
+            backfill_code=args.backfill_code,
             notify_wechat=args.notify_wechat,
         )
-        if args.backfill_code:
-            run_backfill(config)
     elif args.backfill_code:
-        run_backfill(config)
+        run_backfill(config, notify_wechat=args.notify_wechat)
     else:
         run(config, notify_wechat=args.notify_wechat)
 
