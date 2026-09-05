@@ -169,6 +169,11 @@ def render_markdown(
     lines.append("")
 
     if format == "readme":
+        lines.extend([
+            "本项目可开启微信和邮箱推送，"
+            "具体配置请参阅[使用说明](./docs/README.md#usage)。",
+            "",
+        ])
         lines.extend(_render_toc(data))
         lines.append("")
         lines.extend(
