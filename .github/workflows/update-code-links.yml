@@ -3,8 +3,13 @@ name: Full Refresh IRSTD Papers and Code Links
 on:
   workflow_dispatch:
   schedule:
-    # 每周一 UTC 08:00（北京时间 16:00）执行全量论文和代码链接刷新
-    - cron: "0 8 * * 1"
+    # 每周一 UTC 08:37 = 北京时间 16:37；实际触发可能延迟。
+    - cron: "37 8 * * 1"
+
+# 与每日工作流共用同一组，防止并发提交与重复读取通知状态。
+concurrency:
+  group: irstd-paper-daily-publish
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -20,6 +25,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # 等待并发锁后读取最新目录，避免使用触发时的旧提交。
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5

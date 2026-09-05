@@ -3,8 +3,13 @@ name: Update IRSTD Paper Daily
 on:
   workflow_dispatch:
   schedule:
-    # UTC 00:00 = 北京时间 08:00
-    - cron: "0 0 * * *"
+    # UTC 00:17 = 北京时间 08:17；避开整点，实际触发可能延迟。
+    - cron: "17 0 * * *"
+
+# 两个发布工作流必须使用相同的组，串行更新目录及通知状态。
+concurrency:
+  group: irstd-paper-daily-publish
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -20,6 +25,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # 等待并发锁后读取最新目录，避免使用触发时的旧提交。
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
