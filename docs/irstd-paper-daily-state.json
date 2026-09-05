@@ -1,10 +1,10 @@
 {
   "last_successful_update": {
-    "IRSTD": "2026-09-04"
+    "IRSTD": "2026-09-05"
   },
   "wechat_notification": {
     "initialized": true,
     "provider": "serverchan",
-    "last_successful_notification": "2026-09-04"
+    "last_successful_notification": "2026-09-05"
   }
 }
