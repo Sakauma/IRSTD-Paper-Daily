@@ -2,9 +2,6 @@ name: Update IRSTD Paper Daily
 
 on:
   workflow_dispatch:
-  schedule:
-    # UTC 00:17 = 北京时间 08:17；避开整点，实际触发可能延迟。
-    - cron: "17 0 * * *"
 
 # 两个发布工作流必须使用相同的组，串行更新目录及通知状态。
 concurrency:
