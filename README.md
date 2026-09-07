@@ -18,6 +18,7 @@
 |**2026-09-01**|**DGNet: Dual-knowledge Guided Network for Infrared Small Target Detection**|Chenglong Yu et.al.|[2609.00666](http://arxiv.org/abs/2609.00666)|[link](https://github.com/iLearn-Lab/MM26-DGNet)|
 |**2026-08-26**|**SPARK-SAM: Learning How to Prompt and Respond for Infrared Small Target Segmentation**|Aji Mao et.al.|[2608.20754](http://arxiv.org/abs/2608.20754)|[link](https://github.com/Sakauma/SPARK-SAM)|
 |**2026-08-21**|**RDANet: Relative Degradation Aware Network for Infrared Small Target Detection**|Rui Liu et.al.|[2608.20870](http://arxiv.org/abs/2608.20870)|[link](https://github.com/BIT-RuiLiu/RDANet)|
+|**2026-08-16**|**Degraded Infrared Small Object Detection via Degradation-Adapted Physics-Guided Restoration**|Xinkai Lu et.al.|[2608.09311](http://arxiv.org/abs/2608.09311)|null|
 |**2026-08-07**|**Understand Before Detect: Vision--Language Learning for Omni-Domain Infrared Small Target Detection**|Haoyang Yuan et.al.|[2608.07015](http://arxiv.org/abs/2608.07015)|null|
 |**2026-08-07**|**HyTBE: Hyperbolic Target-Background Expert Model for Cross-Domain Infrared Small Target Detection**|Aohua Li et.al.|[2608.05771](http://arxiv.org/abs/2608.05771)|[link](https://github.com/PepperCS/HyTBE)|
 |**2026-08-05**|**Beyond Motion Cues and Structural Sparsity: Revisiting Small Moving Target Detection**|Guoyi Zhang et.al.|[2509.07654](http://arxiv.org/abs/2509.07654)|null|
@@ -28,18 +29,22 @@
 |**2026-07-28**|**Effective Receptive Field Ordering Matters for Infrared Small Target Detection**|Guoyi Zhang et.al.|[2607.23994](http://arxiv.org/abs/2607.23994)|null|
 |**2026-07-27**|**LCMamNet: A Lightweight Cross-scale Mamba Network for Infrared Small Target Detection**|Yuhao Fan et.al.|[2607.24184](http://arxiv.org/abs/2607.24184)|[link](https://github.com/Haoyu096/LCMamNet)|
 |**2026-07-21**|**Gaze-DETR: Top-Down Guidance Through Priority Maps for Infrared Weak-Small UAV Detection with DETR**|Nian Liu et.al.|[2607.19040](http://arxiv.org/abs/2607.19040)|[link](https://github.com/nliu-25/Gaze-DETR-Top-Down-Guidance-Through-Priority-Maps-for-Infrared-Weak-Small-UAV-Detection-with-DETR)|
+|**2026-07-21**|**SkyEV: RGB-Event UAV detection and tracking dataset and baseline**|Jakub Mandula et.al.|[2607.18747](http://arxiv.org/abs/2607.18747)|[link](https://github.com/Anthony-ECPKN/SkyEvent)|
 |**2026-07-19**|**Noise-Robust Box-Supervised Infrared Small Target Detection via Physics-Inspired Soft Label Optimization**|Xizhe Zhang et.al.|[2607.17148](http://arxiv.org/abs/2607.17148)|null|
 |**2026-07-17**|**Beyond Unfolding: 60x Faster One-Stage Unmixing for Closely-Spaced Infrared Small Targets**|Ximeng Zhai et.al.|[2607.16007](http://arxiv.org/abs/2607.16007)|null|
+|**2026-07-14**|**On the Detectability of Volcanic Exo-Ios That May Fuel Auroras on Super-Jupiters**|Brooke Kotten et.al.|[2607.13030](http://arxiv.org/abs/2607.13030)|null|
 |**2026-07-02**|**Boosting Infrared Small Target Detection via Logit-Domain Contrast and Adaptive Shape Refinement**|Handong Zeng et.al.|[2607.01555](http://arxiv.org/abs/2607.01555)|null|
 |**2026-06-29**|**Dynamic High-frequency Convolution for Infrared Small Target Detection**|Ruojing Li et.al.|[2602.02969](http://arxiv.org/abs/2602.02969)|[link](https://github.com/TinaLRJ/DHiF)|
-|**2026-06-27**|**Denoising-Enhanced Coarse-to-Fine Infrared Small Target Detection with Attention Prior-Guided Knowledge Distillation**|Houzhang Fang et.al.|[2606.21956](http://arxiv.org/abs/2606.21956)|null|
+|**2026-06-27**|**Denoising-Enhanced Coarse-to-Fine Infrared Small Target Detection with Attention Prior-Guided Knowledge Distillation**|Houzhang Fang et.al.|[2606.21956](http://arxiv.org/abs/2606.21956)|[link](https://github.com/IVPLabs/ECFNet)|
 |**2026-06-26**|**Temporal-Emerged Prompting for Segment Anything in Multiframe Infrared Small Target Detection**|Yinghui Xing et.al.|[2606.27655](http://arxiv.org/abs/2606.27655)|null|
 |**2026-06-23**|**A Unified Analysis for Dynamic Programming Track-Before-Detect Algorithms: Error Convergence and Spatial Uncertainty**|Nicholas Bampton et.al.|[2512.11170](http://arxiv.org/abs/2512.11170)|null|
-|**2026-06-17**|**SCR-Guided Difficulty-Aware Optimization for Infrared Small Target Detection**|Yunus Sevim et.al.|[2606.18783](http://arxiv.org/abs/2606.18783)|null|
+|**2026-06-17**|**SCR-Guided Difficulty-Aware Optimization for Infrared Small Target Detection**|Yunus Sevim et.al.|[2606.18783](http://arxiv.org/abs/2606.18783)|[link](https://github.com/yall-in-one/Reemm)|
 |**2026-06-13**|**Decoupled Motion Representation Learning for Moving Infrared Small Target Detection**|Guoyi Zhang et.al.|[2606.15286](http://arxiv.org/abs/2606.15286)|null|
 |**2026-06-08**|**STGBD-Net: Spatio-temporal Gradient Basis Decomposition Network for Infrared Small Target Detection**|Chen Hu et.al.|[2512.03470](http://arxiv.org/abs/2512.03470)|[link](https://github.com/greekinRoma/IRSTD_HC_Platform)|
+|**2026-06-02**|**Edge-Aware and Content-Adaptive Infrared Gas Leak Detection for Industrial Safety Monitoring**|Dongsheng Li et.al.|[2512.23234](http://arxiv.org/abs/2512.23234)|null|
 |**2026-06-01**|**RPCASSM: Robust PCA State Space Model For Infrared Small Target Detection**|Pingping Liu et.al.|[2606.01689](http://arxiv.org/abs/2606.01689)|[link](https://github.com/PepperCS/RPCASSM)|
 |**2026-05-20**|**Diffuse to Detect: Bi-Level Sample Rebalancing with Pseudo-Label Diffusion for Point-Supervised Infrared Small-Target Detection**|Zhu Liu et.al.|[2605.20766](http://arxiv.org/abs/2605.20766)|[link](https://github.com/yuanhang-yao/diffuse-to-detect)|
+|**2026-05-20**|**LER-YOLO: Reliability-Aware Expert Routing for Misaligned RGB-Infrared UAV Detection**|Liming Hou et.al.|[2605.20667](http://arxiv.org/abs/2605.20667)|null|
 |**2026-05-18**|**HyperTea: A Hypergraph-based Temporal Enhancement and Alignment Network for Moving Infrared Small Target Detection**|Zhaoyuan Qi et.al.|[2508.10678](http://arxiv.org/abs/2508.10678)|[link](https://github.com/Lurenjia-LRJ/HyperTea)|
 |**2026-05-14**|**Learning with Semantic Priors: Stabilizing Point-Supervised Infrared Small Target Detection via Hierarchical Knowledge Distillation**|Yuanhang Yao et.al.|[2605.14346](http://arxiv.org/abs/2605.14346)|[link](https://github.com/yuanhang-yao/semantic-prior)|
 |**2026-05-08**|**LoHGNet: Infrared Small Target Detection through Lorentz Geometric Encoding with High-Order Relation Learning**|Qianwen Ma et.al.|[2605.07213](http://arxiv.org/abs/2605.07213)|null|
@@ -49,54 +54,69 @@
 |**2026-04-11**|**Revisiting the Scale Loss Function and Gaussian-Shape Convolution for Infrared Small Target Detection**|Hao Li et.al.|[2604.09991](http://arxiv.org/abs/2604.09991)|null|
 |**2026-04-07**|**FeedbackSTS-Det: Sparse Frames-Based Spatio-Temporal Semantic Feedback Network for Moving Infrared Small Target Detection**|Yian Huang et.al.|[2601.14690](http://arxiv.org/abs/2601.14690)|[link](https://github.com/IDIP-Lab/FeedbackSTS-Det)|
 |**2026-04-02**|**Rethinking Representations for Cross-Domain Infrared Small Target Detection: A Generalizable Perspective from the Frequency Domain**|Yimin Fu et.al.|[2604.01934](http://arxiv.org/abs/2604.01934)|[link](https://github.com/fuyimin96/S2CPNet)|
-|**2026-03-31**|**CCDNet: Learning to Detect Camouflage against Distractors in Infrared Small Target Detection**|Zikai Liao et.al.|[2603.29228](http://arxiv.org/abs/2603.29228)|null|
+|**2026-03-31**|**CCDNet: Learning to Detect Camouflage against Distractors in Infrared Small Target Detection**|Zikai Liao et.al.|[2603.29228](http://arxiv.org/abs/2603.29228)|[link](https://github.com/Shelly-H/S-cCDNet)|
 |**2026-03-27**|**Probing Deep into Temporal Profile Makes the Infrared Small Target Detector Much Better**|Ruojing Li et.al.|[2506.12766](http://arxiv.org/abs/2506.12766)|null|
 |**2026-03-26**|**FSGNet: A Frequency-Aware and Semantic Guidance Network for Infrared Small Target Detection**|Yingmei Zhang et.al.|[2603.25389](http://arxiv.org/abs/2603.25389)|[link](https://github.com/Wangtao-Bao/FSGNet)|
 |**2026-03-22**|**DSCSNet: A Dynamic Sparse Compression Sensing Network for Closely-Spaced Infrared Small Target Unmixing**|Zhiyang Tang et.al.|[2603.21192](http://arxiv.org/abs/2603.21192)|null|
 |**2026-03-17**|**Point-to-Mask: From Arbitrary Point Annotations to Mask-Level Infrared Small Target Detection**|Weihua Gao et.al.|[2603.16257](http://arxiv.org/abs/2603.16257)|[link](https://github.com/GaoScience/point-to-mask)|
+|**2026-03-06**|**Small Target Detection Based on Mask-Enhanced Attention Fusion of Visible and Infrared Remote Sensing Images**|Qianqian Zhang et.al.|[2603.06925](http://arxiv.org/abs/2603.06925)|null|
 |**2026-03-05**|**MI-DETR: A Strong Baseline for Moving Infrared Small Target Detection with Bio-Inspired Motion Integration**|Nian Liu et.al.|[2603.05071](http://arxiv.org/abs/2603.05071)|[link](https://github.com/nliu-25/MI-DETR)|
-|**2026-02-24**|**Seeing Through the Noise: Improving Infrared Small Target Detection and Segmentation from Noise Suppression Perspective**|Maoxun Yuan et.al.|[2508.06878](http://arxiv.org/abs/2508.06878)|null|
-|**2026-02-13**|**MDAFNet: Multiscale Differential Edge and Adaptive Frequency Guided Network for Infrared Small Target Detection**|Shuying Li et.al.|[2601.16434](http://arxiv.org/abs/2601.16434)|null|
-|**2026-02-02**|**SPIRIT: Adapting Vision Foundation Models for Unified Single- and Multi-Frame Infrared Small Target Detection**|Qian Xu et.al.|[2602.01843](http://arxiv.org/abs/2602.01843)|null|
+|**2026-02-24**|**Seeing Through the Noise: Improving Infrared Small Target Detection and Segmentation from Noise Suppression Perspective**|Maoxun Yuan et.al.|[2508.06878](http://arxiv.org/abs/2508.06878)|[link](https://github.com/mengduann/NS-FPN)|
+|**2026-02-13**|**MDAFNet: Multiscale Differential Edge and Adaptive Frequency Guided Network for Infrared Small Target Detection**|Shuying Li et.al.|[2601.16434](http://arxiv.org/abs/2601.16434)|[link](https://github.com/ML202010/MDAFNet)|
+|**2026-02-02**|**SPIRIT: Adapting Vision Foundation Models for Unified Single- and Multi-Frame Infrared Small Target Detection**|Qian Xu et.al.|[2602.01843](http://arxiv.org/abs/2602.01843)|[link](https://github.com/silexlabs/Silex)|
 |**2026-02-01**|**Weakly-supervised Contrastive Learning with Quantity Prompts for Moving Infrared Small Target Detection**|Weiwei Duan et.al.|[2507.02454](http://arxiv.org/abs/2507.02454)|null|
 |**2026-01-23**|**DCCS-Det: Directional Context and Cross-Scale-Aware Detector for Infrared Small Target**|Shuying Li et.al.|[2601.16428](http://arxiv.org/abs/2601.16428)|null|
 |**2026-01-09**|**TAPM-Net: Trajectory-Aware Perturbation Modeling for Infrared Small Target Detection**|Hongyang Xie et.al.|[2601.05446](http://arxiv.org/abs/2601.05446)|null|
-|**2025-12-28**|**It's Not the Target, It's the Background: Rethinking Infrared Small Target Detection via Deep Patch-Free Low-Rank Representations**|Guoyi Zhang et.al.|[2506.10425](http://arxiv.org/abs/2506.10425)|null|
+|**2026-01-05**|**DGE-YOLO: Dual-Branch Gathering and Attention for Accurate UAV Object Detection**|Kunwei Lv et.al.|[2506.23252](http://arxiv.org/abs/2506.23252)|null|
+|**2025-12-28**|**It's Not the Target, It's the Background: Rethinking Infrared Small Target Detection via Deep Patch-Free Low-Rank Representations**|Guoyi Zhang et.al.|[2506.10425](http://arxiv.org/abs/2506.10425)|[link](https://github.com/HaLongbao/LRRNet)|
+|**2025-12-27**|**Scalpel-SAM: A Semi-Supervised Paradigm for Adapting SAM to Infrared Small Object Detection**|Zihan Liu et.al.|[2512.22483](http://arxiv.org/abs/2512.22483)|null|
 |**2025-12-10**|**Gradient-Guided Learning Network for Infrared Small Target Detection**|Jinmiao Zhao et.al.|[2512.09497](http://arxiv.org/abs/2512.09497)|[link](https://github.com/YuChuang1205/MSDA-Net)|
 |**2025-12-10**|**DISTA-Net: Dynamic Closely-Spaced Infrared Small Target Unmixing**|Shengdong Han et.al.|[2505.19148](http://arxiv.org/abs/2505.19148)|[link](https://github.com/GrokCV/GrokCSO)|
 |**2025-12-05**|**Rethinking Infrared Small Target Detection: A Foundation-Driven Efficient Paradigm**|Chuang Yu et.al.|[2512.05511](http://arxiv.org/abs/2512.05511)|[link](https://github.com/YuChuang1205/FDEP-Framework)|
+|**2025-12-04**|**DuGI-MAE: Improving Infrared Mask Autoencoders via Dual-Domain Guidance**|Yinghui Xing et.al.|[2512.04511](http://arxiv.org/abs/2512.04511)|[link](https://github.com/Xtingsu/DuGI-MAE)|
 |**2025-12-03**|**A BTR-Based Approach for Detection of Infrared Small Targets**|Ke-Xin Li et.al.|[2512.03752](http://arxiv.org/abs/2512.03752)|null|
 |**2025-11-25**|**IrisNet: Infrared Image Status Awareness Meta Decoder for Infrared Small Targets Detection**|Xuelin Qian et.al.|[2511.20319](http://arxiv.org/abs/2511.20319)|null|
 |**2025-11-24**|**Dual-Granularity Semantic Prompting for Language Guidance Infrared Small Target Detection**|Zixuan Wang et.al.|[2511.19306](http://arxiv.org/abs/2511.19306)|null|
-|**2025-11-16**|**Spatio-Temporal Context Learning with Temporal Difference Convolution for Moving Infrared Small Target Detection**|Houzhang Fang et.al.|[2511.09352](http://arxiv.org/abs/2511.09352)|null|
-|**2025-10-30**|**RRCANet: Recurrent Reusable-Convolution Attention Network for Infrared Small Target Detection**|Yongxian Liu et.al.|[2506.02393](http://arxiv.org/abs/2506.02393)|null|
+|**2025-11-24**|**MambaRefine-YOLO: A Dual-Modality Small Object Detector for UAV Imagery**|Shuyu Cao et.al.|[2511.19134](http://arxiv.org/abs/2511.19134)|null|
+|**2025-11-16**|**Spatio-Temporal Context Learning with Temporal Difference Convolution for Moving Infrared Small Target Detection**|Houzhang Fang et.al.|[2511.09352](http://arxiv.org/abs/2511.09352)|[link](https://github.com/IVPLabs/TDCNet)|
+|**2025-11-03**|**Contrast-Guided Cross-Modal Distillation for Thermal Object Detection**|SiWoo Kim et.al.|[2511.01435](http://arxiv.org/abs/2511.01435)|null|
+|**2025-10-30**|**RRCANet: Recurrent Reusable-Convolution Attention Network for Infrared Small Target Detection**|Yongxian Liu et.al.|[2506.02393](http://arxiv.org/abs/2506.02393)|[link](https://github.com/yongxianLiu/RRCANet-for-IRSTD)|
 |**2025-10-14**|**Ivan-ISTD: Rethinking Cross-domain Heteroscedastic Noise Perturbations in Infrared Small Target Detection**|Yuehui Li et.al.|[2510.12241](http://arxiv.org/abs/2510.12241)|[link](https://github.com/nanjin1/Ivan-ISTD)|
 |**2025-10-13**|**LSP-ST: Ladder Shape-Biased Side-Tuning for Robust Infrared Small Target Detection**|Guoyi Zhang et.al.|[2504.14481](http://arxiv.org/abs/2504.14481)|null|
+|**2025-10-12**|**Motion-Enhanced Nonlocal Similarity Implicit Neural Representation for Infrared Dim and Small Target Detection**|Pei Liu et.al.|[2504.15665](http://arxiv.org/abs/2504.15665)|null|
 |**2025-10-07**|**AuxDet: Auxiliary Metadata Matters for Omni-Domain Infrared Small Target Detection**|Yangting Shi et.al.|[2505.15184](http://arxiv.org/abs/2505.15184)|[link](https://github.com/GrokCV/AuxDet)|
 |**2025-10-06**|**Anomaly-Aware YOLO: A Frugal yet Robust Approach to Infrared Small Target Detection**|Alina Ciocarlan et.al.|[2510.04741](http://arxiv.org/abs/2510.04741)|null|
-|**2025-09-26**|**TY-RIST: Tactical YOLO Tricks for Real-time Infrared Small Target Detection**|Abdulkarim Atrash et.al.|[2509.22909](http://arxiv.org/abs/2509.22909)|null|
-|**2025-09-25**|**DENet: Dual-Path Edge Network with Global-Local Attention for Infrared Small Target Detection**|Jiayi Zuo et.al.|[2509.20701](http://arxiv.org/abs/2509.20701)|null|
+|**2025-09-26**|**TY-RIST: Tactical YOLO Tricks for Real-time Infrared Small Target Detection**|Abdulkarim Atrash et.al.|[2509.22909](http://arxiv.org/abs/2509.22909)|[link](https://github.com/moured/TY-RIST)|
+|**2025-09-25**|**DENet: Dual-Path Edge Network with Global-Local Attention for Infrared Small Target Detection**|Jiayi Zuo et.al.|[2509.20701](http://arxiv.org/abs/2509.20701)|[link](https://github.com/lachlants/denet)|
 |**2025-09-23**|**Rethinking Evaluation of Infrared Small Target Detection**|Youwei Pang et.al.|[2509.16888](http://arxiv.org/abs/2509.16888)|[link](https://github.com/lartpang/PyIRSTDMetrics)|
 |**2025-09-10**|**Lightweight Deep Unfolding Networks with Enhanced Robustness for Infrared Small Target Detection**|Jingjing Liu et.al.|[2509.08205](http://arxiv.org/abs/2509.08205)|[link](https://github.com/xianchaoxiu/L-RPCANet)|
-|**2025-08-21**|**Bidirectional Temporal Information Propagation for Moving Infrared Small Target Detection**|Dengyan Luo et.al.|[2508.15415](http://arxiv.org/abs/2508.15415)|null|
-|**2025-08-04**|**10K is Enough: An Ultra-Lightweight Binarized Network for Infrared Small-Target Detection**|Biqiao Xin et.al.|[2503.02662](http://arxiv.org/abs/2503.02662)|null|
-|**2025-08-02**|**SWAN: Synergistic Wavelet-Attention Network for Infrared Small Target Detection**|Yuxin Jing et.al.|[2508.01322](http://arxiv.org/abs/2508.01322)|null|
+|**2025-08-21**|**Bidirectional Temporal Information Propagation for Moving Infrared Small Target Detection**|Dengyan Luo et.al.|[2508.15415](http://arxiv.org/abs/2508.15415)|[link](https://github.com/xiaomingxige/BIRD)|
+|**2025-08-04**|**10K is Enough: An Ultra-Lightweight Binarized Network for Infrared Small-Target Detection**|Biqiao Xin et.al.|[2503.02662](http://arxiv.org/abs/2503.02662)|[link](https://github.com/joeyxin-del/BiisNet)|
+|**2025-08-02**|**SWAN: Synergistic Wavelet-Attention Network for Infrared Small Target Detection**|Yuxin Jing et.al.|[2508.01322](http://arxiv.org/abs/2508.01322)|[link](https://github.com/SwanHubX/SwanLab)|
 |**2025-08-02**|**Make Both Ends Meet: A Synergistic Optimization Infrared Small Target Detection with Streamlined Computational Overhead**|Yuxin Jing et.al.|[2504.21581](http://arxiv.org/abs/2504.21581)|null|
 |**2025-07-24**|**Exploiting Gaussian Agnostic Representation Learning with Diffusion Priors for Enhanced Infrared Small Target Detection**|Junyao Li et.al.|[2507.18260](http://arxiv.org/abs/2507.18260)|null|
 |**2025-07-17**|**Leveraging Language Prior for Infrared Small Target Detection**|Pranav Singh et.al.|[2507.13113](http://arxiv.org/abs/2507.13113)|null|
 |**2025-07-13**|**SeqCSIST: Sequential Closely-Spaced Infrared Small Target Unmixing**|Ximeng Zhai et.al.|[2507.09556](http://arxiv.org/abs/2507.09556)|[link](https://github.com/GrokCV/SeqCSIST)|
 |**2025-07-13**|**DRPCA-Net: Make Robust PCA Great Again for Infrared Small Target Detection**|Zihao Xiong et.al.|[2507.09541](http://arxiv.org/abs/2507.09541)|[link](https://github.com/GrokCV/DRPCA-Net)|
 |**2025-07-13**|**Selective Variable Convolution Meets Dynamic Content-Guided Attention for Infrared Small Target Detection**|Yirui Chen et.al.|[2504.21612](http://arxiv.org/abs/2504.21612)|null|
-|**2025-06-20**|**MSCA-Net:Multi-Scale Context Aggregation Network for Infrared Small Target Detection**|Xiaojin Lu et.al.|[2503.17193](http://arxiv.org/abs/2503.17193)|null|
+|**2025-07-01**|**UAVD-Mamba: Deformable Token Fusion Vision Mamba for Multimodal UAV Detection**|Wei Li et.al.|[2507.00849](http://arxiv.org/abs/2507.00849)|[link](https://github.com/GreatPlum-hnu/UAVD-Mamba)|
+|**2025-06-20**|**MSCA-Net:Multi-Scale Context Aggregation Network for Infrared Small Target Detection**|Xiaojin Lu et.al.|[2503.17193](http://arxiv.org/abs/2503.17193)|[link](https://github.com/YonghengSun1997/MSCA-Net)|
 |**2025-06-06**|**SDS-Net: Shallow-Deep Synergism-detection Network for infrared small target detection**|Taoran Yue et.al.|[2506.06042](http://arxiv.org/abs/2506.06042)|[link](https://github.com/PhysiLearn/SDS-Net)|
 |**2025-06-02**|**Target Driven Adaptive Loss For Infrared Small Target Detection**|Yuho Shoji et.al.|[2506.01349](http://arxiv.org/abs/2506.01349)|null|
 |**2025-05-29**|**SAMamba: Adaptive State Space Modeling with Hierarchical Vision for Infrared Small Target Detection**|Wenhao Xu et.al.|[2505.23214](http://arxiv.org/abs/2505.23214)|[link](https://github.com/zhengshuchen/SAMamba)|
+|**2025-05-23**|**Selective Structured State Space for Multispectral-fused Small Target Detection**|Qianqian Zhang et.al.|[2505.14043](http://arxiv.org/abs/2505.14043)|null|
 |**2025-05-23**|**ARFC-WAHNet: Adaptive Receptive Field Convolution and Wavelet-Attentive Hierarchical Network for Infrared Small Target Detection**|Xingye Cui et.al.|[2505.10595](http://arxiv.org/abs/2505.10595)|[link](https://github.com/Leaf2001/ARFC-WAHNet)|
 |**2025-05-15**|**CSPENet: Contour-Aware and Saliency Priors Embedding Network for Infrared Small Target Detection**|Jiakun Deng et.al.|[2505.09943](http://arxiv.org/abs/2505.09943)|[link](https://github.com/IDIP2025/CSPENet)|
+|**2025-05-08**|**A Simple Detector with Frame Dynamics is a Strong Tracker**|Chenxu Peng et.al.|[2505.04917](http://arxiv.org/abs/2505.04917)|[link](https://github.com/facias914/A-Simple-Detector-is-a-Strong-Tracker)|
 |**2025-04-23**|**Rethinking Generalizable Infrared Small Target Detection: A Real-scene Benchmark and Cross-view Representation Learning**|Yahao Lu et.al.|[2504.16487](http://arxiv.org/abs/2504.16487)|[link](https://github.com/luy0222/RealScene-ISTD)|
 |**2025-04-19**|**ISTD-YOLO: A Multi-Scale Lightweight High-Performance Infrared Small Target Detection Algorithm**|Shang Zhang et.al.|[2504.14289](http://arxiv.org/abs/2504.14289)|null|
-|**2025-03-10**|**Text-IRSTD: Leveraging Semantic Text to Promote Infrared Small Target Detection in Complex Scenes**|Feng Huang et.al.|[2503.07249](http://arxiv.org/abs/2503.07249)|null|
+|**2025-04-18**|**FocusTrack: A Self-Adaptive Local Sampling Algorithm for Efficient Anti-UAV Tracking**|Ying Wang et.al.|[2504.13604](http://arxiv.org/abs/2504.13604)|[link](https://github.com/vero1925/FocusTrack)|
+|**2025-04-15**|**Enhanced Small Target Detection via Multi-Modal Fusion and Attention Mechanisms: A YOLOv5 Approach**|Xiaoxiao Ma et.al.|[2504.11262](http://arxiv.org/abs/2504.11262)|null|
+|**2025-04-07**|**Strong Baseline: Multi-UAV Tracking via YOLOv12 with BoT-SORT-ReID**|Yu-Hsi Chen et.al.|[2503.17237](http://arxiv.org/abs/2503.17237)|[link](https://github.com/wish44165/YOLOv12-BoT-SORT-ReID)|
+|**2025-03-10**|**Text-IRSTD: Leveraging Semantic Text to Promote Infrared Small Target Detection in Complex Scenes**|Feng Huang et.al.|[2503.07249](http://arxiv.org/abs/2503.07249)|[link](https://github.com/ActCVLab/Text-IRSTD)|
 |**2025-03-04**|**Low-Level Matters: An Efficient Hybrid Architecture for Robust Multi-frame Infrared Small Target Detection**|Zhihua Shen et.al.|[2503.02220](http://arxiv.org/abs/2503.02220)|[link](https://github.com/ZhihuaShen/LVNet)|
+|**2025-02-20**|**Deep learning based infrared small object segmentation: Challenges and future directions**|Zhengeng Yang et.al.|[2502.14168](http://arxiv.org/abs/2502.14168)|null|
+|**2025-02-02**|**Spatio-Temporal Progressive Attention Model for EEG Classification in Rapid Serial Visual Presentation Task**|Yang Li et.al.|[2502.00730](http://arxiv.org/abs/2502.00730)|null|
 
 <p align=right>(<a href=#updated-on-20260907>back to top</a>)</p>
 

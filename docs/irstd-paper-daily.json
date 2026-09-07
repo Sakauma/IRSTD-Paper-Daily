@@ -133,7 +133,7 @@
       "first_author": "Houzhang Fang",
       "authors": "Houzhang Fang, Ruixuan Huang, Qiuhuan Chen, Xiaolin Wang, Yi Chang, Luxin Yan",
       "url": "http://arxiv.org/abs/2606.21956",
-      "code": null
+      "code": "https://github.com/IVPLabs/ECFNet"
     },
     "2606.18783": {
       "id": "2606.18783",
@@ -142,7 +142,7 @@
       "first_author": "Yunus Sevim",
       "authors": "Yunus Sevim, Behçet Uğur Töreyin",
       "url": "http://arxiv.org/abs/2606.18783",
-      "code": null
+      "code": "https://github.com/yall-in-one/Reemm"
     },
     "2606.15286": {
       "id": "2606.15286",
@@ -250,7 +250,7 @@
       "first_author": "Zikai Liao",
       "authors": "Zikai Liao, Zhaozheng Yin",
       "url": "http://arxiv.org/abs/2603.29228",
-      "code": null
+      "code": "https://github.com/Shelly-H/S-cCDNet"
     },
     "2603.25389": {
       "id": "2603.25389",
@@ -304,7 +304,7 @@
       "first_author": "Qian Xu",
       "authors": "Qian Xu, Xi Li, Fei Gao, Jie Guo, Haojuan Yuan, Shuaipeng Fan, Mingjin Zhang",
       "url": "http://arxiv.org/abs/2602.01843",
-      "code": null
+      "code": "https://github.com/silexlabs/Silex"
     },
     "2601.16434": {
       "id": "2601.16434",
@@ -313,7 +313,7 @@
       "first_author": "Shuying Li",
       "authors": "Shuying Li, Qiang Ma, San Zhang, Wuwei Wang, Chuang Yang",
       "url": "http://arxiv.org/abs/2601.16434",
-      "code": null
+      "code": "https://github.com/ML202010/MDAFNet"
     },
     "2601.16428": {
       "id": "2601.16428",
@@ -430,7 +430,7 @@
       "first_author": "Houzhang Fang",
       "authors": "Houzhang Fang, Shukai Guo, Qiuhuan Chen, Yi Chang, Luxin Yan",
       "url": "http://arxiv.org/abs/2511.09352",
-      "code": null
+      "code": "https://github.com/IVPLabs/TDCNet"
     },
     "2510.12241": {
       "id": "2510.12241",
@@ -457,7 +457,7 @@
       "first_author": "Abdulkarim Atrash",
       "authors": "Abdulkarim Atrash, Omar Moured, Yufan Chen, Jiaming Zhang, Seyda Ertekin, Omur Ugur",
       "url": "http://arxiv.org/abs/2509.22909",
-      "code": null
+      "code": "https://github.com/moured/TY-RIST"
     },
     "2509.20701": {
       "id": "2509.20701",
@@ -466,7 +466,7 @@
       "first_author": "Jiayi Zuo",
       "authors": "Jiayi Zuo, Songwei Pei, Qian Li",
       "url": "http://arxiv.org/abs/2509.20701",
-      "code": null
+      "code": "https://github.com/lachlants/denet"
     },
     "2509.16888": {
       "id": "2509.16888",
@@ -502,7 +502,7 @@
       "first_author": "Dengyan Luo",
       "authors": "Dengyan Luo, Yanping Xiang, Hu Wang, Luping Ji. Shuai Li, Mao Ye",
       "url": "http://arxiv.org/abs/2508.15415",
-      "code": null
+      "code": "https://github.com/xiaomingxige/BIRD"
     },
     "2508.10678": {
       "id": "2508.10678",
@@ -520,7 +520,7 @@
       "first_author": "Maoxun Yuan",
       "authors": "Maoxun Yuan, Duanni Meng, Ziteng Xi, Tianyi Zhao, Shiji Zhao, Yimian Dai, Xingxing Wei",
       "url": "http://arxiv.org/abs/2508.06878",
-      "code": null
+      "code": "https://github.com/mengduann/NS-FPN"
     },
     "2508.01322": {
       "id": "2508.01322",
@@ -529,7 +529,7 @@
       "first_author": "Yuxin Jing",
       "authors": "Yuxin Jing, Jufeng Zhao, Tianpei Zhang, Yiming Zhu",
       "url": "http://arxiv.org/abs/2508.01322",
-      "code": null
+      "code": "https://github.com/SwanHubX/SwanLab"
     },
     "2507.18260": {
       "id": "2507.18260",
@@ -592,7 +592,7 @@
       "first_author": "Guoyi Zhang",
       "authors": "Guoyi Zhang, Guangsheng Xu, Siyang Chen, Han Wang, Xiaohu Zhang",
       "url": "http://arxiv.org/abs/2506.10425",
-      "code": null
+      "code": "https://github.com/HaLongbao/LRRNet"
     },
     "2506.06042": {
       "id": "2506.06042",
@@ -610,7 +610,7 @@
       "first_author": "Yongxian Liu",
       "authors": "Yongxian Liu, Boyang Li, Ting Liu, Zaiping Lin, Wei An",
       "url": "http://arxiv.org/abs/2506.02393",
-      "code": null
+      "code": "https://github.com/yongxianLiu/RRCANet-for-IRSTD"
     },
     "2506.01349": {
       "id": "2506.01349",
@@ -718,7 +718,7 @@
       "first_author": "Xiaojin Lu",
       "authors": "Xiaojin Lu, Taoran yue, Jiaxi cai, Yuanping Chen, Cuihong Lv, Shibing Chu",
       "url": "http://arxiv.org/abs/2503.17193",
-      "code": null
+      "code": "https://github.com/YonghengSun1997/MSCA-Net"
     },
     "2503.07249": {
       "id": "2503.07249",
@@ -727,7 +727,7 @@
       "first_author": "Feng Huang",
       "authors": "Feng Huang, Shuyuan Zheng, Zhaobing Qiu, Huanxian Liu, Huanxin Bai, Liqiong Chen",
       "url": "http://arxiv.org/abs/2503.07249",
-      "code": null
+      "code": "https://github.com/ActCVLab/Text-IRSTD"
     },
     "2503.02662": {
       "id": "2503.02662",
@@ -736,7 +736,7 @@
       "first_author": "Biqiao Xin",
       "authors": "Biqiao Xin, Qianchen Mao, Bingshu Wang, Jiangbin Zheng, Yong Zhao, C. L. Philip Chen",
       "url": "http://arxiv.org/abs/2503.02662",
-      "code": null
+      "code": "https://github.com/joeyxin-del/BiisNet"
     },
     "2503.02220": {
       "id": "2503.02220",
@@ -746,6 +746,186 @@
       "authors": "Zhihua Shen, Siyang Chen, Han Wang, Tongsu Zhang, Xiaohu Zhang, Xiangpeng Xu, Xia Yang",
       "url": "http://arxiv.org/abs/2503.02220",
       "code": "https://github.com/ZhihuaShen/LVNet"
+    },
+    "2608.09311": {
+      "id": "2608.09311",
+      "publish_date": "2026-08-16",
+      "title": "Degraded Infrared Small Object Detection via Degradation-Adapted Physics-Guided Restoration",
+      "first_author": "Xinkai Lu",
+      "authors": "Xinkai Lu, Wenjun Chen, Yi Li, Yi Chang, Luxin Yan",
+      "url": "http://arxiv.org/abs/2608.09311",
+      "code": null
+    },
+    "2607.18747": {
+      "id": "2607.18747",
+      "publish_date": "2026-07-21",
+      "title": "SkyEV: RGB-Event UAV detection and tracking dataset and baseline",
+      "first_author": "Jakub Mandula",
+      "authors": "Jakub Mandula, Sebastian Heusinger, Julian Moosmann, Christian Vogt, Michele Magno",
+      "url": "http://arxiv.org/abs/2607.18747",
+      "code": "https://github.com/Anthony-ECPKN/SkyEvent"
+    },
+    "2607.13030": {
+      "id": "2607.13030",
+      "publish_date": "2026-07-14",
+      "title": "On the Detectability of Volcanic Exo-Ios That May Fuel Auroras on Super-Jupiters",
+      "first_author": "Brooke Kotten",
+      "authors": "Brooke Kotten, Mary Anne Limbach, Johanna M. Vos, Merle Schrader, Allison McCarthy, Melodie M. Kao, Mikayla J. Wilson, Andrew Householder, Andrew Skemer, Kevin B. Stevenson, Genaro Suarez, Beth Biller, Jacqueline Faherty, Eileen C. Gonzales, Philip Muirhead",
+      "url": "http://arxiv.org/abs/2607.13030",
+      "code": null
+    },
+    "2605.20667": {
+      "id": "2605.20667",
+      "publish_date": "2026-05-20",
+      "title": "LER-YOLO: Reliability-Aware Expert Routing for Misaligned RGB-Infrared UAV Detection",
+      "first_author": "Liming Hou",
+      "authors": "Liming Hou, Yueping Peng, Hexiang Hao, Ji Wang, Xuekai Zhang, Wei Tang, Zecong Ye, Xin Ying, Yubo He",
+      "url": "http://arxiv.org/abs/2605.20667",
+      "code": null
+    },
+    "2603.06925": {
+      "id": "2603.06925",
+      "publish_date": "2026-03-06",
+      "title": "Small Target Detection Based on Mask-Enhanced Attention Fusion of Visible and Infrared Remote Sensing Images",
+      "first_author": "Qianqian Zhang",
+      "authors": "Qianqian Zhang, Xiaolong Jia, Ahmed M. Abdelmoniem, Li Zhou, Junshe An",
+      "url": "http://arxiv.org/abs/2603.06925",
+      "code": null
+    },
+    "2512.23234": {
+      "id": "2512.23234",
+      "publish_date": "2026-06-02",
+      "title": "Edge-Aware and Content-Adaptive Infrared Gas Leak Detection for Industrial Safety Monitoring",
+      "first_author": "Dongsheng Li",
+      "authors": "Dongsheng Li, Tianli Ma, Siling Wang, Beibei Duan, Song Gao",
+      "url": "http://arxiv.org/abs/2512.23234",
+      "code": null
+    },
+    "2512.22483": {
+      "id": "2512.22483",
+      "publish_date": "2025-12-27",
+      "title": "Scalpel-SAM: A Semi-Supervised Paradigm for Adapting SAM to Infrared Small Object Detection",
+      "first_author": "Zihan Liu",
+      "authors": "Zihan Liu, Xiangning Ren, Dezhang Kong, Yipeng Zhang, Meng Han",
+      "url": "http://arxiv.org/abs/2512.22483",
+      "code": null
+    },
+    "2512.04511": {
+      "id": "2512.04511",
+      "publish_date": "2025-12-04",
+      "title": "DuGI-MAE: Improving Infrared Mask Autoencoders via Dual-Domain Guidance",
+      "first_author": "Yinghui Xing",
+      "authors": "Yinghui Xing, Xiaoting Su, Shizhou Zhang, Donghao Chu, Di Xu",
+      "url": "http://arxiv.org/abs/2512.04511",
+      "code": "https://github.com/Xtingsu/DuGI-MAE"
+    },
+    "2511.19134": {
+      "id": "2511.19134",
+      "publish_date": "2025-11-24",
+      "title": "MambaRefine-YOLO: A Dual-Modality Small Object Detector for UAV Imagery",
+      "first_author": "Shuyu Cao",
+      "authors": "Shuyu Cao, Minxin Chen, Yucheng Song, Zhaozhong Chen, Xinyou Zhang",
+      "url": "http://arxiv.org/abs/2511.19134",
+      "code": null
+    },
+    "2511.01435": {
+      "id": "2511.01435",
+      "publish_date": "2025-11-03",
+      "title": "Contrast-Guided Cross-Modal Distillation for Thermal Object Detection",
+      "first_author": "SiWoo Kim",
+      "authors": "SiWoo Kim, JhongHyun An",
+      "url": "http://arxiv.org/abs/2511.01435",
+      "code": null
+    },
+    "2507.00849": {
+      "id": "2507.00849",
+      "publish_date": "2025-07-01",
+      "title": "UAVD-Mamba: Deformable Token Fusion Vision Mamba for Multimodal UAV Detection",
+      "first_author": "Wei Li",
+      "authors": "Wei Li, Jiaman Tang, Yang Li, Beihao Xia, Ligang Tan, Hongmao Qin",
+      "url": "http://arxiv.org/abs/2507.00849",
+      "code": "https://github.com/GreatPlum-hnu/UAVD-Mamba"
+    },
+    "2506.23252": {
+      "id": "2506.23252",
+      "publish_date": "2026-01-05",
+      "title": "DGE-YOLO: Dual-Branch Gathering and Attention for Accurate UAV Object Detection",
+      "first_author": "Kunwei Lv",
+      "authors": "Kunwei Lv, Zhiren Xiao, Hang Ren, Ping Lan",
+      "url": "http://arxiv.org/abs/2506.23252",
+      "code": null
+    },
+    "2505.14043": {
+      "id": "2505.14043",
+      "publish_date": "2025-05-23",
+      "title": "Selective Structured State Space for Multispectral-fused Small Target Detection",
+      "first_author": "Qianqian Zhang",
+      "authors": "Qianqian Zhang, WeiJun Wang, Yunxing Liu, Li Zhou, Hao Zhao, Junshe An, Zihan Wang",
+      "url": "http://arxiv.org/abs/2505.14043",
+      "code": null
+    },
+    "2505.04917": {
+      "id": "2505.04917",
+      "publish_date": "2025-05-08",
+      "title": "A Simple Detector with Frame Dynamics is a Strong Tracker",
+      "first_author": "Chenxu Peng",
+      "authors": "Chenxu Peng, Chenxu Wang, Minrui Zou, Danyang Li, Zhengpeng Yang, Yimian Dai, Ming-Ming Cheng, Xiang Li",
+      "url": "http://arxiv.org/abs/2505.04917",
+      "code": "https://github.com/facias914/A-Simple-Detector-is-a-Strong-Tracker"
+    },
+    "2504.15665": {
+      "id": "2504.15665",
+      "publish_date": "2025-10-12",
+      "title": "Motion-Enhanced Nonlocal Similarity Implicit Neural Representation for Infrared Dim and Small Target Detection",
+      "first_author": "Pei Liu",
+      "authors": "Pei Liu, Yisi Luo, Wenzhen Wang, Xiangyong Cao",
+      "url": "http://arxiv.org/abs/2504.15665",
+      "code": null
+    },
+    "2504.13604": {
+      "id": "2504.13604",
+      "publish_date": "2025-04-18",
+      "title": "FocusTrack: A Self-Adaptive Local Sampling Algorithm for Efficient Anti-UAV Tracking",
+      "first_author": "Ying Wang",
+      "authors": "Ying Wang, Tingfa Xu, Jianan Li",
+      "url": "http://arxiv.org/abs/2504.13604",
+      "code": "https://github.com/vero1925/FocusTrack"
+    },
+    "2504.11262": {
+      "id": "2504.11262",
+      "publish_date": "2025-04-15",
+      "title": "Enhanced Small Target Detection via Multi-Modal Fusion and Attention Mechanisms: A YOLOv5 Approach",
+      "first_author": "Xiaoxiao Ma",
+      "authors": "Xiaoxiao Ma, Junxiong Tong",
+      "url": "http://arxiv.org/abs/2504.11262",
+      "code": null
+    },
+    "2503.17237": {
+      "id": "2503.17237",
+      "publish_date": "2025-04-07",
+      "title": "Strong Baseline: Multi-UAV Tracking via YOLOv12 with BoT-SORT-ReID",
+      "first_author": "Yu-Hsi Chen",
+      "authors": "Yu-Hsi Chen",
+      "url": "http://arxiv.org/abs/2503.17237",
+      "code": "https://github.com/wish44165/YOLOv12-BoT-SORT-ReID"
+    },
+    "2502.14168": {
+      "id": "2502.14168",
+      "publish_date": "2025-02-20",
+      "title": "Deep learning based infrared small object segmentation: Challenges and future directions",
+      "first_author": "Zhengeng Yang",
+      "authors": "Zhengeng Yang, Hongshan Yu, Jianjun Zhang, Qiang Tang, Ajmal Mian",
+      "url": "http://arxiv.org/abs/2502.14168",
+      "code": null
+    },
+    "2502.00730": {
+      "id": "2502.00730",
+      "publish_date": "2025-02-02",
+      "title": "Spatio-Temporal Progressive Attention Model for EEG Classification in Rapid Serial Visual Presentation Task",
+      "first_author": "Yang Li",
+      "authors": "Yang Li, Wei Liu, Tianzhi Feng, Fu Li, Chennan Wu, Boxun Fu, Zhifu Zhao, Xiaotian Wang, Guangming Shi",
+      "url": "http://arxiv.org/abs/2502.00730",
+      "code": null
     }
   }
 }
