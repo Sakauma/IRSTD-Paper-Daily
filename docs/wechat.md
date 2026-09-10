@@ -3,7 +3,7 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 
-> Updated on 2026.09.07
+> Updated on 2026.09.10
 > Usage instructions: [here](./README.md#usage)
 
 <details>
@@ -15,6 +15,7 @@
 
 ## IRSTD
 
+- 2026-09-07, **PICANet: Physics-Informed Cascaded Asymmetric Network for Infrared Small Target Detection**, Jingjing Liu et.al., Paper: [http://arxiv.org/abs/2609.07515](http://arxiv.org/abs/2609.07515), Code: **[https://github.com/xianchaoxiu/PICANet](https://github.com/xianchaoxiu/PICANet)**
 - 2026-09-01, **ADGNet: Asymmetric Dual-text Guided Network for Infrared Small Target Detection**, Tongtong Wang et.al., Paper: [http://arxiv.org/abs/2609.00853](http://arxiv.org/abs/2609.00853), Code: **[https://github.com/iLearn-Lab/MM26-ADGNet](https://github.com/iLearn-Lab/MM26-ADGNet)**
 - 2026-09-01, **DGNet: Dual-knowledge Guided Network for Infrared Small Target Detection**, Chenglong Yu et.al., Paper: [http://arxiv.org/abs/2609.00666](http://arxiv.org/abs/2609.00666), Code: **[https://github.com/iLearn-Lab/MM26-DGNet](https://github.com/iLearn-Lab/MM26-DGNet)**
 - 2026-08-26, **SPARK-SAM: Learning How to Prompt and Respond for Infrared Small Target Segmentation**, Aji Mao et.al., Paper: [http://arxiv.org/abs/2608.20754](http://arxiv.org/abs/2608.20754), Code: **[https://github.com/Sakauma/SPARK-SAM](https://github.com/Sakauma/SPARK-SAM)**

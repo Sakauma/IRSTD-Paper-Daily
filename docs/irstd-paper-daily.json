@@ -926,6 +926,15 @@
       "authors": "Yang Li, Wei Liu, Tianzhi Feng, Fu Li, Chennan Wu, Boxun Fu, Zhifu Zhao, Xiaotian Wang, Guangming Shi",
       "url": "http://arxiv.org/abs/2502.00730",
       "code": null
+    },
+    "2609.07515": {
+      "id": "2609.07515",
+      "publish_date": "2026-09-07",
+      "title": "PICANet: Physics-Informed Cascaded Asymmetric Network for Infrared Small Target Detection",
+      "first_author": "Jingjing Liu",
+      "authors": "Jingjing Liu, Yinchao Han, Xianchao Xiu, Jianhua Zhang, Wanquan Liu",
+      "url": "http://arxiv.org/abs/2609.07515",
+      "code": "https://github.com/xianchaoxiu/PICANet"
     }
   }
 }
