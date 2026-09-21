@@ -281,10 +281,10 @@
     },
     "2603.05071": {
       "id": "2603.05071",
-      "publish_date": "2026-03-05",
-      "title": "MI-DETR: A Strong Baseline for Moving Infrared Small Target Detection with Bio-Inspired Motion Integration",
+      "publish_date": "2026-09-16",
+      "title": "MI-DETR: A Strong Baseline for Moving Infrared Small Target Detection with Motion Integration",
       "first_author": "Nian Liu",
-      "authors": "Nian Liu, Jin Gao, Shubo Lin, Yutong Kou, Sikui Zhang, Fudong Ge, Zhiqiang Pu, Liang Li, Gang Wang, Yizheng Wang, Weiming Hu",
+      "authors": "Nian Liu, Jin Gao, Zhen Liang, Shubo Lin, Sikui Zhang, Fudong Ge, Liang Li, Weiming Hu",
       "url": "http://arxiv.org/abs/2603.05071",
       "code": "https://github.com/nliu-25/MI-DETR"
     },

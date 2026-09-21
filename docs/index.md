@@ -2,7 +2,7 @@
 layout: default
 ---
 
-## Updated on 2026.09.20
+## Updated on 2026.09.21
 > Usage instructions: [here](./README.md#usage)
 
 ## IRSTD
@@ -10,6 +10,7 @@ layout: default
 | Publish Date | Title | Authors | PDF | Code |
 |:---------|:-----------------------|:---------|:------|:------|
 |**2026-09-16**|**DISTA-Net++: Rethinking Infrared Small Target Unmixing Beyond Sub-Pixel Separation**|Mengze Xu et.al.|[2609.18773](http://arxiv.org/abs/2609.18773)|[link](https://github.com/GrokCV/GrokDet)|
+|**2026-09-16**|**MI-DETR: A Strong Baseline for Moving Infrared Small Target Detection with Motion Integration**|Nian Liu et.al.|[2603.05071](http://arxiv.org/abs/2603.05071)|[link](https://github.com/nliu-25/MI-DETR)|
 |**2026-09-07**|**PICANet: Physics-Informed Cascaded Asymmetric Network for Infrared Small Target Detection**|Jingjing Liu et.al.|[2609.07515](http://arxiv.org/abs/2609.07515)|[link](https://github.com/xianchaoxiu/PICANet)|
 |**2026-09-01**|**ADGNet: Asymmetric Dual-text Guided Network for Infrared Small Target Detection**|Tongtong Wang et.al.|[2609.00853](http://arxiv.org/abs/2609.00853)|[link](https://github.com/iLearn-Lab/MM26-ADGNet)|
 |**2026-09-01**|**DGNet: Dual-knowledge Guided Network for Infrared Small Target Detection**|Chenglong Yu et.al.|[2609.00666](http://arxiv.org/abs/2609.00666)|[link](https://github.com/iLearn-Lab/MM26-DGNet)|
@@ -57,7 +58,6 @@ layout: default
 |**2026-03-22**|**DSCSNet: A Dynamic Sparse Compression Sensing Network for Closely-Spaced Infrared Small Target Unmixing**|Zhiyang Tang et.al.|[2603.21192](http://arxiv.org/abs/2603.21192)|null|
 |**2026-03-17**|**Point-to-Mask: From Arbitrary Point Annotations to Mask-Level Infrared Small Target Detection**|Weihua Gao et.al.|[2603.16257](http://arxiv.org/abs/2603.16257)|[link](https://github.com/GaoScience/point-to-mask)|
 |**2026-03-06**|**Small Target Detection Based on Mask-Enhanced Attention Fusion of Visible and Infrared Remote Sensing Images**|Qianqian Zhang et.al.|[2603.06925](http://arxiv.org/abs/2603.06925)|null|
-|**2026-03-05**|**MI-DETR: A Strong Baseline for Moving Infrared Small Target Detection with Bio-Inspired Motion Integration**|Nian Liu et.al.|[2603.05071](http://arxiv.org/abs/2603.05071)|[link](https://github.com/nliu-25/MI-DETR)|
 |**2026-02-24**|**Seeing Through the Noise: Improving Infrared Small Target Detection and Segmentation from Noise Suppression Perspective**|Maoxun Yuan et.al.|[2508.06878](http://arxiv.org/abs/2508.06878)|[link](https://github.com/mengduann/NS-FPN)|
 |**2026-02-13**|**MDAFNet: Multiscale Differential Edge and Adaptive Frequency Guided Network for Infrared Small Target Detection**|Shuying Li et.al.|[2601.16434](http://arxiv.org/abs/2601.16434)|[link](https://github.com/ML202010/MDAFNet)|
 |**2026-02-02**|**SPIRIT: Adapting Vision Foundation Models for Unified Single- and Multi-Frame Infrared Small Target Detection**|Qian Xu et.al.|[2602.01843](http://arxiv.org/abs/2602.01843)|[link](https://github.com/silexlabs/Silex)|
