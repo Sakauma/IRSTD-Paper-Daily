@@ -14,6 +14,8 @@
 
 |Publish Date|Title|Authors|PDF|Code|
 |---|---|---|---|---|
+|**2026-09-30**|**Edge-Aware and Content-Adaptive Infrared Gas Leak Detection for Industrial Safety Monitoring**|Dongsheng Li et.al.|[2512.23234](http://arxiv.org/abs/2512.23234)|null|
+|**2026-09-28**|**Denoising-Enhanced Coarse-to-Fine Infrared Small Target Detection with Attention Prior-Guided Knowledge Distillation**|Houzhang Fang et.al.|[2606.21956](http://arxiv.org/abs/2606.21956)|[link](https://github.com/IVPLabs/ECFNet)|
 |**2026-09-16**|**DISTA-Net++: Rethinking Infrared Small Target Unmixing Beyond Sub-Pixel Separation**|Mengze Xu et.al.|[2609.18773](http://arxiv.org/abs/2609.18773)|[link](https://github.com/GrokCV/GrokDet)|
 |**2026-09-16**|**MI-DETR: A Strong Baseline for Moving Infrared Small Target Detection with Motion Integration**|Nian Liu et.al.|[2603.05071](http://arxiv.org/abs/2603.05071)|[link](https://github.com/nliu-25/MI-DETR)|
 |**2026-09-07**|**PICANet: Physics-Informed Cascaded Asymmetric Network for Infrared Small Target Detection**|Jingjing Liu et.al.|[2609.07515](http://arxiv.org/abs/2609.07515)|[link](https://github.com/xianchaoxiu/PICANet)|
@@ -38,13 +40,11 @@
 |**2026-07-14**|**On the Detectability of Volcanic Exo-Ios That May Fuel Auroras on Super-Jupiters**|Brooke Kotten et.al.|[2607.13030](http://arxiv.org/abs/2607.13030)|null|
 |**2026-07-02**|**Boosting Infrared Small Target Detection via Logit-Domain Contrast and Adaptive Shape Refinement**|Handong Zeng et.al.|[2607.01555](http://arxiv.org/abs/2607.01555)|null|
 |**2026-06-29**|**Dynamic High-frequency Convolution for Infrared Small Target Detection**|Ruojing Li et.al.|[2602.02969](http://arxiv.org/abs/2602.02969)|[link](https://github.com/TinaLRJ/DHiF)|
-|**2026-06-27**|**Denoising-Enhanced Coarse-to-Fine Infrared Small Target Detection with Attention Prior-Guided Knowledge Distillation**|Houzhang Fang et.al.|[2606.21956](http://arxiv.org/abs/2606.21956)|[link](https://github.com/IVPLabs/ECFNet)|
 |**2026-06-26**|**Temporal-Emerged Prompting for Segment Anything in Multiframe Infrared Small Target Detection**|Yinghui Xing et.al.|[2606.27655](http://arxiv.org/abs/2606.27655)|null|
 |**2026-06-23**|**A Unified Analysis for Dynamic Programming Track-Before-Detect Algorithms: Error Convergence and Spatial Uncertainty**|Nicholas Bampton et.al.|[2512.11170](http://arxiv.org/abs/2512.11170)|null|
 |**2026-06-17**|**SCR-Guided Difficulty-Aware Optimization for Infrared Small Target Detection**|Yunus Sevim et.al.|[2606.18783](http://arxiv.org/abs/2606.18783)|[link](https://github.com/yall-in-one/Reemm)|
 |**2026-06-13**|**Decoupled Motion Representation Learning for Moving Infrared Small Target Detection**|Guoyi Zhang et.al.|[2606.15286](http://arxiv.org/abs/2606.15286)|null|
 |**2026-06-08**|**STGBD-Net: Spatio-temporal Gradient Basis Decomposition Network for Infrared Small Target Detection**|Chen Hu et.al.|[2512.03470](http://arxiv.org/abs/2512.03470)|[link](https://github.com/greekinRoma/IRSTD_HC_Platform)|
-|**2026-06-02**|**Edge-Aware and Content-Adaptive Infrared Gas Leak Detection for Industrial Safety Monitoring**|Dongsheng Li et.al.|[2512.23234](http://arxiv.org/abs/2512.23234)|null|
 |**2026-06-01**|**RPCASSM: Robust PCA State Space Model For Infrared Small Target Detection**|Pingping Liu et.al.|[2606.01689](http://arxiv.org/abs/2606.01689)|[link](https://github.com/PepperCS/RPCASSM)|
 |**2026-05-20**|**Diffuse to Detect: Bi-Level Sample Rebalancing with Pseudo-Label Diffusion for Point-Supervised Infrared Small-Target Detection**|Zhu Liu et.al.|[2605.20766](http://arxiv.org/abs/2605.20766)|[link](https://github.com/yuanhang-yao/diffuse-to-detect)|
 |**2026-05-20**|**LER-YOLO: Reliability-Aware Expert Routing for Misaligned RGB-Infrared UAV Detection**|Liming Hou et.al.|[2605.20667](http://arxiv.org/abs/2605.20667)|null|
