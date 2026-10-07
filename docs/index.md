@@ -2,13 +2,15 @@
 layout: default
 ---
 
-## Updated on 2026.10.06
+## Updated on 2026.10.07
 > Usage instructions: [here](./README.md#usage)
 
 ## IRSTD
 
 | Publish Date | Title | Authors | PDF | Code |
 |:---------|:-----------------------|:---------|:------|:------|
+|**2026-10-05**|**Prompt and Refinement: Asymmetric Mutual Learning for Infrared Small Target Detection with Noisy Labels**|Yimin Fu et.al.|[2610.05918](http://arxiv.org/abs/2610.05918)|[link](https://github.com/fuyimin96/PAR)|
+|**2026-10-04**|**IRSTD-Agent: Agentic Infrared Small Target Detection via Zoom-Guided Interaction Learning**|Jiawen Xi et.al.|[2610.05342](http://arxiv.org/abs/2610.05342)|[link](https://github.com/fuyimin96/IRSTD-Agent)|
 |**2026-09-30**|**Edge-Aware and Content-Adaptive Infrared Gas Leak Detection for Industrial Safety Monitoring**|Dongsheng Li et.al.|[2512.23234](http://arxiv.org/abs/2512.23234)|null|
 |**2026-09-28**|**Denoising-Enhanced Coarse-to-Fine Infrared Small Target Detection with Attention Prior-Guided Knowledge Distillation**|Houzhang Fang et.al.|[2606.21956](http://arxiv.org/abs/2606.21956)|[link](https://github.com/IVPLabs/ECFNet)|
 |**2026-09-16**|**DISTA-Net++: Rethinking Infrared Small Target Unmixing Beyond Sub-Pixel Separation**|Mengze Xu et.al.|[2609.18773](http://arxiv.org/abs/2609.18773)|[link](https://github.com/GrokCV/GrokDet)|
