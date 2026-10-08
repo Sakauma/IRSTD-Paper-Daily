@@ -27,17 +27,24 @@ python daily_arxiv.py
 ```
 
 首次运行会从 `start_date` 开始执行全量抓取，并把成功日期写入
-`docs/irstd-paper-daily-state.json`。后续每日运行只查询上次成功日期附近的增量
-窗口；默认向前回看 3 天，以容忍 arXiv 收录延迟。历史论文仍保存在主 JSON 中，
-不会因增量查询而删除。
+`docs/irstd-paper-daily-state.json`。后续每日运行在上次成功日期附近的增量
+窗口中查找新论文；默认向前回看 3 天，以容忍 arXiv 收录延迟。同时按已收录的
+arXiv ID 检查历史论文的最新版本，并补查历史代码链接。历史论文仍保存在主 JSON 中，
+不会因增量查询或 API 暂未返回该 ID 而删除。
 
 更新状态同时记录查询配置指纹与各领域缓存校验值。缓存不存在、为空、与状态不一致，
 或修改了查询条件、起始日期、数量限制时，会自动执行全量重建。升级前的状态没有这些
 字段，首次运行会全量刷新一次。JSON 使用临时文件加原子替换，写入失败保留旧文件。
 
-增量窗口使用首次提交日期；每周自动全量刷新已暂停，旧论文的新版本请通过手动执行
-`--full-refresh` 补查。正整数 `max_results` 只取最新的指定数量；如需完整收录，
-请保持 `max_results: null`。
+增量窗口使用首次提交日期；旧论文修订通过不带版本号的 ID 单独查询，不受该窗口限制。
+根配置已启用 `refresh_history: true`：每批最多查询 100 个历史 ID，跨领域复用本轮已获取
+的元数据；合并后统一补查缺失代码并复核历史搜索链接。新论文、旧论文版本和代码链接的
+变化会一起进入本次通知。检查失败会中止本次更新，保留磁盘目录和成功日期以供重试。
+
+将 `refresh_history` 设为 `false` 或在自定义配置中省略该项，可恢复仅增量抓取的行为。
+`enable_code_lookup: false` 只关闭 GitHub 查询，仍会检查历史元数据并提取作者代码链接。
+正整数 `max_results` 只限制发现论文时的搜索结果数量，不限制已收录 ID 的检查；如需
+完整发现新论文，请保持 `max_results: null`。
 
 程序优先采用摘要或备注中明确标注为本文代码的地址，支持 GitHub、GitLab、GitCode、
 Gitee 和 Anonymous 4open.science。提取时兼容换行和 Markdown 转义；同一代码声明中的
@@ -53,7 +60,7 @@ Actions 中执行代码链接补查。
 python daily_arxiv.py --full-refresh
 ```
 
-要为历史论文补齐代码链接：
+要单独补查整个目录的代码链接（不抓取论文元数据）：
 
 ```bash
 python daily_arxiv.py --backfill_code
@@ -69,7 +76,7 @@ python daily_arxiv.py --backfill_code
 给出了 [匿名镜像](https://anonymous.4open.science/r/SANetE808/)。这些地址不会被同名
 GitHub 搜索结果覆盖。网络故障会中止本次核验并保留磁盘上的原目录。
 
-全量刷新工作流目前仅支持手动触发，组合执行以下命令，同时刷新旧论文元数据和缺失代码链接：
+全量刷新工作流仍仅支持手动触发，用于从配置起始日期重新发现论文，并补查整个目录的代码：
 
 ```bash
 python daily_arxiv.py --full-refresh --backfill_code
@@ -93,8 +100,9 @@ domains:
 
 `max_results: null` 表示抓取日期范围内的全部结果；正整数表示只取最新的指定
 数量。`start_date` 是全量收录的起始日期；`incremental_lookback_days` 是每日
-查询相对于上次成功日期向前回看的天数。`enable: false` 会停止抓取该领域的新
-论文，但不会删除历史数据。含空格的过滤词按完整短语搜索，多个过滤词以 `OR`
+查询相对于上次成功日期向前回看的天数。`enable: false` 会停止该领域的新论文抓取、
+每日历史版本检查和代码补查，但不会删除历史数据；显式 `--backfill_code` 仍处理整个目录。
+含空格的过滤词按完整短语搜索，多个过滤词以 `OR`
 连接。
 
 需要使用字段限定、括号和布尔条件时，可以直接配置原生 arXiv 查询；`query` 的
@@ -109,8 +117,9 @@ domains:
 ```
 
 两个更新工作流目前都仅支持手动触发：增量更新的每日定时未启用，全量刷新的每周定时
-已暂停。需要更新时，在 Actions 页面手动运行 **Update IRSTD Paper Daily**；需要
-补查旧论文和代码链接时，手动运行 **Full Refresh IRSTD Papers and Code Links**。
+已暂停。需要更新时，在 Actions 页面手动运行 **Update IRSTD Paper Daily**，即可同时
+检查新论文、历史版本和代码链接；需要从起始日期完整重新扫描时，手动运行
+**Full Refresh IRSTD Papers and Code Links**。
 
 两个工作流共用 `irstd-paper-daily-publish` 并发组，同一时间只运行一个，后来的
 任务等待且不取消正在执行的任务。排队结束后检出最新 `main`，再读取目录和
@@ -248,6 +257,8 @@ python -m pytest -q
 测试不访问网络，覆盖配置解析、增量与全量日期窗口、数据合并、Markdown 渲染、
 微信渲染、Server酱通知以及代码链接校验的基本行为。回归测试还覆盖缓存丢失、配置变更、
 通知失败重跑、接收目标变更、代码误匹配、限流重试、部分拒收与原子写入故障。
+日更历史检查还覆盖 ID 分批与去重、旧论文修订、无新版本的代码补查、人工链接保留、
+禁用领域保护，以及 API 失败后保留目录和更新进度。
 PR 和代码 push 会自动在 Python 3.11、3.12 上执行离线测试。
 
 ## 参考项目

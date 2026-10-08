@@ -18,7 +18,7 @@ from typing import Any, Dict, Optional
 
 from arxiv_daily.codelink import backfill_code_links
 from arxiv_daily.config import add_date_range, load_config
-from arxiv_daily.fetcher import fetch_daily_papers
+from arxiv_daily.fetcher import fetch_daily_papers, fetch_papers_by_id
 from arxiv_daily.notifier import notify_daily_update
 from arxiv_daily.renderer import render_markdown
 from arxiv_daily.storage import load_data, merge_papers, save_data
@@ -229,7 +229,7 @@ def run(
     notify_unchanged: bool = False,
     today: Optional[date] = None,
 ) -> None:
-    """读取缓存，执行增量或全量抓取，然后合并并渲染。"""
+    """抓取新论文，按配置检查历史版本与代码，再合并、渲染和通知。"""
     run_date = today or date.today()
     data = load_data(config["data_path"])
     state_path = config.get("state_path", "./docs/irstd-paper-daily-state.json")
@@ -242,7 +242,9 @@ def run(
         for papers in data.values() if isinstance(papers, dict)
         for pid, paper in papers.items() if isinstance(paper, dict)
     }
-    lookup_missing_code = bool(config.get("enable_code_lookup", True))
+    enable_code_lookup = bool(config.get("enable_code_lookup", True))
+    refresh_history = bool(config.get("refresh_history", False))
+    perform_backfill = backfill_code or (refresh_history and enable_code_lookup)
     previous_queries = state.get("query_fingerprints", {})
     previous_checksums = state.get("catalog_checksums", {})
     if not isinstance(previous_queries, dict):
@@ -293,15 +295,51 @@ def run(
             max_results,
             known_codes=known_codes,
             known_paper_ids=known_paper_ids,
-            lookup_missing_code=lookup_missing_code,
+            lookup_missing_code=enable_code_lookup and not perform_backfill,
             known_code_sources=known_code_sources,
         )
         new_papers_by_topic[topic] = fetched_papers
 
+    if refresh_history:
+        # 跨领域复用本轮已获取的元数据，避免按 ID 再次查询增量结果。
+        refreshed = {
+            paper["id"]: paper
+            for papers in new_papers_by_topic.values()
+            for paper in papers
+        }
+        history_ids = {
+            str(paper_id)
+            for topic in new_papers_by_topic
+            if isinstance(data.get(topic), dict)
+            for paper_id in data[topic]
+        }
+        pending_ids = sorted(history_ids - refreshed.keys())
+        if pending_ids:
+            logger.info("检查 %d 篇历史论文的最新版本", len(pending_ids))
+            history = fetch_papers_by_id(
+                pending_ids,
+                known_codes=known_codes,
+                known_code_sources=known_code_sources,
+            )
+            refreshed.update({paper["id"]: paper for paper in history})
+        for topic, papers in new_papers_by_topic.items():
+            cached = data.get(topic, {})
+            if isinstance(cached, dict):
+                fetched_ids = {paper["id"] for paper in papers}
+                papers.extend(
+                    refreshed[paper_id] for paper_id in cached
+                    if paper_id in refreshed and paper_id not in fetched_ids
+                )
+
     for topic, papers in new_papers_by_topic.items():
         data = merge_papers(data, papers, topic)
-    if backfill_code:
-        data, updated = backfill_code_links(data)
+    if perform_backfill:
+        # 日更只处理启用领域；显式 --backfill_code 保留全目录补查语义。
+        backfill_data = data if backfill_code else {
+            topic: data[topic] for topic in new_papers_by_topic
+        }
+        refreshed_data, updated = backfill_code_links(backfill_data)
+        data.update(refreshed_data)
         logger.info("代码链接核验完成，共调整 %d 篇", updated)
     save_data(config["data_path"], data)
     logger.info("数据已写入 %s", config["data_path"])
