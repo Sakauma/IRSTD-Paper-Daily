@@ -29,10 +29,12 @@ def fetch_daily_papers(
     known_codes: Optional[Dict[str, str]] = None,
     known_paper_ids: Optional[Set[str]] = None,
     lookup_missing_code: bool = True,
+    known_code_sources: Optional[Dict[str, str]] = None,
 ) -> List[Dict[str, Any]]:
     """按搜索表达式抓取指定数量的最新论文。
 
-    论文摘要/备注中的 GitHub 地址优先级最高。``known_codes`` 用于复用历史
+    优先使用论文摘要/备注中明确的作者代码地址（支持多种托管平台），保留人工覆盖。
+    ``known_codes`` 用于复用历史
     链接；``known_paper_ids`` 避免每天为已有但无代码的论文重复搜索 GitHub。
     """
     search = arxiv.Search(
@@ -47,18 +49,24 @@ def fetch_daily_papers(
         paper_id = _strip_version(result.get_short_id())
         logger.info("抓取到论文 %s | %s", paper_id, result.title)
 
+        cached_code = (known_codes or {}).get(paper_id)
+        source = (known_code_sources or {}).get(paper_id, "legacy")
         code = extract_code_link(
             getattr(result, "summary", None),
             getattr(result, "comment", None),
         )
-        if code:
+        if cached_code and source == "manual":
+            code = cached_code
+        elif code:
+            source = "arxiv_metadata"
             logger.info("从 arXiv 元数据提取到官方代码链接: %s", code)
-        elif known_codes is not None:
-            code = known_codes.get(paper_id)
+        else:
+            code = cached_code
 
         is_new_paper = known_paper_ids is None or paper_id not in known_paper_ids
         if lookup_missing_code and is_new_paper and not code:
             code = lookup_code_link(paper_id, result.title)
+            source = "github_verified"
 
         authors = [str(author) for author in (result.authors or [])]
         updated = result.updated or result.published
@@ -72,6 +80,7 @@ def fetch_daily_papers(
                 "authors": ", ".join(authors),
                 "url": ARXIV_ABS_URL.format(paper_id),
                 "code": code,
+                **({"code_source": source} if code else {}),
             }
         )
 

@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-from copy import deepcopy
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -23,6 +22,10 @@ from arxiv_daily.fetcher import fetch_daily_papers
 from arxiv_daily.notifier import notify_daily_update
 from arxiv_daily.renderer import render_markdown
 from arxiv_daily.storage import load_data, merge_papers, save_data
+from arxiv_daily.state import (
+    catalog_fingerprints, changes_since_notification, fingerprint,
+    notification_target, query_fingerprint,
+)
 from arxiv_daily.wechat import build_wechat_data, render_wechat_markdown
 
 logging.basicConfig(
@@ -112,49 +115,23 @@ def _all_papers(data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _classify_catalog_changes(
-    previous: Dict[str, Any],
-    current: Dict[str, Any],
-) -> tuple[Dict[str, Any], Dict[str, Any]]:
-    """比较更新前后的完整目录，找出新增和字段发生变化的论文。"""
-    new_papers: Dict[str, Any] = {}
-    updated_papers: Dict[str, Any] = {}
-    for topic, papers in current.items():
-        if not isinstance(papers, dict):
-            continue
-        previous_papers = previous.get(topic, {})
-        if not isinstance(previous_papers, dict):
-            previous_papers = {}
-
-        topic_new = []
-        topic_updated = []
-        for paper_id, paper in papers.items():
-            if not isinstance(paper, dict):
-                continue
-            if paper_id not in previous_papers:
-                topic_new.append(paper)
-            elif previous_papers[paper_id] != paper:
-                topic_updated.append(paper)
-        new_papers[str(topic)] = topic_new
-        updated_papers[str(topic)] = topic_updated
-    return new_papers, updated_papers
-
-
 def _change_count(groups: Dict[str, Any]) -> int:
     return sum(len(papers) for papers in groups.values())
 
 
-def _notification_initialized(state: Dict[str, Any], provider: str) -> bool:
+def _notification_initialized(state: Dict[str, Any], provider: str, target: str) -> bool:
     notification_state = state.get("wechat_notification", {})
     return isinstance(notification_state, dict) and bool(
         notification_state.get("initialized")
-    ) and notification_state.get("provider") == provider
+    ) and notification_state.get("provider") == provider and (
+        notification_state.get("target") == target
+        and isinstance(notification_state.get("delivered"), dict)
+    )
 
 
 def _notify_catalog_update(
     config: Dict[str, Any],
     state: Dict[str, Any],
-    previous_data: Dict[str, Any],
     current_data: Dict[str, Any],
     *,
     run_date: date,
@@ -167,7 +144,11 @@ def _notify_catalog_update(
         if isinstance(settings, dict)
         else "serverchan"
     )
-    initial_sync = not _notification_initialized(state, provider)
+    target = notification_target(config, provider)
+    if target is None:
+        logger.info("未配置 SERVERCHAN_SENDKEY，保留上次通知进度")
+        return
+    initial_sync = not _notification_initialized(state, provider, target)
     if initial_sync:
         new_papers = _all_papers(current_data)
         updated_papers: Dict[str, Any] = {}
@@ -175,9 +156,8 @@ def _notify_catalog_update(
             logger.info("论文目录为空，暂不初始化微信通知")
             return
     else:
-        new_papers, updated_papers = _classify_catalog_changes(
-            previous_data,
-            current_data,
+        new_papers, updated_papers = changes_since_notification(
+            current_data, state["wechat_notification"]["delivered"],
         )
         if not (_change_count(new_papers) + _change_count(updated_papers)):
             if not notify_unchanged:
@@ -197,6 +177,8 @@ def _notify_catalog_update(
         state["wechat_notification"] = {
             "initialized": True,
             "provider": provider,
+            "target": target,
+            "delivered": catalog_fingerprints(current_data),
             "last_successful_notification": run_date.isoformat(),
         }
 
@@ -250,13 +232,24 @@ def run(
     """读取缓存，执行增量或全量抓取，然后合并并渲染。"""
     run_date = today or date.today()
     data = load_data(config["data_path"])
-    previous_data = deepcopy(data)
     state_path = config.get("state_path", "./docs/irstd-paper-daily-state.json")
     state = load_data(state_path)
     successful_dates = _last_successful_dates(state)
     known_codes: Dict[str, str] = _known_code_links(data)
     known_paper_ids = _known_paper_ids(data)
+    known_code_sources = {
+        str(pid): str(paper.get("code_source", "legacy"))
+        for papers in data.values() if isinstance(papers, dict)
+        for pid, paper in papers.items() if isinstance(paper, dict)
+    }
     lookup_missing_code = bool(config.get("enable_code_lookup", True))
+    previous_queries = state.get("query_fingerprints", {})
+    previous_checksums = state.get("catalog_checksums", {})
+    if not isinstance(previous_queries, dict):
+        previous_queries = {}
+    if not isinstance(previous_checksums, dict):
+        previous_checksums = {}
+    current_queries = dict(previous_queries)
 
     new_papers_by_topic: Dict[str, Any] = {}
     for topic, base_query in config["kv"].items():
@@ -269,11 +262,17 @@ def run(
             topic,
             int(config.get("incremental_lookback_days", 3)),
         )
+        current_queries[topic] = query_fingerprint(base_query, configured_start, max_results)
+        cache_valid = (
+            isinstance(data.get(topic), dict)
+            and previous_checksums.get(topic) == fingerprint(data[topic])
+            and previous_queries.get(topic) == current_queries[topic]
+        )
         query_start, is_incremental = _effective_start_date(
             configured_start,
             successful_dates.get(topic),
             lookback_days,
-            full_refresh=full_refresh,
+            full_refresh=full_refresh or not cache_valid,
             today=run_date,
         )
         query = add_date_range(
@@ -295,6 +294,7 @@ def run(
             known_codes=known_codes,
             known_paper_ids=known_paper_ids,
             lookup_missing_code=lookup_missing_code,
+            known_code_sources=known_code_sources,
         )
         new_papers_by_topic[topic] = fetched_papers
 
@@ -302,26 +302,28 @@ def run(
         data = merge_papers(data, papers, topic)
     if backfill_code:
         data, updated = backfill_code_links(data)
-        logger.info("代码链接回填完成，共补齐 %d 篇", updated)
+        logger.info("代码链接核验完成，共调整 %d 篇", updated)
     save_data(config["data_path"], data)
     logger.info("数据已写入 %s", config["data_path"])
 
-    _render_outputs(config, data)
-    if notify_wechat:
-        _notify_catalog_update(
-            config,
-            state,
-            previous_data,
-            data,
-            run_date=run_date,
-            notify_unchanged=notify_unchanged,
-        )
     successful_dates.update(
         {topic: run_date.isoformat() for topic in new_papers_by_topic}
     )
     state["last_successful_update"] = successful_dates
+    state["query_fingerprints"] = current_queries
+    state["catalog_checksums"] = {
+        **previous_checksums,
+        **{str(topic): fingerprint(data[topic]) for topic in new_papers_by_topic},
+    }
     save_data(state_path, state)
     logger.info("增量更新状态已写入 %s", state_path)
+    _render_outputs(config, data)
+    if notify_wechat:
+        _notify_catalog_update(
+            config, state, data,
+            run_date=run_date, notify_unchanged=notify_unchanged,
+        )
+        save_data(state_path, state)
     logger.info("全部任务完成")
 
 
@@ -332,29 +334,36 @@ def run_backfill(
     notify_unchanged: bool = False,
     today: Optional[date] = None,
 ) -> None:
-    """为历史论文补齐代码链接并重新生成所有开启的输出。"""
+    """补查并重新核验代码链接，重新生成所有开启的输出。"""
     run_date = today or date.today()
     data = load_data(config["data_path"])
-    previous_data = deepcopy(data)
+    state_path = config.get("state_path", "./docs/irstd-paper-daily-state.json")
+    state = load_data(state_path)
     data, updated = backfill_code_links(data)
     save_data(config["data_path"], data)
+    # Backfill did not fetch the complete catalog, so it cannot certify its integrity.
     _render_outputs(config, data)
     if notify_wechat:
-        state_path = config.get(
-            "state_path",
-            "./docs/irstd-paper-daily-state.json",
-        )
-        state = load_data(state_path)
         _notify_catalog_update(
             config,
             state,
-            previous_data,
             data,
             run_date=run_date,
             notify_unchanged=notify_unchanged,
         )
         save_data(state_path, state)
-    logger.info("代码链接回填完成，共补齐 %d 篇", updated)
+    logger.info("代码链接核验完成，共调整 %d 篇", updated)
+
+
+def run_notification(config: Dict[str, Any], *, notify_unchanged: bool = False) -> None:
+    """独立重试目录通知，不依赖本次抓取是否有变化。"""
+    state_path = config.get("state_path", "./docs/irstd-paper-daily-state.json")
+    state = load_data(state_path)
+    data = load_data(config["data_path"])
+    _notify_catalog_update(
+        config, state, data, run_date=date.today(), notify_unchanged=notify_unchanged,
+    )
+    save_data(state_path, state)
 
 
 def main() -> None:
@@ -370,7 +379,7 @@ def main() -> None:
     parser.add_argument(
         "--backfill_code",
         action="store_true",
-        help="遍历已有数据，为缺失代码链接的论文补齐链接（不抓取新论文）",
+        help="补查缺失代码并重新核验历史搜索链接（不抓取新论文）",
     )
     parser.add_argument(
         "--full-refresh",
@@ -383,15 +392,24 @@ def main() -> None:
         help="更新完成后通过 Server酱向绑定的微信发送论文摘要",
     )
     parser.add_argument(
+        "--notify-only",
+        action="store_true",
+        help="仅发送或重试尚未通知的目录变化，不抓取论文",
+    )
+    parser.add_argument(
         "--notify-unchanged",
         action="store_true",
         help="论文目录没有变化时也发送“今日无新增”微信通知",
     )
     args = parser.parse_args()
+    if args.notify_only and (args.full_refresh or args.backfill_code):
+        parser.error("--notify-only 不能与 --full-refresh 或 --backfill_code 一起使用")
 
     config = load_config(args.config_path)
     logger.info("配置加载完成，启用领域: %s", list(config["kv"].keys()))
-    if args.full_refresh:
+    if args.notify_only:
+        run_notification(config, notify_unchanged=args.notify_unchanged)
+    elif args.full_refresh:
         run(
             config,
             full_refresh=True,

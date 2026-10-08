@@ -508,6 +508,32 @@ def build_email_message(
     return message
 
 
+def _send_to_recipients(
+    smtp: smtplib.SMTP, message: EmailMessage, settings: EmailSettings,
+) -> None:
+    """检查部分拒收，并仅对暂时拒收的地址重试一次。"""
+    pending = list(settings.recipients)
+    rejected = {}
+    for attempt in range(2):
+        try:
+            refused = smtp.send_message(message, from_addr=settings.sender, to_addrs=pending)
+        except smtplib.SMTPRecipientsRefused as exc:
+            refused = exc.recipients
+        retry = []
+        for recipient, detail in refused.items():
+            code = int(detail[0])
+            if attempt == 0 and 400 <= code < 500:
+                retry.append(recipient)
+            else:
+                rejected[recipient] = code
+        if not retry:
+            break
+        pending = retry
+    if rejected:
+        details = ", ".join(f"{recipient} (SMTP {code})" for recipient, code in rejected.items())
+        raise EmailNotificationError(f"邮件未送达以下收件人: {details}")
+
+
 def send_email_message(
     settings: EmailSettings,
     content: str,
@@ -531,11 +557,7 @@ def send_email_message(
                 context=tls_context,
             ) as smtp:
                 smtp.login(settings.username, settings.password)
-                smtp.send_message(
-                    message,
-                    from_addr=settings.sender,
-                    to_addrs=list(settings.recipients),
-                )
+                _send_to_recipients(smtp, message, settings)
         else:
             with smtplib.SMTP(
                 settings.host,
@@ -546,11 +568,7 @@ def send_email_message(
                 smtp.starttls(context=tls_context)
                 smtp.ehlo()
                 smtp.login(settings.username, settings.password)
-                smtp.send_message(
-                    message,
-                    from_addr=settings.sender,
-                    to_addrs=list(settings.recipients),
-                )
+                _send_to_recipients(smtp, message, settings)
     except (OSError, smtplib.SMTPException):
         raise EmailNotificationError(
             "邮件发送失败（SMTP 连接、认证或发送错误）"

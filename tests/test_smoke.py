@@ -34,6 +34,9 @@ from arxiv_daily.notifier import (  # noqa: E402
 )
 from arxiv_daily.renderer import render_markdown  # noqa: E402
 from arxiv_daily.storage import load_data, merge_papers, save_data  # noqa: E402
+from arxiv_daily.state import (  # noqa: E402
+    catalog_fingerprints, fingerprint, notification_target, query_fingerprint,
+)
 from arxiv_daily.wechat import build_wechat_data, render_wechat_markdown  # noqa: E402
 
 
@@ -47,6 +50,15 @@ def sample_paper(code: str | None = None) -> dict[str, object]:
         "url": "http://arxiv.org/abs/2608.07015",
         "code": code,
     }
+
+
+def initialized_notification(config, data):
+    with mock.patch.dict(os.environ, {"SERVERCHAN_SENDKEY": "SCT_test-key"}, clear=True):
+        return {
+            "initialized": True, "provider": "serverchan",
+            "target": notification_target(config, "serverchan"),
+            "delivered": catalog_fingerprints(data),
+        }
 
 
 def sample_wechat_markdown() -> str:
@@ -269,6 +281,7 @@ def test_formatted_email_limits_size_and_keeps_newest_papers() -> None:
 def test_send_daily_email_with_ssl() -> None:
     content = sample_wechat_markdown()
     smtp_client = mock.Mock()
+    smtp_client.send_message.return_value = {}
     smtp_context = mock.MagicMock()
     smtp_context.__enter__.return_value = smtp_client
     environ = {
@@ -311,6 +324,7 @@ def test_send_daily_email_with_ssl() -> None:
 
 def test_send_daily_email_with_starttls() -> None:
     smtp_client = mock.Mock()
+    smtp_client.send_message.return_value = {}
     smtp_context = mock.MagicMock()
     smtp_context.__enter__.return_value = smtp_client
     environ = {
@@ -351,8 +365,8 @@ def test_build_serverchan_url() -> None:
     assert build_serverchan_url("SCT_test-key_123") == (
         "https://sctapi.ftqq.com/SCT_test-key_123.send"
     )
-    assert build_serverchan_url("sctp-test-key") == (
-        "https://sctp-test-key.push.ft07.com/send"
+    assert build_serverchan_url("sctp123tTestKey") == (
+        "https://123.push.ft07.com/send/sctp123tTestKey.send"
     )
 
     try:
@@ -830,6 +844,11 @@ def test_incremental_and_full_refresh_windows() -> None:
             "domain_lookback_days": {"IRSTD": 3},
         }
 
+        state = load_data(state_path)
+        state["query_fingerprints"] = {"IRSTD": query_fingerprint("IRSTD", "2025-01-01", None)}
+        state["catalog_checksums"] = {"IRSTD": fingerprint(load_data(data_path)["IRSTD"])}
+        save_data(state_path, state)
+
         with mock.patch.object(
             daily_arxiv,
             "fetch_daily_papers",
@@ -900,7 +919,13 @@ def test_run_notifies_only_new_and_updated_papers() -> None:
             "domain_start_dates": {"IRSTD": "2025-01-01"},
             "domain_lookback_days": {"IRSTD": 3},
         }
-        with mock.patch.object(
+        state = load_data(state_path)
+        state["wechat_notification"] = initialized_notification(config, load_data(data_path))
+        save_data(state_path, state)
+
+        with mock.patch.dict(
+            os.environ, {"SERVERCHAN_SENDKEY": "SCT_test-key"}, clear=True,
+        ), mock.patch.object(
             daily_arxiv,
             "fetch_daily_papers",
             return_value=[unchanged, updated, new_paper],
@@ -954,7 +979,9 @@ def test_first_run_notifies_with_full_catalog_then_skips_unchanged() -> None:
             "domain_start_dates": {"IRSTD": "2025-01-01"},
             "domain_lookback_days": {"IRSTD": 3},
         }
-        with mock.patch.object(
+        with mock.patch.dict(
+            os.environ, {"SERVERCHAN_SENDKEY": "SCT_test-key"}, clear=True,
+        ), mock.patch.object(
             daily_arxiv,
             "fetch_daily_papers",
             return_value=[first, second],
@@ -1035,7 +1062,13 @@ def test_full_refresh_notifies_after_code_backfill() -> None:
             topics["2608.07015"]["code"] = "https://github.com/foo/new-code"
             return data, 1
 
-        with mock.patch.object(
+        state = load_data(state_path)
+        state["wechat_notification"] = initialized_notification(config, load_data(data_path))
+        save_data(state_path, state)
+
+        with mock.patch.dict(
+            os.environ, {"SERVERCHAN_SENDKEY": "SCT_test-key"}, clear=True,
+        ), mock.patch.object(
             daily_arxiv,
             "fetch_daily_papers",
             return_value=[paper],
