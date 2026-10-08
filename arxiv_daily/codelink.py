@@ -17,6 +17,7 @@ GITHUB_SEARCH_URL = "https://api.github.com/search/repositories"
 GITHUB_REPO_URL = "https://api.github.com/repos"
 REQUEST_TIMEOUT = 15
 SEARCH_RESULT_LIMIT = 5
+SEARCH_ATTEMPTS = 3
 MAX_RETRY_WAIT = 60
 
 CODE_REPO_PATTERN = re.compile(
@@ -38,6 +39,28 @@ MIRROR_SEPARATOR = re.compile(
 # GitHub Search API 的未认证限制是 10 次/分钟，认证后通常为 30 次/分钟。
 UNAUTHENTICATED_DELAY = 6.5
 AUTHENTICATED_DELAY = 2.2
+
+IMPLEMENTATION_CUE = re.compile(
+    r"\b(?:official\s+(?:(?:pytorch|tensorflow)\s+)?(?:implementation|code|repository)|"
+    r"(?:code|implementation)\s+(?:for|of|accompanying)\s+(?:the|our|this)\s+(?:paper|work|method))\b",
+    re.I,
+)
+REFERENCE_HEADING = re.compile(
+    r"^(?:\d+\s+)*(?:references?|bibliography|related (?:work|papers)|paper list|"
+    r"acknowledg(?:e)?ments?|credits?|baselines?|comparisons?)\b", re.I,
+)
+# Only grammatical connectors may bridge a claim and its subject. Arbitrary
+# prose such as "another method; we compare with ..." is not an association.
+SUBJECT_CONNECTORS = {
+    "of", "for", "the", "our", "this", "paper", "work", "method",
+    "titled", "entitled", "called", "arxiv",
+}
+SELF_CLAIM_PREFIX = {
+    "this", "the", "our", "repository", "repo", "project", "codebase",
+    "is", "an", "a", "we", "provide", "provides", "present", "presents",
+    "release", "releases", "contains", "contain", "here", "it",
+}
+
 
 class CodeLookupError(RuntimeError):
     """代码仓库服务不可用；与确实没有匹配结果区分。"""
@@ -154,28 +177,34 @@ def _github_get(url: str, *, attempts: int = 3, **kwargs: Any) -> requests.Respo
 
 
 def _search_repositories(query: str) -> List[str]:
-    """搜索仓库；仅成功且无结果时返回空列表。"""
+    """搜索仓库；不完整响应重试原查询，只有完整结果才能判定未找到。"""
     params = {
         "q": query,
         "sort": "stars",
         "order": "desc",
         "per_page": SEARCH_RESULT_LIMIT,
     }
-    response = _github_get(GITHUB_SEARCH_URL, params=params, headers=_headers())
-    if response.status_code == 404:
-        raise CodeLookupError("GitHub 搜索接口不可用（HTTP 404）")
-    try:
-        payload = response.json()
-    except ValueError:
-        raise CodeLookupError("GitHub 搜索返回了无效 JSON") from None
-    if not isinstance(payload, dict) or not isinstance(payload.get("items"), list):
-        raise CodeLookupError("GitHub 搜索响应缺少有效的 items 列表")
-    items = payload["items"]
-    return [
-        str(item["html_url"])
-        for item in items
-        if isinstance(item, dict) and item.get("html_url")
-    ]
+    for attempt in range(SEARCH_ATTEMPTS):
+        response = _github_get(GITHUB_SEARCH_URL, params=params, headers=_headers())
+        if response.status_code == 404:
+            raise CodeLookupError("GitHub 搜索接口不可用（HTTP 404）")
+        try:
+            payload = response.json()
+        except ValueError:
+            raise CodeLookupError("GitHub 搜索返回了无效 JSON") from None
+        if not isinstance(payload, dict) or not isinstance(payload.get("items"), list):
+            raise CodeLookupError("GitHub 搜索响应缺少有效的 items 列表")
+        if payload.get("incomplete_results", False):
+            if attempt + 1 < SEARCH_ATTEMPTS:
+                logger.warning("GitHub 搜索结果不完整，将重试原查询 (%d/%d)", attempt + 2, SEARCH_ATTEMPTS)
+                time.sleep(_request_delay() * (attempt + 1))
+            continue
+        return [
+            str(item["html_url"])
+            for item in payload["items"]
+            if isinstance(item, dict) and item.get("html_url")
+        ]
+    raise CodeLookupError("GitHub 搜索结果持续不完整，保留已有数据供下次重试")
 
 
 def _candidate_queries(arxiv_id: str, title: str) -> List[str]:
@@ -217,10 +246,128 @@ def _fetch_readme(owner: str, repo: str, retries: int = 3) -> str:
     return response.text if response.status_code == 200 else ""
 
 
+def _words(text: str) -> List[str]:
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+
+def _readme_blocks(readme: str) -> List[str]:
+    """保留标题/段落边界，排除参考章节、列表、代码块及 HTML 注释。"""
+    readme = re.sub(r"<!--.*?-->", "", readme, flags=re.S)
+    # Setext and HTML headings have the same section semantics as Markdown #.
+    readme = re.sub(
+        r"(?m)^([^\n]+)\n[ \t]*([=-])\2{2,}[ \t]*$",
+        lambda match: ("# " if match[2] == "=" else "## ") + match[1], readme,
+    )
+    readme = re.sub(
+        r"<h([1-6])\b[^>]*>(.*?)</h\1>",
+        lambda match: "\n" + "#" * int(match[1]) + " " + match[2] + "\n",
+        readme, flags=re.I | re.S,
+    )
+    blocks: List[str] = []
+    paragraph: List[str] = []
+    skipped_level = None
+    fence = ""
+    list_paragraph = False
+
+    def flush() -> None:
+        if paragraph:
+            blocks.append(" ".join(paragraph))
+            paragraph.clear()
+
+    for line in readme.splitlines():
+        marker = re.match(r"^\s{0,3}(`{3,}|~{3,})", line)
+        if marker:
+            flush()
+            blocks.append("")
+            if not fence:
+                fence = marker[1]
+            elif marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
+                fence = ""
+            continue
+        if fence:
+            continue
+        heading = re.match(r"^\s{0,3}(#{1,6})\s+(.+)", line)
+        if heading:
+            flush()
+            list_paragraph = False
+            level = len(heading[1])
+            if skipped_level is not None and level <= skipped_level:
+                skipped_level = None
+            if skipped_level is None and REFERENCE_HEADING.match(" ".join(_words(heading[2]))):
+                skipped_level = level
+            blocks.append(heading[2] if skipped_level is None else "")
+        elif skipped_level is not None:
+            continue
+        elif not line.strip():
+            flush()
+            list_paragraph = False
+        elif list_paragraph:
+            continue
+        elif re.match(r"^\s*(?:[-+*]|\d+[.)])\s", line):
+            flush()
+            blocks.append("")
+            list_paragraph = True
+        elif re.match(r"^(?: {4}|\t|\s{0,3}>)", line):
+            flush()
+            blocks.append("")
+        else:
+            paragraph.append(line.strip())
+    flush()
+    return blocks
+
+
+def _paper_identity_pattern(arxiv_id: str, title: str) -> re.Pattern[str]:
+    paper_id = re.escape(arxiv_id)
+    paper_url = rf"https?://(?:www\.)?arxiv\.org/(?:abs|pdf)/{paper_id}(?:v\d+)?(?:\.pdf)?/?"
+    identities = [
+        # Treat a paper link as one subject, including its Markdown label.
+        rf"\[[^\]\n]+\]\({paper_url}\)",
+        rf"{paper_url}(?!\w)",
+        rf"(?<![\w.])(?:arxiv:\s*)?{paper_id}(?:v\d+)?(?!\w)",
+    ]
+    title_words = _words(title)
+    if len(title_words) >= 4:
+        identities.append(r"\b" + r"[^a-z0-9]+".join(map(re.escape, title_words)) + r"\b")
+    return re.compile("|".join(identities), re.I)
+
+
+def _has_implementation_evidence(readme: str, arxiv_id: str, title: str) -> bool:
+    """声明必须直接指向论文，或紧随独立的论文标题/链接。"""
+    identity = _paper_identity_pattern(arxiv_id, title)
+
+    def paper_subject(text: str) -> bool:
+        return bool(identity.search(text)) and set(_words(identity.sub("", text))) <= {"paper", "arxiv"}
+
+    def self_claim(text: str) -> bool:
+        return any(
+            set(_words(text[:cue.start()])) <= SELF_CLAIM_PREFIX
+            and set(_words(text[cue.end():])) <= SUBJECT_CONNECTORS | {"in", "pytorch", "tensorflow"}
+            for cue in IMPLEMENTATION_CUE.finditer(text)
+        )
+
+    previous_subject = False
+    for block in _readme_blocks(readme):
+        for cue in IMPLEMENTATION_CUE.finditer(block):
+            # A preceding sentence can describe the method, but the claim itself
+            # must describe this repository, not code borrowed from a baseline.
+            prefix = re.split(r"(?<=[.!?;])\s+", block[:cue.start()])[-1]
+            if set(_words(prefix)) <= SELF_CLAIM_PREFIX:
+                for subject in identity.finditer(block, cue.end()):
+                    if set(_words(block[cue.end():subject.start()])) <= SUBJECT_CONNECTORS:
+                        return True
+        for subject in identity.finditer(block):
+            if paper_subject(block[:subject.end()]) and self_claim(block[subject.end():]):
+                return True
+        if previous_subject and self_claim(block):
+            return True
+        previous_subject = paper_subject(block)
+    return False
+
+
 def verify_code_link(arxiv_id: str, title: str, html_url: str) -> bool:
     """校验候选仓库是否与论文相关。
 
-    README 必须同时有论文身份（精确 ID 或完整标题）和实现说明。
+    README 的实现声明必须直接关联论文身份（精确 ID 或完整标题）。
     通用词重合、仓库名相似和仅列出论文的目录都不足以证明是代码仓库。
     """
     parsed = urlsplit(html_url)
@@ -233,20 +380,21 @@ def verify_code_link(arxiv_id: str, title: str, html_url: str) -> bool:
         return False
     if re.search(r"(?:^|[-_])(awesome|papers|survey)(?:$|[-_])", repo, re.I):
         return False
-    # Exclude bibliography and paper-list sections from identity evidence.
-    introduction = re.split(
-        r"(?im)^#{1,6}\s+(?:references|related (?:work|papers)|paper list)\b", readme,
-    )[0]
-    identity = bool(re.search(rf"(?<![\w.]){re.escape(arxiv_id)}(?:v\d+)?(?!\w)", introduction))
-    normalized_title = " ".join(re.findall(r"[a-z0-9]+", title.lower()))
-    normalized_readme = " ".join(re.findall(r"[a-z0-9]+", introduction.lower()))
-    identity = identity or (len(normalized_title.split()) >= 4 and normalized_title in normalized_readme)
-    implementation = re.search(
-        r"\b(?:official\s+(?:(?:pytorch|tensorflow)\s+)?(?:implementation|code|repository)|"
-        r"(?:code|implementation)\s+(?:for|of|accompanying)\s+(?:the|our|this)\s+(?:paper|work|method))\b",
-        introduction, re.I,
-    )
-    return bool(identity and implementation)
+
+    def mask_external_code(match: re.Match[str]) -> str:
+        linked = urlsplit(match[1])
+        linked_repo = linked.path.strip("/").split("/")[:2]
+        if CODE_REPO_PATTERN.match(match[1]) and (
+            linked.netloc.lower() != "github.com"
+            or "/".join(linked_repo).removesuffix(".git").lower() != f"{owner}/{repo}".lower()
+        ):
+            # Keep a barrier: deleting a foreign link could falsely join a
+            # preceding implementation claim to the next paper reference.
+            return " external repository reference "
+        return match[0]
+
+    readme = re.sub(r"\[[^\]\n]+\]\((https?://[^\s)]+)\)", mask_external_code, readme)
+    return _has_implementation_evidence(readme, arxiv_id, title)
 
 
 def backfill_code_links(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
