@@ -33,7 +33,8 @@ def fetch_daily_papers(
 ) -> List[Dict[str, Any]]:
     """按搜索表达式抓取指定数量的最新论文。
 
-    论文摘要/备注中的 GitHub 地址优先级最高。``known_codes`` 用于复用历史
+    优先使用论文摘要/备注中明确的作者代码地址（支持多种托管平台），保留人工覆盖。
+    ``known_codes`` 用于复用历史
     链接；``known_paper_ids`` 避免每天为已有但无代码的论文重复搜索 GitHub。
     """
     search = arxiv.Search(

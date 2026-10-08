@@ -1,4 +1,4 @@
-"""通过 GitHub 搜索 API 查找并校验论文代码仓库。"""
+"""提取作者提供的代码地址，并通过 GitHub 搜索补查和校验仓库。"""
 
 from __future__ import annotations
 
@@ -19,8 +19,19 @@ REQUEST_TIMEOUT = 15
 SEARCH_RESULT_LIMIT = 5
 MAX_RETRY_WAIT = 60
 
-GITHUB_REPO_PATTERN = re.compile(
-    r"https?://github\.com/[A-Za-z0-9][A-Za-z0-9.-]*/[A-Za-z0-9_.-]+",
+CODE_REPO_PATTERN = re.compile(
+    r"https?://(?:"
+    r"(?:github\.com|gitcode\.com|gitee\.com)/"
+    r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9_.-]+"
+    r"|gitlab\.com/(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+"
+    r"|anonymous\.4open\.science/r/[A-Za-z0-9_.-]+"
+    r")/?",
+    flags=re.IGNORECASE,
+)
+MIRROR_SEPARATOR = re.compile(
+    r"^[\s,()[\]{}<>]*"
+    r"(?:(?:and|or)(?:\s+at)?|(?:mirror(?:ed)?|also)(?:\s+at)?\s*:?)?"
+    r"[\s,()[\]{}<>]*$",
     flags=re.IGNORECASE,
 )
 
@@ -33,35 +44,58 @@ class CodeLookupError(RuntimeError):
 
 
 def extract_code_link(*texts: Optional[str]) -> Optional[str]:
-    """只提取明确指向本文代码的地址；多个同等级候选时保持未知。"""
-    candidates: Dict[str, int] = {}
+    """提取明确的作者代码声明；并列镜像优先使用非匿名地址。"""
+    declarations: List[Tuple[int, List[str]]] = []
     for text in texts:
         if not text:
             continue
-        for sentence in re.split(r"(?<=[.!?;])\s+|\n+", str(text)):
-            previous_end = 0
-            for match in GITHUB_REPO_PATTERN.finditer(sentence):
-                context = sentence[previous_end:match.start()][-180:]
-                previous_end = match.end()
-                if re.search(r"\b(baseline|based on|build on|built on|compared? (?:to|with|against)|third.party)\b", context, re.I):
-                    continue
-                cue = re.search(
-                    r"\b(?:(our|official)\s+)?(?:source\s+)?"
-                    r"(?:codes?|implementation|project(?:\s+page)?|repository)\b"
-                    r"[^.!?;\n]{0,100}$", context, re.I,
-                )
-                if not cue:
-                    continue
-                url = match.group(0).rstrip(".,;:!?)]}'\"")
-                if url.lower().endswith(".git"):
-                    url = url[:-4]
-                url = "https://github.com/" + url.split("/", 3)[3]
-                candidates[url] = max(candidates.get(url, 0), 2 if cue.group(1) else 1)
-    if not candidates:
+        normalized = re.sub(r"\\([:/_.-])", r"\1", str(text))
+        normalized = re.sub(r"\\\r?\n", " ", normalized)
+        for paragraph in re.split(r"\n\s*\n", normalized):
+            # arXiv may wrap the code cue and URL onto different lines.
+            for sentence in re.split(r"(?<=[.!?;])\s+", " ".join(paragraph.split())):
+                previous_end = 0
+                current_urls: Optional[List[str]] = None
+                for match in CODE_REPO_PATTERN.finditer(sentence):
+                    context = sentence[previous_end:match.start()]
+                    previous_end = match.end()
+                    if re.search(r"\b(baseline|based on|build on|built on|compared? (?:to|with|against)|third.party)\b", context, re.I):
+                        current_urls = None
+                        continue
+                    cue = re.search(
+                        r"\b(?:(our|official)\s+)?(?:source\s+)?"
+                        r"(?:codes?|implementation|project(?:\s+page)?|repository)\b"
+                        r"[^.!?;\n]{0,100}$", context[-180:], re.I,
+                    )
+                    if cue:
+                        current_urls = []
+                        declarations.append((2 if cue.group(1) else 1, current_urls))
+                    elif current_urls is None or not MIRROR_SEPARATOR.fullmatch(context):
+                        current_urls = None
+                        continue
+                    parsed = urlsplit(match.group(0).rstrip(".,;:!?)]}'\""))
+                    path = parsed.path.rstrip("/")
+                    if parsed.netloc.lower() == "anonymous.4open.science":
+                        path += "/"
+                    else:
+                        if parsed.netloc.lower() == "gitlab.com":
+                            path = path.split("/-/", 1)[0]
+                        if path.lower().endswith(".git"):
+                            path = path[:-4]
+                    url = f"https://{parsed.netloc.lower()}{path}"
+                    if url not in current_urls:
+                        current_urls.append(url)
+    if not declarations:
         return None
-    best_score = max(candidates.values())
-    best = [url for url, score in candidates.items() if score == best_score]
-    return best[0] if len(best) == 1 else None
+    best_score = max(score for score, _ in declarations)
+    best = {url for score, urls in declarations if score == best_score for url in urls}
+    if len(best) == 1:
+        return next(iter(best))
+    for score, urls in declarations:
+        if score == best_score and set(urls) == best:
+            # Only links sharing one explicit code declaration count as mirrors.
+            return next((url for url in urls if urlsplit(url).netloc != "anonymous.4open.science"), urls[0])
+    return None
 
 
 def _headers() -> Dict[str, str]:

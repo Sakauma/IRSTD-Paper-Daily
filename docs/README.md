@@ -39,8 +39,10 @@ python daily_arxiv.py
 可手动执行 `--full-refresh`。正整数 `max_results` 只取最新的指定数量；如需完整收录，
 请保持 `max_results: null`。
 
-程序优先采用摘要或备注中明确标注为本文代码的 GitHub 地址，忽略基线引用和不明确的
-多个候选。GitHub 搜索结果必须在 README 中同时提供精确论文 ID 或完整标题，以及
+程序优先采用摘要或备注中明确标注为本文代码的地址，支持 GitHub、GitLab、GitCode、
+Gitee 和 Anonymous 4open.science。提取时兼容换行和 Markdown 转义；同一代码声明中的
+并列地址视为镜像，优先选用非匿名地址。基线引用和不同声明中不明确的多个候选仍会忽略。
+GitHub 搜索结果必须在 README 中同时提供精确论文 ID 或完整标题，以及
 实现说明；通用词重合不作为匹配依据。限流和临时服务错误会重试同一个请求，耗尽后
 报错，不会把请求失败当成“没有代码”。GitHub Search API 未认证时限流较低，建议在
 Actions 中执行代码链接补查。
@@ -61,7 +63,11 @@ python daily_arxiv.py --backfill_code
 记录中的 `code_source` 表示来源：`arxiv_metadata` 为明确的作者元数据，
 `github_verified` 为通过核验的搜索结果，`legacy` 为尚未核验的旧缓存。
 作者元数据和人工设置的 `code_source: manual` 不会被回填覆盖；人工确认的链接可用
-`manual` 保留。网络故障会中止本次核验并保留磁盘上的原目录。
+`manual` 保留。抓取范围为 arXiv API 提供的摘要和备注；仅出现在论文正文中的代码地址
+需要人工确认后写入 `code`，并标记 `code_source: manual`。例如 SANet（2610.09875）
+按论文中的代码声明记录为 [GitCode](https://gitcode.com/m0_61988291/SANet)，论文同时
+给出了 [匿名镜像](https://anonymous.4open.science/r/SANetE808/)。这些地址不会被同名
+GitHub 搜索结果覆盖。网络故障会中止本次核验并保留磁盘上的原目录。
 
 每周工作流会组合执行以下命令，同时刷新旧论文元数据和缺失代码链接：
 
@@ -158,7 +164,7 @@ GitHub Actions Secrets 中删除不再使用的 `WXPUSHER_APP_TOKEN` 和
 
 后续增量通知始终只发送一条，默认最多展示 20 篇变化；可通过 `config.yaml` 的
 `wechat_notification.max_papers` 修改。消息同样按 UTF-8 字节数限制在 28 KB 内，
-极端情况下会安全截断。这里的代码更新指目录中的代码链接从空值变为 GitHub 地址
+极端情况下会安全截断。这里的代码更新指目录中的代码链接从空值变为代码仓库地址
 或链接发生变化，不监控代码仓库内部的每次 commit。
 
 没有配置 `SERVERCHAN_SENDKEY` 时，程序跳过通知并保留上次成功发送的进度；首次配置后
