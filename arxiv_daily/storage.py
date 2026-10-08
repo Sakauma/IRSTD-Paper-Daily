@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -27,13 +29,24 @@ def load_data(path: str | Path) -> Dict[str, Any]:
 
 
 def save_data(path: str | Path, data: Dict[str, Any]) -> None:
-    """以 UTF-8、可读格式保存 JSON 数据。"""
+    """在同一目录写临时文件并原子替换，避免中断时截断原文件。"""
     data_path = Path(path)
     data_path.parent.mkdir(parents=True, exist_ok=True)
-    data_path.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    content = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=data_path.parent,
+            prefix=f".{data_path.name}.", suffix=".tmp", delete=False,
+        ) as file:
+            temporary_path = Path(file.name)
+            file.write(content)
+            file.flush()
+            os.fsync(file.fileno())
+        os.replace(temporary_path, data_path)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
 
 
 def merge_papers(

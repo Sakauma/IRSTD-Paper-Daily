@@ -13,7 +13,7 @@ import requests
 logger = logging.getLogger(__name__)
 
 SERVERCHAN_TURBO_API_URL = "https://sctapi.ftqq.com/{sendkey}.send"
-SERVERCHAN_3_API_URL = "https://{sendkey}.push.ft07.com/send"
+SERVERCHAN_3_API_URL = "https://{server}.push.ft07.com/send/{sendkey}.send"
 REQUEST_TIMEOUT = 15
 SERVERCHAN_SUCCESS_CODE = 0
 MAX_CONTENT_BYTES = 28 * 1024
@@ -27,8 +27,9 @@ class NotificationError(RuntimeError):
 
 def build_serverchan_url(sendkey: str) -> str:
     """校验 SendKey，并生成 Turbo 或 Server酱³ 的发送地址。"""
-    if re.fullmatch(r"sctp[A-Za-z0-9-]+", sendkey):
-        return SERVERCHAN_3_API_URL.format(sendkey=sendkey)
+    serverchan_3 = re.fullmatch(r"sctp(\d+)t[A-Za-z0-9_-]+", sendkey)
+    if serverchan_3:
+        return SERVERCHAN_3_API_URL.format(server=serverchan_3.group(1), sendkey=sendkey)
     if re.fullmatch(r"SCT[A-Za-z0-9_-]+", sendkey):
         return SERVERCHAN_TURBO_API_URL.format(sendkey=sendkey)
     raise NotificationError(

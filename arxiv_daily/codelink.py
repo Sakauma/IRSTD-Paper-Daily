@@ -6,7 +6,8 @@ import logging
 import os
 import re
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlsplit
 
 import requests
 
@@ -16,6 +17,7 @@ GITHUB_SEARCH_URL = "https://api.github.com/search/repositories"
 GITHUB_REPO_URL = "https://api.github.com/repos"
 REQUEST_TIMEOUT = 15
 SEARCH_RESULT_LIMIT = 5
+MAX_RETRY_WAIT = 60
 
 GITHUB_REPO_PATTERN = re.compile(
     r"https?://github\.com/[A-Za-z0-9][A-Za-z0-9.-]*/[A-Za-z0-9_.-]+",
@@ -26,33 +28,40 @@ GITHUB_REPO_PATTERN = re.compile(
 UNAUTHENTICATED_DELAY = 6.5
 AUTHENTICATED_DELAY = 2.2
 
-_STOPWORDS: Set[str] = {
-    "a", "an", "the", "and", "or", "of", "on", "in", "to", "with",
-    "via", "using", "based", "from", "by", "at", "is", "are", "for",
-    "towards", "toward", "over", "under", "into", "its", "it", "this",
-    "that",
-}
-
-
-def _tokens(text: str) -> Set[str]:
-    """把文本切成小写词元，去掉停用词和单字母词。"""
-    words = re.findall(r"[a-z0-9]+", text.lower())
-    return {word for word in words if word not in _STOPWORDS and len(word) > 1}
+class CodeLookupError(RuntimeError):
+    """代码仓库服务不可用；与确实没有匹配结果区分。"""
 
 
 def extract_code_link(*texts: Optional[str]) -> Optional[str]:
-    """从论文摘要或备注中提取作者提供的 GitHub 仓库地址。"""
+    """只提取明确指向本文代码的地址；多个同等级候选时保持未知。"""
+    candidates: Dict[str, int] = {}
     for text in texts:
         if not text:
             continue
-        match = GITHUB_REPO_PATTERN.search(str(text))
-        if not match:
-            continue
-        url = match.group(0).rstrip(".,;:!?)]}'\"")
-        if url.lower().endswith(".git"):
-            url = url[:-4]
-        return url
-    return None
+        for sentence in re.split(r"(?<=[.!?;])\s+|\n+", str(text)):
+            previous_end = 0
+            for match in GITHUB_REPO_PATTERN.finditer(sentence):
+                context = sentence[previous_end:match.start()][-180:]
+                previous_end = match.end()
+                if re.search(r"\b(baseline|based on|build on|built on|compared? (?:to|with|against)|third.party)\b", context, re.I):
+                    continue
+                cue = re.search(
+                    r"\b(?:(our|official)\s+)?(?:source\s+)?"
+                    r"(?:codes?|implementation|project(?:\s+page)?|repository)\b"
+                    r"[^.!?;\n]{0,100}$", context, re.I,
+                )
+                if not cue:
+                    continue
+                url = match.group(0).rstrip(".,;:!?)]}'\"")
+                if url.lower().endswith(".git"):
+                    url = url[:-4]
+                url = "https://github.com/" + url.split("/", 3)[3]
+                candidates[url] = max(candidates.get(url, 0), 2 if cue.group(1) else 1)
+    if not candidates:
+        return None
+    best_score = max(candidates.values())
+    best = [url for url, score in candidates.items() if score == best_score]
+    return best[0] if len(best) == 1 else None
 
 
 def _headers() -> Dict[str, str]:
@@ -68,51 +77,66 @@ def _request_delay() -> float:
 
 
 def _rate_limit_wait(response: requests.Response) -> int:
+    retry_after = response.headers.get("Retry-After")
+    if retry_after:
+        try:
+            return min(max(int(retry_after), 1), MAX_RETRY_WAIT)
+        except (TypeError, ValueError):
+            pass
     reset_value = response.headers.get("X-RateLimit-Reset", "0")
     try:
         reset_timestamp = int(reset_value)
     except (TypeError, ValueError):
         reset_timestamp = 0
-    return max(reset_timestamp - int(time.time()), 30)
+    return min(max(reset_timestamp - int(time.time()), 30), MAX_RETRY_WAIT)
+
+
+def _github_get(url: str, *, attempts: int = 3, **kwargs: Any) -> requests.Response:
+    """网络错误、服务错误和限流均重试原请求；耗尽后明确报错。"""
+    for attempt in range(attempts):
+        try:
+            response = requests.get(url, timeout=REQUEST_TIMEOUT, **kwargs)
+        except requests.RequestException:
+            if attempt + 1 == attempts:
+                raise CodeLookupError("GitHub 请求失败，保留已有数据供下次重试") from None
+            time.sleep(2 ** attempt)
+            continue
+        limited = response.status_code == 429 or (
+            response.status_code == 403 and (
+                response.headers.get("X-RateLimit-Remaining") == "0"
+                or bool(response.headers.get("Retry-After"))
+                or "rate limit" in response.text.lower()
+            )
+        )
+        if limited or response.status_code >= 500:
+            if attempt + 1 == attempts:
+                raise CodeLookupError(f"GitHub 请求重试耗尽（HTTP {response.status_code}）")
+            time.sleep(_rate_limit_wait(response) if limited else 2 ** attempt)
+            continue
+        if response.status_code not in (200, 404):
+            raise CodeLookupError(f"GitHub 请求失败（HTTP {response.status_code}）")
+        return response
+    raise CodeLookupError("GitHub 请求重试次数必须大于零")
 
 
 def _search_repositories(query: str) -> List[str]:
-    """搜索仓库并返回若干候选地址；请求失败返回空列表。"""
+    """搜索仓库；仅成功且无结果时返回空列表。"""
     params = {
         "q": query,
         "sort": "stars",
         "order": "desc",
         "per_page": SEARCH_RESULT_LIMIT,
     }
-    response: Optional[requests.Response] = None
-
-    for attempt in range(3):
-        try:
-            response = requests.get(
-                GITHUB_SEARCH_URL,
-                params=params,
-                headers=_headers(),
-                timeout=REQUEST_TIMEOUT,
-            )
-            break
-        except requests.RequestException as exc:
-            logger.warning("GitHub 搜索请求失败（第 %d 次）: %s", attempt + 1, exc)
-            if attempt < 2:
-                time.sleep(5)
-
-    if response is None:
-        return []
-
-    if response.status_code in (403, 429):
-        wait = _rate_limit_wait(response)
-        logger.warning("GitHub API 限流，等待 %d 秒后继续", wait)
-        time.sleep(wait)
-        return []
-    if response.status_code != 200:
-        logger.warning("GitHub 搜索失败: HTTP %s", response.status_code)
-        return []
-
-    items = response.json().get("items") or []
+    response = _github_get(GITHUB_SEARCH_URL, params=params, headers=_headers())
+    if response.status_code == 404:
+        raise CodeLookupError("GitHub 搜索接口不可用（HTTP 404）")
+    try:
+        payload = response.json()
+    except ValueError:
+        raise CodeLookupError("GitHub 搜索返回了无效 JSON") from None
+    if not isinstance(payload, dict) or not isinstance(payload.get("items"), list):
+        raise CodeLookupError("GitHub 搜索响应缺少有效的 items 列表")
+    items = payload["items"]
     return [
         str(item["html_url"])
         for item in items
@@ -122,17 +146,17 @@ def _search_repositories(query: str) -> List[str]:
 
 def _candidate_queries(arxiv_id: str, title: str) -> List[str]:
     """生成按可靠性排序的 GitHub 搜索词。"""
-    queries = [f'"{arxiv_id}"']
+    queries = [f'"{arxiv_id}" in:readme']
     title_head = title.split(":", 1)[0].strip()
 
     if ":" in title and title_head and len(title_head) <= 40:
-        queries.append(f'"{title_head}"')
+        queries.append(f'"{title_head}" in:name,description,readme')
     elif len(title.split()) <= 5 and title:
-        queries.append(f'"{title}"')
+        queries.append(f'"{title}" in:name,description,readme')
 
     short_title = title[:80].strip()
     if short_title:
-        queries.append(f'"{short_title}"')
+        queries.append(f'"{short_title}" in:readme')
     return list(dict.fromkeys(queries))
 
 
@@ -149,65 +173,57 @@ def lookup_code_link(arxiv_id: str, title: str) -> Optional[str]:
     return None
 
 
-def _fetch_readme(owner: str, repo: str, retries: int = 2) -> str:
-    """读取仓库 README 原文；失败返回空字符串。"""
+def _fetch_readme(owner: str, repo: str, retries: int = 3) -> str:
+    """读取 README；不存在时返回空串，临时故障抛错以免清除有效链接。"""
     url = f"{GITHUB_REPO_URL}/{owner}/{repo}/readme"
-    response: Optional[requests.Response] = None
-
-    for attempt in range(retries):
-        try:
-            response = requests.get(
-                url,
-                headers={**_headers(), "Accept": "application/vnd.github.raw"},
-                timeout=REQUEST_TIMEOUT,
-            )
-        except requests.RequestException as exc:
-            logger.warning("README 请求失败 %s: %s", url, exc)
-            if attempt < retries - 1:
-                time.sleep(5)
-            continue
-
-        if response.status_code in (403, 429):
-            wait = _rate_limit_wait(response)
-            logger.warning("README 请求限流，等待 %d 秒后重试", wait)
-            time.sleep(wait)
-            continue
-        break
-
-    if response is None or response.status_code != 200:
-        return ""
-    return response.text
+    response = _github_get(
+        url, attempts=retries,
+        headers={**_headers(), "Accept": "application/vnd.github.raw"},
+    )
+    return response.text if response.status_code == 200 else ""
 
 
 def verify_code_link(arxiv_id: str, title: str, html_url: str) -> bool:
     """校验候选仓库是否与论文相关。
 
-    仓库名/README 包含 arXiv ID，或与标题共享至少两个特征词时通过校验。
-    网络读取失败视为不通过，避免把无关仓库写入日报。
+    README 必须同时有论文身份（精确 ID 或完整标题）和实现说明。
+    通用词重合、仓库名相似和仅列出论文的目录都不足以证明是代码仓库。
     """
-    parts = html_url.rstrip("/").split("/")
-    if len(parts) < 5 or parts[-3] != "github.com":
+    parsed = urlsplit(html_url)
+    parts = parsed.path.strip("/").split("/")
+    if parsed.scheme not in ("https", "http") or parsed.netloc.lower() != "github.com" or len(parts) != 2:
         return False
-    owner, repo = parts[-2], parts[-1]
-    combined = f"{owner} {repo} {_fetch_readme(owner, repo)}"
-
-    if arxiv_id in combined:
-        return True
-
-    overlap = _tokens(combined) & _tokens(title)
-    long_overlap = {token for token in overlap if len(token) >= 5}
-    return len(overlap) >= 2 and len(long_overlap) >= 2
+    owner, repo = parts
+    readme = _fetch_readme(owner, repo)
+    if not readme:
+        return False
+    if re.search(r"(?:^|[-_])(awesome|papers|survey)(?:$|[-_])", repo, re.I):
+        return False
+    # Exclude bibliography and paper-list sections from identity evidence.
+    introduction = re.split(
+        r"(?im)^#{1,6}\s+(?:references|related (?:work|papers)|paper list)\b", readme,
+    )[0]
+    identity = bool(re.search(rf"(?<![\w.]){re.escape(arxiv_id)}(?:v\d+)?(?!\w)", introduction))
+    normalized_title = " ".join(re.findall(r"[a-z0-9]+", title.lower()))
+    normalized_readme = " ".join(re.findall(r"[a-z0-9]+", introduction.lower()))
+    identity = identity or (len(normalized_title.split()) >= 4 and normalized_title in normalized_readme)
+    implementation = re.search(
+        r"\b(?:official\s+(?:(?:pytorch|tensorflow)\s+)?(?:implementation|code|repository)|"
+        r"(?:code|implementation)\s+(?:for|of|accompanying)\s+(?:the|our|this)\s+(?:paper|work|method))\b",
+        introduction, re.I,
+    )
+    return bool(identity and implementation)
 
 
 def backfill_code_links(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
-    """为所有缺少代码链接的结构化论文记录回填链接。"""
+    """补查缺失链接并复核旧搜索结果；保留明确的元数据链接和人工覆盖。"""
     updated = 0
     papers_to_update = [
         paper
         for papers in data.values()
         if isinstance(papers, dict)
         for paper in papers.values()
-        if isinstance(paper, dict) and not paper.get("code")
+        if isinstance(paper, dict) and paper.get("code_source") not in ("arxiv_metadata", "manual")
     ]
     total = len(papers_to_update)
     done = 0
@@ -216,7 +232,7 @@ def backfill_code_links(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
         if not isinstance(papers, dict):
             continue
         for paper_id, paper in papers.items():
-            if not isinstance(paper, dict) or paper.get("code"):
+            if not isinstance(paper, dict) or paper.get("code_source") in ("arxiv_metadata", "manual"):
                 continue
             done += 1
             title = str(paper.get("title", ""))
@@ -227,12 +243,19 @@ def backfill_code_links(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
                 paper_id,
                 title[:50],
             )
-            candidate = lookup_code_link(str(paper_id), title)
-            if candidate:
-                paper["code"] = candidate
-                updated += 1
-                logger.info("找到并校验通过: %s", candidate)
+            previous = paper.get("code")
+            if previous and verify_code_link(str(paper_id), title, str(previous)):
+                candidate = str(previous)
             else:
-                logger.info("未找到或校验未通过: %s", paper_id)
+                candidate = lookup_code_link(str(paper_id), title)
+            # Do not mutate a record until both verification and lookup complete.
+            paper["code"] = candidate
+            if candidate:
+                paper["code_source"] = "github_verified"
+            else:
+                paper.pop("code_source", None)
+            if candidate != previous:
+                updated += 1
+                logger.info("代码链接已调整: %s", paper_id)
 
     return data, updated

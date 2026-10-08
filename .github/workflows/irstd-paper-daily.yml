@@ -37,8 +37,14 @@ jobs:
       - name: Run daily arXiv update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python daily_arxiv.py
+
+      - name: Send WeChat digest
+        id: wechat
+        continue-on-error: true
+        env:
           SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
-        run: python daily_arxiv.py --notify-wechat --notify-unchanged
+        run: python daily_arxiv.py --notify-only --notify-unchanged
 
       - name: Commit generated files
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -58,3 +64,9 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: python -m arxiv_daily.emailer docs/wechat.md
+
+      - name: Report WeChat delivery failure
+        if: ${{ !cancelled() && steps.wechat.outcome == 'failure' }}
+        run: |
+          echo "WeChat delivery failed. Catalog changes are saved; rerun to retry delivery."
+          exit 1
