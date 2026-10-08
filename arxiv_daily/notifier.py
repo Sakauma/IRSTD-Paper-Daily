@@ -79,7 +79,7 @@ def _paper_lines(paper: Mapping[str, Any], index: int) -> List[str]:
         lines.append(f"   - 作者：{author} et al.")
     code_url = str(paper.get("code") or "")
     if code_url:
-        lines.append(f"   - 代码：[GitHub]({code_url})")
+        lines.append(f"   - 代码：[查看代码]({code_url})")
     lines.append("")
     return lines
 
@@ -97,15 +97,17 @@ def _append_papers(
 
     lines.extend([f"## {heading}", ""])
     index = start_index
-    for topic, papers in groups.items():
-        if len(groups) > 1 and papers:
+    current_topic = ""
+    show_topics = sum(bool(papers) for papers in groups.values()) > 1
+    for topic, paper in _papers_by_recency(groups):
+        if remaining <= 0:
+            break
+        if show_topics and topic != current_topic:
             lines.extend([f"### {_escape_markdown(topic)}", ""])
-        for paper in papers:
-            if remaining <= 0:
-                return remaining, index
-            index += 1
-            remaining -= 1
-            lines.extend(_paper_lines(paper, index))
+            current_topic = topic
+        index += 1
+        remaining -= 1
+        lines.extend(_paper_lines(paper, index))
     return remaining, index
 
 

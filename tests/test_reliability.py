@@ -10,7 +10,10 @@ import requests
 
 import daily_arxiv
 from arxiv_daily import codelink, emailer, fetcher, notifier, storage
-from arxiv_daily.state import catalog_fingerprints, fingerprint, notification_target, query_fingerprint
+from arxiv_daily.state import (
+    catalog_fingerprints, changes_since_notification, fingerprint,
+    notification_target, query_fingerprint,
+)
 from arxiv_daily.wechat import render_wechat_markdown
 
 
@@ -161,6 +164,29 @@ def test_missing_sendkey_does_not_lose_changes(config, monkeypatch):
         daily_arxiv.run_notification(config)
     assert send.call_args.args[1]["IRSTD"] == [added]
     assert send.call_args.kwargs["initial_sync"] is False
+
+
+@pytest.mark.parametrize("change_type", ["new", "updated"])
+@pytest.mark.parametrize("multiple_topics", [False, True])
+def test_limited_pending_digest_prioritizes_newest_changes(change_type, multiple_topics):
+    older = paper("2610.00001", publish_date="2026-10-01", title="Older pending paper")
+    newer = paper("2610.00008", publish_date="2026-10-08", title="Newest pending paper")
+    data = {"IRSTD": {older["id"]: older}}
+    data.setdefault("Other" if multiple_topics else "IRSTD", {})[newer["id"]] = newer
+    delivered = {}
+    if change_type == "updated":
+        previous = deepcopy(data)
+        for papers in previous.values():
+            for record in papers.values():
+                record["code"] = "https://github.com/example/previous-link"
+        delivered = catalog_fingerprints(previous)
+    added, updated = changes_since_notification(data, delivered)
+    _, content = notifier.build_daily_digest(
+        added, updated, run_date=date(2026, 10, 8), repo_url="", max_papers=1,
+    )
+    assert "Newest pending paper" in content
+    assert "Older pending paper" not in content
+    assert "本次共有 2 篇变化，仅展示前 1 篇" in content
 
 
 @pytest.mark.parametrize("change", ["sendkey", "fork", "legacy"])
