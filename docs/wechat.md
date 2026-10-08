@@ -3,7 +3,7 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 
-> Updated on 2026.10.07
+> Updated on 2026.10.08
 > Usage instructions: [here](./README.md#usage)
 
 <details>
@@ -15,6 +15,7 @@
 
 ## IRSTD
 
+- 2026-10-07, **SANet: Selective Attention Network for Infrared Small Target Detection**, Yingmei Zhang et.al., Paper: [http://arxiv.org/abs/2610.09875](http://arxiv.org/abs/2610.09875), Code: **[https://github.com/mj129/SANet](https://github.com/mj129/SANet)**
 - 2026-10-05, **Prompt and Refinement: Asymmetric Mutual Learning for Infrared Small Target Detection with Noisy Labels**, Yimin Fu et.al., Paper: [http://arxiv.org/abs/2610.05918](http://arxiv.org/abs/2610.05918), Code: **[https://github.com/fuyimin96/PAR](https://github.com/fuyimin96/PAR)**
 - 2026-10-04, **IRSTD-Agent: Agentic Infrared Small Target Detection via Zoom-Guided Interaction Learning**, Jiawen Xi et.al., Paper: [http://arxiv.org/abs/2610.05342](http://arxiv.org/abs/2610.05342), Code: **[https://github.com/fuyimin96/IRSTD-Agent](https://github.com/fuyimin96/IRSTD-Agent)**
 - 2026-09-30, **Edge-Aware and Content-Adaptive Infrared Gas Leak Detection for Industrial Safety Monitoring**, Dongsheng Li et.al., Paper: [http://arxiv.org/abs/2512.23234](http://arxiv.org/abs/2512.23234)
