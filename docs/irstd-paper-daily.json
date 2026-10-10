@@ -7,7 +7,8 @@
       "first_author": "Tongtong Wang",
       "authors": "Tongtong Wang, Mingzhu Xu, Chenglong Yu, Jing Wang, Xiaohui Lin, Weili Guan",
       "url": "http://arxiv.org/abs/2609.00853",
-      "code": "https://github.com/iLearn-Lab/MM26-ADGNet"
+      "code": "https://github.com/iLearn-Lab/MM26-ADGNet",
+      "code_source": "arxiv_metadata"
     },
     "2609.00666": {
       "id": "2609.00666",
@@ -16,7 +17,8 @@
       "first_author": "Chenglong Yu",
       "authors": "Chenglong Yu, Mingzhu Xu, Jing Wang, Tongtong Wang, Pingping Miao, Liqiang Nie",
       "url": "http://arxiv.org/abs/2609.00666",
-      "code": "https://github.com/iLearn-Lab/MM26-DGNet"
+      "code": "https://github.com/iLearn-Lab/MM26-DGNet",
+      "code_source": "arxiv_metadata"
     },
     "2608.20870": {
       "id": "2608.20870",
@@ -25,7 +27,8 @@
       "first_author": "Rui Liu",
       "authors": "Rui Liu, Jing Nie, Ying Fu",
       "url": "http://arxiv.org/abs/2608.20870",
-      "code": "https://github.com/BIT-RuiLiu/RDANet"
+      "code": "https://github.com/BIT-RuiLiu/RDANet",
+      "code_source": "arxiv_metadata"
     },
     "2608.20754": {
       "id": "2608.20754",
@@ -34,7 +37,8 @@
       "first_author": "Aji Mao",
       "authors": "Aji Mao, Zhenming Peng, Bailin Mu, Tian Pu",
       "url": "http://arxiv.org/abs/2608.20754",
-      "code": "https://github.com/Sakauma/SPARK-SAM"
+      "code": "https://github.com/Sakauma/SPARK-SAM",
+      "code_source": "arxiv_metadata"
     },
     "2608.07015": {
       "id": "2608.07015",
@@ -52,7 +56,8 @@
       "first_author": "Aohua Li",
       "authors": "Aohua Li, Jin Kuang, Yubing Lu, Pingping Liu",
       "url": "http://arxiv.org/abs/2608.05771",
-      "code": "https://github.com/PepperCS/HyTBE"
+      "code": "https://github.com/PepperCS/HyTBE",
+      "code_source": "arxiv_metadata"
     },
     "2607.24184": {
       "id": "2607.24184",
@@ -61,7 +66,8 @@
       "first_author": "Yuhao Fan",
       "authors": "Yuhao Fan, Le Hui, Yuchao Dai",
       "url": "http://arxiv.org/abs/2607.24184",
-      "code": "https://github.com/Haoyu096/LCMamNet"
+      "code": "https://github.com/Haoyu096/LCMamNet",
+      "code_source": "arxiv_metadata"
     },
     "2607.23994": {
       "id": "2607.23994",
@@ -79,7 +85,8 @@
       "first_author": "Nian Liu",
       "authors": "Nian Liu, Yuxin Yang, Shubo Lin, Sikui Zhang, Liang Li, Boyu Cai, Yizheng Wang, Weiming Hu, Jin Gao",
       "url": "http://arxiv.org/abs/2607.19040",
-      "code": "https://github.com/nliu-25/Gaze-DETR-Top-Down-Guidance-Through-Priority-Maps-for-Infrared-Weak-Small-UAV-Detection-with-DETR"
+      "code": "https://github.com/nliu-25/Gaze-DETR-Top-Down-Guidance-Through-Priority-Maps-for-Infrared-Weak-Small-UAV-Detection-with-DETR",
+      "code_source": "arxiv_metadata"
     },
     "2607.17148": {
       "id": "2607.17148",
@@ -106,7 +113,8 @@
       "first_author": "Tianfang Zhang",
       "authors": "Tianfang Zhang, Lei Li, Chang Liu, Zhenming Peng, Huaping Zhang, Xiangyang Ji",
       "url": "http://arxiv.org/abs/2607.04603",
-      "code": "https://github.com/Tianfang-Zhang/LCPNet"
+      "code": "https://github.com/Tianfang-Zhang/LCPNet",
+      "code_source": "arxiv_metadata"
     },
     "2607.01555": {
       "id": "2607.01555",
@@ -133,7 +141,8 @@
       "first_author": "Houzhang Fang",
       "authors": "Houzhang Fang, Ruixuan Huang, Qiuhuan Chen, Xiaolin Wang, Yi Chang, Luxin Yan",
       "url": "http://arxiv.org/abs/2606.21956",
-      "code": "https://github.com/IVPLabs/ECFNet"
+      "code": "https://github.com/IVPLabs/ECFNet",
+      "code_source": "arxiv_metadata"
     },
     "2606.18783": {
       "id": "2606.18783",
@@ -142,7 +151,7 @@
       "first_author": "Yunus Sevim",
       "authors": "Yunus Sevim, Behçet Uğur Töreyin",
       "url": "http://arxiv.org/abs/2606.18783",
-      "code": "https://github.com/yall-in-one/Reemm"
+      "code": null
     },
     "2606.15286": {
       "id": "2606.15286",
@@ -160,7 +169,8 @@
       "first_author": "Pingping Liu",
       "authors": "Pingping Liu, Aohua Li, Yubing Lu, Jin Kuang, Tongshun Zhang, Qiuzhan Zhou",
       "url": "http://arxiv.org/abs/2606.01689",
-      "code": "https://github.com/PepperCS/RPCASSM"
+      "code": "https://github.com/PepperCS/RPCASSM",
+      "code_source": "arxiv_metadata"
     },
     "2605.20766": {
       "id": "2605.20766",
@@ -169,7 +179,8 @@
       "first_author": "Zhu Liu",
       "authors": "Zhu Liu, Yuanhang Yao, Ping Qian, Zihang Chen, Risheng Liu",
       "url": "http://arxiv.org/abs/2605.20766",
-      "code": "https://github.com/yuanhang-yao/diffuse-to-detect"
+      "code": "https://github.com/yuanhang-yao/diffuse-to-detect",
+      "code_source": "arxiv_metadata"
     },
     "2605.14346": {
       "id": "2605.14346",
@@ -178,7 +189,8 @@
       "first_author": "Yuanhang Yao",
       "authors": "Yuanhang Yao, Ping Qian, Zhu Liu, Long Ma, Weimin Wang",
       "url": "http://arxiv.org/abs/2605.14346",
-      "code": "https://github.com/yuanhang-yao/semantic-prior"
+      "code": "https://github.com/yuanhang-yao/semantic-prior",
+      "code_source": "arxiv_metadata"
     },
     "2605.07213": {
       "id": "2605.07213",
@@ -232,7 +244,8 @@
       "first_author": "Rixiang Ni",
       "authors": "Rixiang Ni, Boyang Li, Jun Chen, Yonghao Li, Feiyu Ren, Yuji Wang, Haoyang Yuan, Wujiao He, Wei An",
       "url": "http://arxiv.org/abs/2604.05363",
-      "code": "https://github.com/NIRIXIANG/SPIRE-IRSTD"
+      "code": "https://github.com/NIRIXIANG/SPIRE-IRSTD",
+      "code_source": "arxiv_metadata"
     },
     "2604.01934": {
       "id": "2604.01934",
@@ -241,7 +254,8 @@
       "first_author": "Yimin Fu",
       "authors": "Yimin Fu, Songbo Wang, Feiyan Wu, Jialin Lyu, Zhunga Liu, Michael K. Ng",
       "url": "http://arxiv.org/abs/2604.01934",
-      "code": "https://github.com/fuyimin96/S2CPNet"
+      "code": "https://github.com/fuyimin96/S2CPNet",
+      "code_source": "arxiv_metadata"
     },
     "2603.29228": {
       "id": "2603.29228",
@@ -250,7 +264,7 @@
       "first_author": "Zikai Liao",
       "authors": "Zikai Liao, Zhaozheng Yin",
       "url": "http://arxiv.org/abs/2603.29228",
-      "code": "https://github.com/Shelly-H/S-cCDNet"
+      "code": null
     },
     "2603.25389": {
       "id": "2603.25389",
@@ -259,7 +273,8 @@
       "first_author": "Yingmei Zhang",
       "authors": "Yingmei Zhang, Wangtao Bao, Yong Yang, Weiguo Wan, Qin Xiao, Xueting Zou",
       "url": "http://arxiv.org/abs/2603.25389",
-      "code": "https://github.com/Wangtao-Bao/FSGNet"
+      "code": "https://github.com/Wangtao-Bao/FSGNet",
+      "code_source": "arxiv_metadata"
     },
     "2603.21192": {
       "id": "2603.21192",
@@ -277,7 +292,8 @@
       "first_author": "Weihua Gao",
       "authors": "Weihua Gao, Wenlong Niu, Jie Tang, Man Yang, Jiafeng Zhang, Xiaodong Peng",
       "url": "http://arxiv.org/abs/2603.16257",
-      "code": "https://github.com/GaoScience/point-to-mask"
+      "code": "https://github.com/GaoScience/point-to-mask",
+      "code_source": "arxiv_metadata"
     },
     "2603.05071": {
       "id": "2603.05071",
@@ -286,7 +302,7 @@
       "first_author": "Nian Liu",
       "authors": "Nian Liu, Jin Gao, Zhen Liang, Shubo Lin, Sikui Zhang, Fudong Ge, Liang Li, Weiming Hu",
       "url": "http://arxiv.org/abs/2603.05071",
-      "code": "https://github.com/nliu-25/MI-DETR"
+      "code": null
     },
     "2602.02969": {
       "id": "2602.02969",
@@ -295,7 +311,8 @@
       "first_author": "Ruojing Li",
       "authors": "Ruojing Li, Chao Xiao, Qian Yin, Wei An, Nuo Chen, Xinyi Ying, Miao Li, Yingqian Wang",
       "url": "http://arxiv.org/abs/2602.02969",
-      "code": "https://github.com/TinaLRJ/DHiF"
+      "code": "https://github.com/TinaLRJ/DHiF",
+      "code_source": "arxiv_metadata"
     },
     "2602.01843": {
       "id": "2602.01843",
@@ -313,7 +330,7 @@
       "first_author": "Shuying Li",
       "authors": "Shuying Li, Qiang Ma, San Zhang, Wuwei Wang, Chuang Yang",
       "url": "http://arxiv.org/abs/2601.16434",
-      "code": "https://github.com/ML202010/MDAFNet"
+      "code": null
     },
     "2601.16428": {
       "id": "2601.16428",
@@ -331,7 +348,8 @@
       "first_author": "Yian Huang",
       "authors": "Yian Huang, Qing Qin, Aji Mao, Xiangyu Qiu, Liang Xu, Xian Zhang, Zhenming Peng",
       "url": "http://arxiv.org/abs/2601.14690",
-      "code": "https://github.com/IDIP-Lab/FeedbackSTS-Det"
+      "code": "https://github.com/IDIP-Lab/FeedbackSTS-Det",
+      "code_source": "arxiv_metadata"
     },
     "2601.05446": {
       "id": "2601.05446",
@@ -367,7 +385,8 @@
       "first_author": "Jinmiao Zhao",
       "authors": "Jinmiao Zhao, Chuang Yu, Zelin Shi, Yunpeng Liu, Yingdi Zhang",
       "url": "http://arxiv.org/abs/2512.09497",
-      "code": "https://github.com/YuChuang1205/MSDA-Net"
+      "code": "https://github.com/YuChuang1205/MSDA-Net",
+      "code_source": "arxiv_metadata"
     },
     "2512.05511": {
       "id": "2512.05511",
@@ -376,7 +395,8 @@
       "first_author": "Chuang Yu",
       "authors": "Chuang Yu, Jinmiao Zhao, Yunpeng Liu, Yaokun Li, Xiujun Shu, Yuanhao Feng, Bo Wang, Yimian Dai, Xiangyu Yue",
       "url": "http://arxiv.org/abs/2512.05511",
-      "code": "https://github.com/YuChuang1205/FDEP-Framework"
+      "code": "https://github.com/YuChuang1205/FDEP-Framework",
+      "code_source": "arxiv_metadata"
     },
     "2512.03752": {
       "id": "2512.03752",
@@ -394,7 +414,8 @@
       "first_author": "Chen Hu",
       "authors": "Chen Hu, Mingyu Zhou, Shuai Yuan, Hongbo Hu, Zhenming Peng, Tian Pu, Xiying Li",
       "url": "http://arxiv.org/abs/2512.03470",
-      "code": "https://github.com/greekinRoma/IRSTD_HC_Platform"
+      "code": "https://github.com/greekinRoma/IRSTD_HC_Platform",
+      "code_source": "arxiv_metadata"
     },
     "2511.20319": {
       "id": "2511.20319",
@@ -430,7 +451,7 @@
       "first_author": "Houzhang Fang",
       "authors": "Houzhang Fang, Shukai Guo, Qiuhuan Chen, Yi Chang, Luxin Yan",
       "url": "http://arxiv.org/abs/2511.09352",
-      "code": "https://github.com/IVPLabs/TDCNet"
+      "code": null
     },
     "2510.12241": {
       "id": "2510.12241",
@@ -439,7 +460,8 @@
       "first_author": "Yuehui Li",
       "authors": "Yuehui Li, Yahao Lu, Haoyuan Wu, Sen Zhang, Liang Lin, Yukai Shi",
       "url": "http://arxiv.org/abs/2510.12241",
-      "code": "https://github.com/nanjin1/Ivan-ISTD"
+      "code": "https://github.com/nanjin1/Ivan-ISTD",
+      "code_source": "arxiv_metadata"
     },
     "2510.04741": {
       "id": "2510.04741",
@@ -457,7 +479,7 @@
       "first_author": "Abdulkarim Atrash",
       "authors": "Abdulkarim Atrash, Omar Moured, Yufan Chen, Jiaming Zhang, Seyda Ertekin, Omur Ugur",
       "url": "http://arxiv.org/abs/2509.22909",
-      "code": "https://github.com/moured/TY-RIST"
+      "code": null
     },
     "2509.20701": {
       "id": "2509.20701",
@@ -466,7 +488,7 @@
       "first_author": "Jiayi Zuo",
       "authors": "Jiayi Zuo, Songwei Pei, Qian Li",
       "url": "http://arxiv.org/abs/2509.20701",
-      "code": "https://github.com/lachlants/denet"
+      "code": null
     },
     "2509.16888": {
       "id": "2509.16888",
@@ -475,7 +497,7 @@
       "first_author": "Youwei Pang",
       "authors": "Youwei Pang, Xiaoqi Zhao, Lihe Zhang, Huchuan Lu, Georges El Fakhri, Xiaofeng Liu, Shijian Lu",
       "url": "http://arxiv.org/abs/2509.16888",
-      "code": "https://github.com/lartpang/PyIRSTDMetrics"
+      "code": null
     },
     "2509.08205": {
       "id": "2509.08205",
@@ -484,7 +506,8 @@
       "first_author": "Jingjing Liu",
       "authors": "Jingjing Liu, Yinchao Han, Xianchao Xiu, Jianhua Zhang, Wanquan Liu",
       "url": "http://arxiv.org/abs/2509.08205",
-      "code": "https://github.com/xianchaoxiu/L-RPCANet"
+      "code": "https://github.com/xianchaoxiu/L-RPCANet",
+      "code_source": "arxiv_metadata"
     },
     "2509.07654": {
       "id": "2509.07654",
@@ -502,7 +525,7 @@
       "first_author": "Dengyan Luo",
       "authors": "Dengyan Luo, Yanping Xiang, Hu Wang, Luping Ji. Shuai Li, Mao Ye",
       "url": "http://arxiv.org/abs/2508.15415",
-      "code": "https://github.com/xiaomingxige/BIRD"
+      "code": null
     },
     "2508.10678": {
       "id": "2508.10678",
@@ -511,7 +534,8 @@
       "first_author": "Zhaoyuan Qi",
       "authors": "Zhaoyuan Qi, Weihua Gao, Wenlong Niu, Jie Tang, Yun Li, Xiaodong Peng",
       "url": "http://arxiv.org/abs/2508.10678",
-      "code": "https://github.com/Lurenjia-LRJ/HyperTea"
+      "code": "https://github.com/Lurenjia-LRJ/HyperTea",
+      "code_source": "arxiv_metadata"
     },
     "2508.06878": {
       "id": "2508.06878",
@@ -520,7 +544,8 @@
       "first_author": "Maoxun Yuan",
       "authors": "Maoxun Yuan, Duanni Meng, Ziteng Xi, Tianyi Zhao, Shiji Zhao, Yimian Dai, Xingxing Wei",
       "url": "http://arxiv.org/abs/2508.06878",
-      "code": "https://github.com/mengduann/NS-FPN"
+      "code": "https://github.com/mengduann/NS-FPN",
+      "code_source": "github_verified"
     },
     "2508.01322": {
       "id": "2508.01322",
@@ -556,7 +581,8 @@
       "first_author": "Ximeng Zhai",
       "authors": "Ximeng Zhai, Bohan Xu, Yaohong Chen, Hao Wang, Kehua Guo, Yimian Dai",
       "url": "http://arxiv.org/abs/2507.09556",
-      "code": "https://github.com/GrokCV/SeqCSIST"
+      "code": "https://github.com/GrokCV/SeqCSIST",
+      "code_source": "github_verified"
     },
     "2507.09541": {
       "id": "2507.09541",
@@ -565,7 +591,8 @@
       "first_author": "Zihao Xiong",
       "authors": "Zihao Xiong, Fei Zhou, Fengyi Wu, Shuai Yuan, Maixia Fu, Zhenming Peng, Jian Yang, Yimian Dai",
       "url": "http://arxiv.org/abs/2507.09541",
-      "code": "https://github.com/GrokCV/DRPCA-Net"
+      "code": "https://github.com/GrokCV/DRPCA-Net",
+      "code_source": "arxiv_metadata"
     },
     "2507.02454": {
       "id": "2507.02454",
@@ -592,7 +619,7 @@
       "first_author": "Guoyi Zhang",
       "authors": "Guoyi Zhang, Guangsheng Xu, Siyang Chen, Han Wang, Xiaohu Zhang",
       "url": "http://arxiv.org/abs/2506.10425",
-      "code": "https://github.com/HaLongbao/LRRNet"
+      "code": null
     },
     "2506.06042": {
       "id": "2506.06042",
@@ -601,7 +628,8 @@
       "first_author": "Taoran Yue",
       "authors": "Taoran Yue, Xiaojin Lu, Jiaxi Cai, Yuanping Chen, Shibing Chu",
       "url": "http://arxiv.org/abs/2506.06042",
-      "code": "https://github.com/PhysiLearn/SDS-Net"
+      "code": "https://github.com/PhysiLearn/SDS-Net",
+      "code_source": "arxiv_metadata"
     },
     "2506.02393": {
       "id": "2506.02393",
@@ -610,7 +638,7 @@
       "first_author": "Yongxian Liu",
       "authors": "Yongxian Liu, Boyang Li, Ting Liu, Zaiping Lin, Wei An",
       "url": "http://arxiv.org/abs/2506.02393",
-      "code": "https://github.com/yongxianLiu/RRCANet-for-IRSTD"
+      "code": null
     },
     "2506.01349": {
       "id": "2506.01349",
@@ -628,7 +656,8 @@
       "first_author": "Wenhao Xu",
       "authors": "Wenhao Xu, Shuchen Zheng, Changwei Wang, Zherui Zhang, Chuan Ren, Rongtao Xu, Shibiao Xu",
       "url": "http://arxiv.org/abs/2505.23214",
-      "code": "https://github.com/zhengshuchen/SAMamba"
+      "code": "https://github.com/zhengshuchen/SAMamba",
+      "code_source": "arxiv_metadata"
     },
     "2505.19148": {
       "id": "2505.19148",
@@ -637,7 +666,8 @@
       "first_author": "Shengdong Han",
       "authors": "Shengdong Han, Shangdong Yang, Xin Zhang, Yuxuan Li, Xiang Li, Jian Yang, Ming-Ming Cheng, Yimian Dai",
       "url": "http://arxiv.org/abs/2505.19148",
-      "code": "https://github.com/GrokCV/GrokCSO"
+      "code": "https://github.com/GrokCV/GrokCSO",
+      "code_source": "arxiv_metadata"
     },
     "2505.15184": {
       "id": "2505.15184",
@@ -646,7 +676,8 @@
       "first_author": "Yangting Shi",
       "authors": "Yangting Shi, Yinfei Zhu, Renjie He, Le Hui, Meng Cai, Ming-Ming Cheng, Yimian Dai",
       "url": "http://arxiv.org/abs/2505.15184",
-      "code": "https://github.com/GrokCV/AuxDet"
+      "code": "https://github.com/GrokCV/AuxDet",
+      "code_source": "arxiv_metadata"
     },
     "2505.10595": {
       "id": "2505.10595",
@@ -655,7 +686,8 @@
       "first_author": "Xingye Cui",
       "authors": "Xingye Cui, Junhai Luo, Jiakun Deng, Kexuan Li, Xiangyu Qiu, Zhenming Peng",
       "url": "http://arxiv.org/abs/2505.10595",
-      "code": "https://github.com/Leaf2001/ARFC-WAHNet"
+      "code": "https://github.com/Leaf2001/ARFC-WAHNet",
+      "code_source": "arxiv_metadata"
     },
     "2505.09943": {
       "id": "2505.09943",
@@ -664,7 +696,8 @@
       "first_author": "Jiakun Deng",
       "authors": "Jiakun Deng, Kexuan Li, Xingye Cui, Jiaxuan Li, Chang Long, Tian Pu, Zhenming Peng",
       "url": "http://arxiv.org/abs/2505.09943",
-      "code": "https://github.com/IDIP2025/CSPENet"
+      "code": "https://github.com/IDIP2025/CSPENet",
+      "code_source": "arxiv_metadata"
     },
     "2504.21612": {
       "id": "2504.21612",
@@ -691,7 +724,8 @@
       "first_author": "Yahao Lu",
       "authors": "Yahao Lu, Yuehui Li, Xingyuan Guo, Shuai Yuan, Yukai Shi, Liang Lin",
       "url": "http://arxiv.org/abs/2504.16487",
-      "code": "https://github.com/luy0222/RealScene-ISTD"
+      "code": "https://github.com/luy0222/RealScene-ISTD",
+      "code_source": "arxiv_metadata"
     },
     "2504.14481": {
       "id": "2504.14481",
@@ -718,7 +752,7 @@
       "first_author": "Xiaojin Lu",
       "authors": "Xiaojin Lu, Taoran yue, Jiaxi cai, Yuanping Chen, Cuihong Lv, Shibing Chu",
       "url": "http://arxiv.org/abs/2503.17193",
-      "code": "https://github.com/YonghengSun1997/MSCA-Net"
+      "code": null
     },
     "2503.07249": {
       "id": "2503.07249",
@@ -727,7 +761,7 @@
       "first_author": "Feng Huang",
       "authors": "Feng Huang, Shuyuan Zheng, Zhaobing Qiu, Huanxian Liu, Huanxin Bai, Liqiong Chen",
       "url": "http://arxiv.org/abs/2503.07249",
-      "code": "https://github.com/ActCVLab/Text-IRSTD"
+      "code": null
     },
     "2503.02662": {
       "id": "2503.02662",
@@ -736,7 +770,7 @@
       "first_author": "Biqiao Xin",
       "authors": "Biqiao Xin, Qianchen Mao, Bingshu Wang, Jiangbin Zheng, Yong Zhao, C. L. Philip Chen",
       "url": "http://arxiv.org/abs/2503.02662",
-      "code": "https://github.com/joeyxin-del/BiisNet"
+      "code": null
     },
     "2503.02220": {
       "id": "2503.02220",
@@ -745,7 +779,8 @@
       "first_author": "Zhihua Shen",
       "authors": "Zhihua Shen, Siyang Chen, Han Wang, Tongsu Zhang, Xiaohu Zhang, Xiangpeng Xu, Xia Yang",
       "url": "http://arxiv.org/abs/2503.02220",
-      "code": "https://github.com/ZhihuaShen/LVNet"
+      "code": "https://github.com/ZhihuaShen/LVNet",
+      "code_source": "arxiv_metadata"
     },
     "2608.09311": {
       "id": "2608.09311",
@@ -763,7 +798,7 @@
       "first_author": "Jakub Mandula",
       "authors": "Jakub Mandula, Sebastian Heusinger, Julian Moosmann, Christian Vogt, Michele Magno",
       "url": "http://arxiv.org/abs/2607.18747",
-      "code": "https://github.com/Anthony-ECPKN/SkyEvent"
+      "code": null
     },
     "2607.13030": {
       "id": "2607.13030",
@@ -817,7 +852,7 @@
       "first_author": "Yinghui Xing",
       "authors": "Yinghui Xing, Xiaoting Su, Shizhou Zhang, Donghao Chu, Di Xu",
       "url": "http://arxiv.org/abs/2512.04511",
-      "code": "https://github.com/Xtingsu/DuGI-MAE"
+      "code": null
     },
     "2511.19134": {
       "id": "2511.19134",
@@ -844,7 +879,8 @@
       "first_author": "Wei Li",
       "authors": "Wei Li, Jiaman Tang, Yang Li, Beihao Xia, Ligang Tan, Hongmao Qin",
       "url": "http://arxiv.org/abs/2507.00849",
-      "code": "https://github.com/GreatPlum-hnu/UAVD-Mamba"
+      "code": "https://github.com/GreatPlum-hnu/UAVD-Mamba",
+      "code_source": "arxiv_metadata"
     },
     "2506.23252": {
       "id": "2506.23252",
@@ -871,7 +907,7 @@
       "first_author": "Chenxu Peng",
       "authors": "Chenxu Peng, Chenxu Wang, Minrui Zou, Danyang Li, Zhengpeng Yang, Yimian Dai, Ming-Ming Cheng, Xiang Li",
       "url": "http://arxiv.org/abs/2505.04917",
-      "code": "https://github.com/facias914/A-Simple-Detector-is-a-Strong-Tracker"
+      "code": null
     },
     "2504.15665": {
       "id": "2504.15665",
@@ -889,7 +925,8 @@
       "first_author": "Ying Wang",
       "authors": "Ying Wang, Tingfa Xu, Jianan Li",
       "url": "http://arxiv.org/abs/2504.13604",
-      "code": "https://github.com/vero1925/FocusTrack"
+      "code": "https://github.com/vero1925/FocusTrack",
+      "code_source": "github_verified"
     },
     "2504.11262": {
       "id": "2504.11262",
@@ -907,7 +944,8 @@
       "first_author": "Yu-Hsi Chen",
       "authors": "Yu-Hsi Chen",
       "url": "http://arxiv.org/abs/2503.17237",
-      "code": "https://github.com/wish44165/YOLOv12-BoT-SORT-ReID"
+      "code": "https://github.com/wish44165/YOLOv12-BoT-SORT-ReID",
+      "code_source": "arxiv_metadata"
     },
     "2502.14168": {
       "id": "2502.14168",
@@ -934,7 +972,8 @@
       "first_author": "Jingjing Liu",
       "authors": "Jingjing Liu, Yinchao Han, Xianchao Xiu, Jianhua Zhang, Wanquan Liu",
       "url": "http://arxiv.org/abs/2609.07515",
-      "code": "https://github.com/xianchaoxiu/PICANet"
+      "code": "https://github.com/xianchaoxiu/PICANet",
+      "code_source": "arxiv_metadata"
     },
     "2609.18773": {
       "id": "2609.18773",
@@ -943,7 +982,7 @@
       "first_author": "Mengze Xu",
       "authors": "Mengze Xu, Zhu Liu, Weidong Sheng, Boyang Li, Yimian Dai, Ming-Ming Cheng, Jian Yang",
       "url": "http://arxiv.org/abs/2609.18773",
-      "code": "https://github.com/GrokCV/GrokDet"
+      "code": null
     },
     "2610.05918": {
       "id": "2610.05918",
@@ -952,7 +991,8 @@
       "first_author": "Yimin Fu",
       "authors": "Yimin Fu, Songbo Wang, Lizhuo Liu, Baicheng Pan, Zhunga Liu, Michael K. Ng",
       "url": "http://arxiv.org/abs/2610.05918",
-      "code": "https://github.com/fuyimin96/PAR"
+      "code": "https://github.com/fuyimin96/PAR",
+      "code_source": "arxiv_metadata"
     },
     "2610.05342": {
       "id": "2610.05342",
@@ -961,7 +1001,7 @@
       "first_author": "Jiawen Xi",
       "authors": "Jiawen Xi, Yu Zhang, Tianyi Zhao, Zhu Liu, Maoxun Yuan, Xingxing Wei",
       "url": "http://arxiv.org/abs/2610.05342",
-      "code": "https://github.com/fuyimin96/IRSTD-Agent"
+      "code": null
     },
     "2610.09875": {
       "id": "2610.09875",
