@@ -1,6 +1,6 @@
 {
   "last_successful_update": {
-    "IRSTD": "2026-10-10"
+    "IRSTD": "2026-10-11"
   },
   "wechat_notification": {
     "initialized": true,
@@ -118,7 +118,7 @@
         "2610.09875": "ae3a4fb3602be8cf08adb14bb75d42fe484990f8339f1dcf64866222657ea265"
       }
     },
-    "last_successful_notification": "2026-10-10"
+    "last_successful_notification": "2026-10-11"
   },
   "query_fingerprints": {
     "IRSTD": "78e39cb80174d4120ea1b8340feb6756b7a632e7e462c6a9ca873970bce4df1e"
