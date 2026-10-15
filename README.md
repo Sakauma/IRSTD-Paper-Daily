@@ -1,4 +1,4 @@
-## Updated on 2026.10.14
+## Updated on 2026.10.15
 > Usage instructions: [here](./docs/README.md#usage)
 
 本项目可开启微信和邮箱推送，具体配置请参阅[使用说明](./docs/README.md#usage)。
@@ -14,6 +14,8 @@
 
 |Publish Date|Title|Authors|PDF|Code|
 |---|---|---|---|---|
+|**2026-10-13**|**Unsupervised and Supervised Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 2)**|Thierry Bouwmans et.al.|[2610.18291](http://arxiv.org/abs/2610.18291)|null|
+|**2026-10-13**|**Traditional and Recent Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 1)**|Thierry Bouwmans et.al.|[2610.18276](http://arxiv.org/abs/2610.18276)|null|
 |**2026-10-07**|**SANet: Selective Attention Network for Infrared Small Target Detection**|Yingmei Zhang et.al.|[2610.09875](http://arxiv.org/abs/2610.09875)|[link](https://gitcode.com/m0_61988291/SANet)|
 |**2026-10-05**|**Prompt and Refinement: Asymmetric Mutual Learning for Infrared Small Target Detection with Noisy Labels**|Yimin Fu et.al.|[2610.05918](http://arxiv.org/abs/2610.05918)|[link](https://github.com/fuyimin96/PAR)|
 |**2026-10-04**|**IRSTD-Agent: Agentic Infrared Small Target Detection via Zoom-Guided Interaction Learning**|Jiawen Xi et.al.|[2610.05342](http://arxiv.org/abs/2610.05342)|null|
@@ -123,7 +125,7 @@
 |**2025-02-20**|**Deep learning based infrared small object segmentation: Challenges and future directions**|Zhengeng Yang et.al.|[2502.14168](http://arxiv.org/abs/2502.14168)|null|
 |**2025-02-02**|**Spatio-Temporal Progressive Attention Model for EEG Classification in Rapid Serial Visual Presentation Task**|Yang Li et.al.|[2502.00730](http://arxiv.org/abs/2502.00730)|null|
 
-<p align=right>(<a href=#updated-on-20261014>back to top</a>)</p>
+<p align=right>(<a href=#updated-on-20261015>back to top</a>)</p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/Sakauma/IRSTD-Paper-Daily.svg?style=for-the-badge
 [contributors-url]: https://github.com/Sakauma/IRSTD-Paper-Daily/contributors
