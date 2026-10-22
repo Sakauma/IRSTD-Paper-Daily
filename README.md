@@ -1,4 +1,4 @@
-## Updated on 2026.10.21
+## Updated on 2026.10.22
 > Usage instructions: [here](./docs/README.md#usage)
 
 本项目可开启微信和邮箱推送，具体配置请参阅[使用说明](./docs/README.md#usage)。
@@ -14,6 +14,7 @@
 
 |Publish Date|Title|Authors|PDF|Code|
 |---|---|---|---|---|
+|**2026-10-21**|**Seeing through Denoising: Frequency-guided One-step Denoising for Infrared Small Target Detection**|Xuelin Qian et.al.|[2610.29361](http://arxiv.org/abs/2610.29361)|null|
 |**2026-10-15**|**LCPNet: Latent Consistent Proximal Unfolding Network for Infrared Small Target Detection**|Tianfang Zhang et.al.|[2607.04603](http://arxiv.org/abs/2607.04603)|[link](https://github.com/Tianfang-Zhang/LCPNet)|
 |**2026-10-13**|**Unsupervised and Supervised Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 2)**|Thierry Bouwmans et.al.|[2610.18291](http://arxiv.org/abs/2610.18291)|null|
 |**2026-10-13**|**Traditional and Recent Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 1)**|Thierry Bouwmans et.al.|[2610.18276](http://arxiv.org/abs/2610.18276)|null|
@@ -125,7 +126,7 @@
 |**2025-02-20**|**Deep learning based infrared small object segmentation: Challenges and future directions**|Zhengeng Yang et.al.|[2502.14168](http://arxiv.org/abs/2502.14168)|null|
 |**2025-02-02**|**Spatio-Temporal Progressive Attention Model for EEG Classification in Rapid Serial Visual Presentation Task**|Yang Li et.al.|[2502.00730](http://arxiv.org/abs/2502.00730)|null|
 
-<p align=right>(<a href=#updated-on-20261021>back to top</a>)</p>
+<p align=right>(<a href=#updated-on-20261022>back to top</a>)</p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/Sakauma/IRSTD-Paper-Daily.svg?style=for-the-badge
 [contributors-url]: https://github.com/Sakauma/IRSTD-Paper-Daily/contributors

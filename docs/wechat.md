@@ -3,7 +3,7 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 
-> Updated on 2026.10.21
+> Updated on 2026.10.22
 > Usage instructions: [here](./README.md#usage)
 
 <details>
@@ -15,6 +15,7 @@
 
 ## IRSTD
 
+- 2026-10-21, **Seeing through Denoising: Frequency-guided One-step Denoising for Infrared Small Target Detection**, Xuelin Qian et.al., Paper: [http://arxiv.org/abs/2610.29361](http://arxiv.org/abs/2610.29361)
 - 2026-10-15, **LCPNet: Latent Consistent Proximal Unfolding Network for Infrared Small Target Detection**, Tianfang Zhang et.al., Paper: [http://arxiv.org/abs/2607.04603](http://arxiv.org/abs/2607.04603), Code: **[https://github.com/Tianfang-Zhang/LCPNet](https://github.com/Tianfang-Zhang/LCPNet)**
 - 2026-10-13, **Unsupervised and Supervised Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 2)**, Thierry Bouwmans et.al., Paper: [http://arxiv.org/abs/2610.18291](http://arxiv.org/abs/2610.18291)
 - 2026-10-13, **Traditional and Recent Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 1)**, Thierry Bouwmans et.al., Paper: [http://arxiv.org/abs/2610.18276](http://arxiv.org/abs/2610.18276)
