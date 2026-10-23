@@ -2,7 +2,7 @@
 layout: default
 ---
 
-## Updated on 2026.10.22
+## Updated on 2026.10.23
 > Usage instructions: [here](./README.md#usage)
 
 ## IRSTD
@@ -10,9 +10,9 @@ layout: default
 | Publish Date | Title | Authors | PDF | Code |
 |:---------|:-----------------------|:---------|:------|:------|
 |**2026-10-21**|**Seeing through Denoising: Frequency-guided One-step Denoising for Infrared Small Target Detection**|Xuelin Qian et.al.|[2610.29361](http://arxiv.org/abs/2610.29361)|null|
+|**2026-10-21**|**Traditional and Recent Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 2)**|Thierry Bouwmans et.al.|[2610.18291](http://arxiv.org/abs/2610.18291)|null|
+|**2026-10-21**|**Traditional and Recent Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 1)**|Thierry Bouwmans et.al.|[2610.18276](http://arxiv.org/abs/2610.18276)|null|
 |**2026-10-15**|**LCPNet: Latent Consistent Proximal Unfolding Network for Infrared Small Target Detection**|Tianfang Zhang et.al.|[2607.04603](http://arxiv.org/abs/2607.04603)|[link](https://github.com/Tianfang-Zhang/LCPNet)|
-|**2026-10-13**|**Unsupervised and Supervised Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 2)**|Thierry Bouwmans et.al.|[2610.18291](http://arxiv.org/abs/2610.18291)|null|
-|**2026-10-13**|**Traditional and Recent Approaches for Infrared Small Target Detection : Overview, Challenges and Perspectives (Part 1)**|Thierry Bouwmans et.al.|[2610.18276](http://arxiv.org/abs/2610.18276)|null|
 |**2026-10-07**|**SANet: Selective Attention Network for Infrared Small Target Detection**|Yingmei Zhang et.al.|[2610.09875](http://arxiv.org/abs/2610.09875)|[link](https://gitcode.com/m0_61988291/SANet)|
 |**2026-10-05**|**Prompt and Refinement: Asymmetric Mutual Learning for Infrared Small Target Detection with Noisy Labels**|Yimin Fu et.al.|[2610.05918](http://arxiv.org/abs/2610.05918)|[link](https://github.com/fuyimin96/PAR)|
 |**2026-10-04**|**IRSTD-Agent: Agentic Infrared Small Target Detection via Zoom-Guided Interaction Learning**|Jiawen Xi et.al.|[2610.05342](http://arxiv.org/abs/2610.05342)|null|
