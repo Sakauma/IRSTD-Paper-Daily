@@ -1,4 +1,4 @@
-## Updated on 2026.11.02
+## Updated on 2026.11.03
 > Usage instructions: [here](./docs/README.md#usage)
 
 本项目可开启微信和邮箱推送，具体配置请参阅[使用说明](./docs/README.md#usage)。
@@ -31,7 +31,7 @@
 |**2026-08-26**|**SPARK-SAM: Learning How to Prompt and Respond for Infrared Small Target Segmentation**|Aji Mao et.al.|[2608.20754](http://arxiv.org/abs/2608.20754)|[link](https://github.com/Sakauma/SPARK-SAM)|
 |**2026-08-21**|**RDANet: Relative Degradation Aware Network for Infrared Small Target Detection**|Rui Liu et.al.|[2608.20870](http://arxiv.org/abs/2608.20870)|[link](https://github.com/BIT-RuiLiu/RDANet)|
 |**2026-08-16**|**Degraded Infrared Small Object Detection via Degradation-Adapted Physics-Guided Restoration**|Xinkai Lu et.al.|[2608.09311](http://arxiv.org/abs/2608.09311)|null|
-|**2026-08-07**|**Understand Before Detect: Vision--Language Learning for Omni-Domain Infrared Small Target Detection**|Haoyang Yuan et.al.|[2608.07015](http://arxiv.org/abs/2608.07015)|null|
+|**2026-08-07**|**Understand Before Detect: Vision--Language Learning for Omni-Domain Infrared Small Target Detection**|Haoyang Yuan et.al.|[2608.07015](http://arxiv.org/abs/2608.07015)|[link](https://github.com/shushengyuan/OmniIRSTD-VL)|
 |**2026-08-07**|**HyTBE: Hyperbolic Target-Background Expert Model for Cross-Domain Infrared Small Target Detection**|Aohua Li et.al.|[2608.05771](http://arxiv.org/abs/2608.05771)|[link](https://github.com/PepperCS/HyTBE)|
 |**2026-08-05**|**Beyond Motion Cues and Structural Sparsity: Revisiting Small Moving Target Detection**|Guoyi Zhang et.al.|[2509.07654](http://arxiv.org/abs/2509.07654)|null|
 |**2026-08-03**|**Breaking Self-Attention Failure: Rethinking Query Initialization for Infrared Small Target Detection**|Yuteng Liu et.al.|[2601.02837](http://arxiv.org/abs/2601.02837)|null|
@@ -126,7 +126,7 @@
 |**2025-02-20**|**Deep learning based infrared small object segmentation: Challenges and future directions**|Zhengeng Yang et.al.|[2502.14168](http://arxiv.org/abs/2502.14168)|null|
 |**2025-02-02**|**Spatio-Temporal Progressive Attention Model for EEG Classification in Rapid Serial Visual Presentation Task**|Yang Li et.al.|[2502.00730](http://arxiv.org/abs/2502.00730)|null|
 
-<p align=right>(<a href=#updated-on-20261102>back to top</a>)</p>
+<p align=right>(<a href=#updated-on-20261103>back to top</a>)</p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/Sakauma/IRSTD-Paper-Daily.svg?style=for-the-badge
 [contributors-url]: https://github.com/Sakauma/IRSTD-Paper-Daily/contributors

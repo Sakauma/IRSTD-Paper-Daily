@@ -47,7 +47,8 @@
       "first_author": "Haoyang Yuan",
       "authors": "Haoyang Yuan, Boyang Li, Yingqian Wang, Yimian Dai, Nuo Chen, Xinfei Huang, Shuqi Yi, Zaiping Lin, Weidong Sheng, Wei An",
       "url": "http://arxiv.org/abs/2608.07015",
-      "code": null
+      "code": "https://github.com/shushengyuan/OmniIRSTD-VL",
+      "code_source": "github_verified"
     },
     "2608.05771": {
       "id": "2608.05771",
