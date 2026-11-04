@@ -42,7 +42,7 @@
     },
     "2608.07015": {
       "id": "2608.07015",
-      "publish_date": "2026-08-07",
+      "publish_date": "2026-11-02",
       "title": "Understand Before Detect: Vision--Language Learning for Omni-Domain Infrared Small Target Detection",
       "first_author": "Haoyang Yuan",
       "authors": "Haoyang Yuan, Boyang Li, Yingqian Wang, Yimian Dai, Nuo Chen, Xinfei Huang, Shuqi Yi, Zaiping Lin, Weidong Sheng, Wei An",
@@ -391,10 +391,10 @@
     },
     "2512.05511": {
       "id": "2512.05511",
-      "publish_date": "2025-12-05",
+      "publish_date": "2026-11-02",
       "title": "Rethinking Infrared Small Target Detection: A Foundation-Driven Efficient Paradigm",
       "first_author": "Chuang Yu",
-      "authors": "Chuang Yu, Jinmiao Zhao, Yunpeng Liu, Yaokun Li, Xiujun Shu, Yuanhao Feng, Bo Wang, Yimian Dai, Xiangyu Yue",
+      "authors": "Chuang Yu, Jinmiao Zhao, Yunpeng Liu, Yaokun Li, Xiujun Shu, Yuanhao Feng, Bo Wang, Xiangyu Yue",
       "url": "http://arxiv.org/abs/2512.05511",
       "code": "https://github.com/YuChuang1205/FDEP-Framework",
       "code_source": "arxiv_metadata"
