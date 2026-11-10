@@ -2,13 +2,14 @@
 layout: default
 ---
 
-## Updated on 2026.11.09
+## Updated on 2026.11.10
 > Usage instructions: [here](./README.md#usage)
 
 ## IRSTD
 
 | Publish Date | Title | Authors | PDF | Code |
 |:---------|:-----------------------|:---------|:------|:------|
+|**2026-11-06**|**From Points to Targets: Online Foreground Affinity and Background Learning for Infrared Small Target Detection**|Qiancheng Zhou et.al.|[2605.00722](http://arxiv.org/abs/2605.00722)|null|
 |**2026-11-02**|**Understand Before Detect: Vision--Language Learning for Omni-Domain Infrared Small Target Detection**|Haoyang Yuan et.al.|[2608.07015](http://arxiv.org/abs/2608.07015)|[link](https://github.com/shushengyuan/OmniIRSTD-VL)|
 |**2026-11-02**|**Rethinking Infrared Small Target Detection: A Foundation-Driven Efficient Paradigm**|Chuang Yu et.al.|[2512.05511](http://arxiv.org/abs/2512.05511)|[link](https://github.com/YuChuang1205/FDEP-Framework)|
 |**2026-10-21**|**Seeing through Denoising: Frequency-guided One-step Denoising for Infrared Small Target Detection**|Xuelin Qian et.al.|[2610.29361](http://arxiv.org/abs/2610.29361)|null|
@@ -54,7 +55,6 @@ layout: default
 |**2026-05-14**|**Learning with Semantic Priors: Stabilizing Point-Supervised Infrared Small Target Detection via Hierarchical Knowledge Distillation**|Yuanhang Yao et.al.|[2605.14346](http://arxiv.org/abs/2605.14346)|[link](https://github.com/yuanhang-yao/semantic-prior)|
 |**2026-05-08**|**LoHGNet: Infrared Small Target Detection through Lorentz Geometric Encoding with High-Order Relation Learning**|Qianwen Ma et.al.|[2605.07213](http://arxiv.org/abs/2605.07213)|null|
 |**2026-05-07**|**Na-IRSTD: Enhancing Infrared Small Target Detection via Native-Resolution Feature Selection and Fusion**|Qian Xu et.al.|[2605.05804](http://arxiv.org/abs/2605.05804)|null|
-|**2026-05-01**|**Exploring the Limits of End-to-End Feature-Affinity Propagation for Single-Point Supervised Infrared Small Target Detection**|Qiancheng Zhou et.al.|[2605.00722](http://arxiv.org/abs/2605.00722)|null|
 |**2026-04-27**|**Selective Attention-Based Network for Robust Infrared Small Target Detection**|Yingming Zhang et.al.|[2605.00886](http://arxiv.org/abs/2605.00886)|null|
 |**2026-04-11**|**Revisiting the Scale Loss Function and Gaussian-Shape Convolution for Infrared Small Target Detection**|Hao Li et.al.|[2604.09991](http://arxiv.org/abs/2604.09991)|null|
 |**2026-04-07**|**FeedbackSTS-Det: Sparse Frames-Based Spatio-Temporal Semantic Feedback Network for Moving Infrared Small Target Detection**|Yian Huang et.al.|[2601.14690](http://arxiv.org/abs/2601.14690)|[link](https://github.com/IDIP-Lab/FeedbackSTS-Det)|

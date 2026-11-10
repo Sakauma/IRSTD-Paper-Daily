@@ -213,10 +213,10 @@
     },
     "2605.00722": {
       "id": "2605.00722",
-      "publish_date": "2026-05-01",
-      "title": "Exploring the Limits of End-to-End Feature-Affinity Propagation for Single-Point Supervised Infrared Small Target Detection",
+      "publish_date": "2026-11-06",
+      "title": "From Points to Targets: Online Foreground Affinity and Background Learning for Infrared Small Target Detection",
       "first_author": "Qiancheng Zhou",
-      "authors": "Qiancheng Zhou, Wenhua Zhang",
+      "authors": "Qiancheng Zhou, Xiaodong Yue, Wenhua Zhang",
       "url": "http://arxiv.org/abs/2605.00722",
       "code": null
     },

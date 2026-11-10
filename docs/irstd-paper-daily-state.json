@@ -1,6 +1,6 @@
 {
   "last_successful_update": {
-    "IRSTD": "2026-11-09"
+    "IRSTD": "2026-11-10"
   },
   "wechat_notification": {
     "initialized": true,
@@ -30,7 +30,7 @@
         "2605.14346": "bb0966a5af3d55f00778eb596a43ef1162420be8671c8033572ddd6d36525603",
         "2605.07213": "0bfec0c8a5c0b2476aad19a7e78edf01e1783bf28de467b3ae8a3f82507a5703",
         "2605.05804": "9881e0a152a7c1592b0f16141271209c258999948dd8568cdf14879445214f5a",
-        "2605.00722": "999d4a4db46241254c6db5a2b5d61d2c5e9ef9164e3e9265fe793e4567bb3870",
+        "2605.00722": "cd1af626d4336d5a4c1e5486e15ab48ad0179339de700e237f38cb2fdd093f78",
         "2605.00886": "059ca92e951fc3d0f5c66435575554b499d9ed314dad5e7d432166d48a52473e",
         "2604.09991": "0d6b4ffe17dfc29cd79ca3fbe9bbd90bc81e0d5f4dc4d4afd1cb063d2153857a",
         "2604.05363": "f4b8a41f3c241f6ebba9e15eb08de71dab6038b0ac4061a3aad60a915621b3b4",
@@ -121,12 +121,12 @@
         "2610.29361": "8a504246ee8421af01547f47138c1b9e41df629423efc4b94617391f32afdd2c"
       }
     },
-    "last_successful_notification": "2026-11-09"
+    "last_successful_notification": "2026-11-10"
   },
   "query_fingerprints": {
     "IRSTD": "78e39cb80174d4120ea1b8340feb6756b7a632e7e462c6a9ca873970bce4df1e"
   },
   "catalog_checksums": {
-    "IRSTD": "e7b501c1901bbab6cef14ea0c520ccd30987148393f81b5813268e05878a112a"
+    "IRSTD": "7b025b97201159c503d48f0d1ff994df627eadcd16f4db7453258a3cac0671bd"
   }
 }
