@@ -1040,6 +1040,15 @@
       "authors": "Xuelin Qian, Zixuan Wang, Chang Xu, Dingwen Zhang, Junwei Han",
       "url": "http://arxiv.org/abs/2610.29361",
       "code": null
+    },
+    "2611.16724": {
+      "id": "2611.16724",
+      "publish_date": "2026-11-12",
+      "title": "What Limits Thermal Infrared Drone Detection? A Cross-Dataset Benchmark Analysis",
+      "first_author": "Tamara R. Lenhard",
+      "authors": "Tamara R. Lenhard, Jan Kels, Tobias Koch",
+      "url": "http://arxiv.org/abs/2611.16724",
+      "code": null
     }
   }
 }
