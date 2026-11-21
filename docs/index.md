@@ -2,13 +2,14 @@
 layout: default
 ---
 
-## Updated on 2026.11.20
+## Updated on 2026.11.21
 > Usage instructions: [here](./README.md#usage)
 
 ## IRSTD
 
 | Publish Date | Title | Authors | PDF | Code |
 |:---------|:-----------------------|:---------|:------|:------|
+|**2026-11-19**|**Verifying Before Enhancing: Target Evidence Chain Verification for Infrared Small Target Detection**|Jiayi Zuo et.al.|[2611.25724](http://arxiv.org/abs/2611.25724)|null|
 |**2026-11-12**|**What Limits Thermal Infrared Drone Detection? A Cross-Dataset Benchmark Analysis**|Tamara R. Lenhard et.al.|[2611.16724](http://arxiv.org/abs/2611.16724)|null|
 |**2026-11-08**|**Dual-Granularity Semantic Prompting for Language Guidance Infrared Small Target Detection**|Zixuan Wang et.al.|[2511.19306](http://arxiv.org/abs/2511.19306)|null|
 |**2026-11-06**|**From Points to Targets: Online Foreground Affinity and Background Learning for Infrared Small Target Detection**|Qiancheng Zhou et.al.|[2605.00722](http://arxiv.org/abs/2605.00722)|null|

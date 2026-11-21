@@ -1,4 +1,4 @@
-## Updated on 2026.11.20
+## Updated on 2026.11.21
 > Usage instructions: [here](./docs/README.md#usage)
 
 本项目可开启微信和邮箱推送，具体配置请参阅[使用说明](./docs/README.md#usage)。
@@ -14,6 +14,7 @@
 
 |Publish Date|Title|Authors|PDF|Code|
 |---|---|---|---|---|
+|**2026-11-19**|**Verifying Before Enhancing: Target Evidence Chain Verification for Infrared Small Target Detection**|Jiayi Zuo et.al.|[2611.25724](http://arxiv.org/abs/2611.25724)|null|
 |**2026-11-12**|**What Limits Thermal Infrared Drone Detection? A Cross-Dataset Benchmark Analysis**|Tamara R. Lenhard et.al.|[2611.16724](http://arxiv.org/abs/2611.16724)|null|
 |**2026-11-08**|**Dual-Granularity Semantic Prompting for Language Guidance Infrared Small Target Detection**|Zixuan Wang et.al.|[2511.19306](http://arxiv.org/abs/2511.19306)|null|
 |**2026-11-06**|**From Points to Targets: Online Foreground Affinity and Background Learning for Infrared Small Target Detection**|Qiancheng Zhou et.al.|[2605.00722](http://arxiv.org/abs/2605.00722)|null|
@@ -127,7 +128,7 @@
 |**2025-02-20**|**Deep learning based infrared small object segmentation: Challenges and future directions**|Zhengeng Yang et.al.|[2502.14168](http://arxiv.org/abs/2502.14168)|null|
 |**2025-02-02**|**Spatio-Temporal Progressive Attention Model for EEG Classification in Rapid Serial Visual Presentation Task**|Yang Li et.al.|[2502.00730](http://arxiv.org/abs/2502.00730)|null|
 
-<p align=right>(<a href=#updated-on-20261120>back to top</a>)</p>
+<p align=right>(<a href=#updated-on-20261121>back to top</a>)</p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/Sakauma/IRSTD-Paper-Daily.svg?style=for-the-badge
 [contributors-url]: https://github.com/Sakauma/IRSTD-Paper-Daily/contributors
